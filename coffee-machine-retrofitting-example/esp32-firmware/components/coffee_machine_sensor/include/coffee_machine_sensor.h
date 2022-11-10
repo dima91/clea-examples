@@ -9,7 +9,7 @@
 
 
 #if CONFIG_COFFEE_MACHINE_SENSOR == 0
-    #define MIN_DELAY_ISR_TRIGGER_US        1000000         // 1 seconds delay
+    #define MIN_DELAY_ISR_TRIGGER_US        500000         // 1 seconds delay
     #define MIN_DELAY_WATER_CONTAINER_US    3000000         // 3 seconds delay
     #define GPIO_POWER_OUT_ENABLE           GPIO_NUM_25
     #define GPIO_BLUE_LED                   GPIO_NUM_32

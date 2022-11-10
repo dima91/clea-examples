@@ -83,7 +83,7 @@ void queue_consumer_task (void* arg) {
                 if (item.trigger_time_us - last_short_coffee_isr_us > MIN_DELAY_ISR_TRIGGER_US) {
                     last_short_coffee_isr_us    = item.trigger_time_us;
                     esp_event_post(COFFEE_MACHINE_SENSOR_EVENTS, COFFEE_SHORT_EVENT, NULL, 0, 0);
-                    //ESP_LOGI (TAG, "Short coffee delivered!");
+                    ESP_LOGI (TAG, "Short coffee delivered!");
                 }
                 else {
                     // Ignoring trigger
@@ -94,7 +94,7 @@ void queue_consumer_task (void* arg) {
                 if (item.trigger_time_us - last_long_coffee_isr_us > MIN_DELAY_ISR_TRIGGER_US) {
                     last_long_coffee_isr_us     = item.trigger_time_us;
                     esp_event_post(COFFEE_MACHINE_SENSOR_EVENTS, COFFEE_LONG_EVENT, NULL, 0, 0);
-                    //ESP_LOGI (TAG, "Long coffee delivered!");
+                    ESP_LOGI (TAG, "Long coffee delivered!");
                 }
                 else {
                     // Ignoring trigger
@@ -115,29 +115,30 @@ void queue_consumer_task (void* arg) {
 void containers_buttons_monitor (void* arg) {
     // Setting up containers GPIOs
     gpio_pad_select_gpio (GPIO_WATER_CONTAINER_BUTTON);
-    uint64_t water_gpio_up_start_us = 0;
     uint8_t water_alarm_triggered   = 0;
     int64_t curr_time_us            = esp_timer_get_time ();
+    uint64_t water_gpio_last_up_us  = curr_time_us;
+    uint8_t water_button_level      = 0;
 
     while (1) {
-        curr_time_us    = esp_timer_get_time ();
+        curr_time_us        = esp_timer_get_time ();
+        water_button_level  = gpio_get_level(GPIO_WATER_CONTAINER_BUTTON);
 
-        if (gpio_get_level(GPIO_WATER_CONTAINER_BUTTON)) {
-            // Triggering event only if it remains up for at least 
-            if (curr_time_us - water_gpio_up_start_us > MIN_DELAY_WATER_CONTAINER_US && !water_alarm_triggered) {
+        if (water_button_level == 1) {
+            if (curr_time_us - water_gpio_last_up_us > MIN_DELAY_WATER_CONTAINER_US && !water_alarm_triggered) {
                 esp_event_post(COFFEE_MACHINE_SENSOR_EVENTS, WATER_OPEN_ALARM_EVENT, NULL, 0, 0);
                 ESP_LOGE (TAG, "Water container is opened!");
                 water_alarm_triggered   = 1;
             }
         }
-        else if (curr_time_us - water_gpio_up_start_us > MIN_DELAY_WATER_CONTAINER_US && water_alarm_triggered) {
+        else if (curr_time_us - water_gpio_last_up_us > MIN_DELAY_WATER_CONTAINER_US && water_alarm_triggered) {
             esp_event_post(COFFEE_MACHINE_SENSOR_EVENTS, WATER_OFF_ALARM_EVENT, NULL, 0, 0);
             ESP_LOGI (TAG, "Water container closed");
-            water_gpio_up_start_us  = curr_time_us;
+            water_gpio_last_up_us   = curr_time_us;
             water_alarm_triggered   = 0;
         }
         else {
-            water_gpio_up_start_us  = curr_time_us;
+            water_gpio_last_up_us   = curr_time_us;
         }
 
         vTaskDelay (pdMS_TO_TICKS(100));
