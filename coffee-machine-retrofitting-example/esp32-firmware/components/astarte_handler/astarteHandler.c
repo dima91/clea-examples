@@ -224,7 +224,7 @@ void publish_event (AstarteHandler *this, coffee_machine_event event) {
             break;
         case COFFEE_LONG_EVENT:
             ESP_ERROR_CHECK (update_counter (&(this->private_data->nvs_handle), &(this->private_data->long_coffee_cnt),
-                                                this->private_data->long_coffee_cnt+1, "ss_coffee"));
+                                                this->private_data->long_coffee_cnt+1, "sl_coffee"));
             astarte_device_set_integer_property(this->astarteDeviceHandle, machine_counters_interface.name, "/longCoffee", this->private_data->long_coffee_cnt);
             break;
         default:
