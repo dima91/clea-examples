@@ -451,8 +451,8 @@ let get_all_data_since  = async (astarte_client, device_id, since) => {
 
     let since_status        = new Date (since)
     since_status.setHours(since_status.getHours()-24)
-    let container_status    = astarte_client.get_container_status ({device_id, limit:1, since:since_status})
-    let water_status        = astarte_client.get_water_status ({device_id, limit:1, since:since_status})
+    let container_status    = astarte_client.get_container_status ({device_id, since:since_status})
+    let water_status        = astarte_client.get_water_status ({device_id, since:since_status})
     // Short coffee and long coffee requests are not prepared here because they may throw errors
     
     try {
@@ -470,14 +470,18 @@ let get_all_data_since  = async (astarte_client, device_id, since) => {
     }
 
     try {
-        grouped_data.container_status   = await container_status
+        let items                       = await container_status
+        grouped_data.container_status   = [items[items.length-1]]
     } catch (err) {
         // No new data
+        console.log (`No new data for container status`)
     }
     try {
-        grouped_data.water_status       = await water_status
+        let items                       = await water_status
+        grouped_data.water_status       = [items[items.length-1]]
     } catch (err) {
         // No new data
+        console.log (`No new data for water status`)
     }
 
     return grouped_data
