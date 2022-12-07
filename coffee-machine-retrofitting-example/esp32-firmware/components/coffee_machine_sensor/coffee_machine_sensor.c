@@ -78,8 +78,6 @@ void queue_consumer_task (void* arg) {
     
     while (1) {
         if (xQueueReceive(gpio_buttons_evt_queue, &item, portMAX_DELAY)) {
-            //printf ("Event from %d\n", item.gpio_num);
-
             switch (item.gpio_num) {
             case GPIO_SINGLE_SHORT_COFFEE_BUTTON:
                 if (item.trigger_time_us - last_short_coffee_isr_us > MIN_DELAY_ISR_TRIGGER_US) {
