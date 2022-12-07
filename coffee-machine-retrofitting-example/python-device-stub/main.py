@@ -2,6 +2,7 @@
 import argparse
 import os
 import asyncio
+import redis
 from astarte import device
 
 
@@ -9,7 +10,27 @@ class MainApp :
     
     def __init__(self, args) -> None:
         self.params = args
-        print (self.params)
+
+        # Crating REDIS connection
+        pool        = redis.ConnectionPool(host='localhost', port=6379, db=0)
+        self.redis  = redis.Redis(connection_pool=pool)
+
+        # Loading counters
+        try :
+            self.params.short_coffee    = int(self.redis.get ('short_coffee'))
+        except BaseException:
+            self.params.short_coffee    = 0
+            self.redis.set ('short_coffee', self.params.short_coffee)
+
+        try :
+            self.params.long_coffee     = int(self.redis.get ('long_coffee'))
+        except BaseException :
+            self.params.long_coffee     = 0
+            self.redis.set ('long_coffee', self.params.long_coffee)
+
+
+        print (f'{self.params=}')
+
 
         # Initializing Astarte client
         self.persistency_dir    = "astarte_persistency.d"
@@ -103,13 +124,13 @@ class MainApp :
         #print ("astarte_connection_cb")
 
         while True:
-            inp = input ("\n\nType something: ")
-            print (inp)
+            inp = input ("\nType something: ")
 
             if inp == "1":
                 # Increasing short coffe
                 print ("sc++")
                 self.params.short_coffee    = self.params.short_coffee+1
+                self.redis.set ('short_coffee', self.params.short_coffee)
                 self.astarte_device.send (self.counter_interface_name, "/shortCoffee", self.params.short_coffee)
 
             
@@ -117,6 +138,7 @@ class MainApp :
                 # Increasing long coffe
                 print ("lc++")
                 self.params.long_coffee     = self.params.long_coffee+1
+                self.redis.set ('long_coffee', self.params.long_coffee)
                 self.astarte_device.send (self.counter_interface_name, "/longCoffee", self.params.long_coffee)
 
             elif inp == "3":
@@ -161,8 +183,8 @@ def main () :
     parser.add_argument ("-s", "--device-secret", required=True)
     parser.add_argument ("-u", "--astarte-pairing-url", required=True)
     parser.add_argument ("-n", "--realm-name", required=True)
-    parser.add_argument ("-sc", "--short-coffee", required=True, type=int)
-    parser.add_argument ("-lc", "--long-coffee", required=True, type=int)
+    #parser.add_argument ("-sc", "--short-coffee", required=True, type=int)
+    #parser.add_argument ("-lc", "--long-coffee", required=True, type=int)
     args                    = parser.parse_args()
     args.water_container    = False
     args.trash_container    = False
