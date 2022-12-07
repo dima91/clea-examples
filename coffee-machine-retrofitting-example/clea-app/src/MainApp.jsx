@@ -10,11 +10,13 @@ import Chart from "react-apexcharts";
 import DatePicker from "react-datepicker";
 import DatePickerStyle from "react-datepicker/dist/react-datepicker.css";
 import 'react-datepicker/dist/react-datepicker-cssmodules.css';
-import _, { now } from 'lodash';
+import _, { filter, now } from 'lodash';
 
 
 
 
+
+let update_chart_interval   = undefined
 
 export const MainApp = ({ astarte_client, device_id }) => {
     const beverages_descriptors             = {
@@ -287,25 +289,38 @@ export const MainApp = ({ astarte_client, device_id }) => {
 
 
     // Setting up handlers to display chart data
-    const update_chart  = async () => {
+    const update_chart  = async (_search_date, _filter_by, _time_period, _group_by) => {
         if (!astarte_client) {
             console.error ("Astarte client not ready!")
             return ;
         }
 
         // Retrieving interesting data depending on 'filter_by' and 'time_period' values
-        let [query_params, raw_data]    = await retrieve_data (astarte_client, device_id, search_date,
-                                                                filter_by, time_period)
+        let [query_params, raw_data]    = await retrieve_data (astarte_client, device_id, _search_date,
+                                                                _filter_by, _time_period)
 
         // Parsing obtained data
         let new_data                    = parse_retrieved_data (raw_data, beverages_descriptors,
-                                                                group_by, time_period, query_params)
+                                                                _group_by, _time_period, query_params)
 
         // Updating 'chart_desc'
-        set_chart_desc ({...chart_desc, data:new_data})
+        set_chart_desc ((curr_desc) => {
+            /*console.log (`Updating desc..`)
+            console.log (new_data)
+            console.log (curr_desc)*/
+            return {...curr_desc, data:new_data}
+        })
     }
     React.useEffect (() => {
-        update_chart ()
+        //console.log (`Updating chart from effect..`)
+        update_chart (search_date, filter_by, time_period, group_by)
+        
+        if (update_chart_interval) {
+            clearInterval(update_chart_interval)
+        }
+        update_chart_interval   = setInterval(() => {
+            update_chart (search_date, filter_by, time_period, group_by)
+        }, UPDATE_INTERVAL_MS);
     }, [search_date, group_by, filter_by, time_period])
 
 
@@ -644,7 +659,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx, y:item})
+            new_data.push ({x:idx.toString(), y:item})
         })
     }
     else if (time_period == 1) {
@@ -680,7 +695,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx+1, y:item})
+            new_data.push ({x:Number(idx+1).toString(), y:item})
         })
     }
     else if (time_period == 3) {
@@ -697,24 +712,9 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx+1, y:item})
-            /* FIXME Not working
-            console.log (`${months_of_year[idx]} -> ${item}`)
-            new_data.push ({
-                x:months_of_year[idx], y:item})//*/
+            new_data.push ({x:months_of_year[idx], y:item})
         })
     }
-
-    /*console.log (`new_data`)
-    console.log (new_data)
-    if (group_by == 1) {
-        new_data    = _.map (new_data, (item, idx, cll) => {
-            return {x:item.x, y:item.y}
-        })
-    }*/
-
-    /*console.log (`new_data`)
-    console.log (new_data)*/
 
     return new_data
 }
@@ -751,16 +751,12 @@ const chart_options = {
     markers: {
         size: 0,
     },
-    xaxis: {
-        type : "category"
-    },
     tooltip: {
-        shared: false,
-        y: {
-            formatter: (val) => {
-                return val.toString().indexOf(".") == -1 ? val : val.toFixed(2)
-            }
-        }
+        enabled: false
+    },
+    series: [],
+    xaxis: {
+        categories :[]
     },
     yaxis: {
         labels: {
@@ -776,18 +772,12 @@ const ChartData = ({ chart_descriptor, group_by, isMount = false }) => {
     const series    = React.useMemo(
         () => {
             return [{
-                name : group_by==0 ? "Beverages" : "Revenue",
+                name : group_by==0 ? "Beverages" : "Revenues",
                 data : chart_descriptor.data
             }]
         }
     )
-    //chart_options.xaxis.categories  = chart_descriptor.categories
-
-    // if (!chart_descriptor.width)
-    //     console.log (`w: ${get_chart_width()}`)
-    //console.log (`New width is ${width}`)
-
-
+    
     return (<div>
         <Chart width={chart_descriptor.width} height={chart_descriptor.height}
                 options={chart_options} series={series} type='bar'/>
