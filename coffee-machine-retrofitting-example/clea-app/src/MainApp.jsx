@@ -305,8 +305,9 @@ export const MainApp = ({ astarte_client, device_id }) => {
 
         // Updating 'chart_desc'
         set_chart_desc ((curr_desc) => {
+            /*console.log (`Updating desc..`)
             console.log (new_data)
-            console.log (curr_desc)
+            console.log (curr_desc)*/
             return {...curr_desc, data:new_data}
         })
     }
@@ -658,7 +659,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx, y:item})
+            new_data.push ({x:idx.toString(), y:item})
         })
     }
     else if (time_period == 1) {
@@ -694,7 +695,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx+1, y:item})
+            new_data.push ({x:Number(idx+1).toString(), y:item})
         })
     }
     else if (time_period == 3) {
@@ -711,24 +712,9 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:idx+1, y:item})
-            /* FIXME Not working
-            console.log (`${months_of_year[idx]} -> ${item}`)
-            new_data.push ({
-                x:months_of_year[idx], y:item})//*/
+            new_data.push ({x:months_of_year[idx], y:item})
         })
     }
-
-    /*console.log (`new_data`)
-    console.log (new_data)
-    if (group_by == 1) {
-        new_data    = _.map (new_data, (item, idx, cll) => {
-            return {x:item.x, y:item.y}
-        })
-    }*/
-
-    /*console.log (`new_data`)
-    console.log (new_data)*/
 
     return new_data
 }
@@ -765,16 +751,18 @@ const chart_options = {
     markers: {
         size: 0,
     },
-    xaxis: {
-        type : "category"
-    },
     tooltip: {
-        shared: false,
+        enabled: true,
+        /*shared: false,
         y: {
             formatter: (val) => {
                 return val.toString().indexOf(".") == -1 ? val : val.toFixed(2)
             }
-        }
+        }*/
+    },
+    series: [],
+    xaxis: {
+        categories :[]
     },
     yaxis: {
         labels: {
@@ -795,13 +783,7 @@ const ChartData = ({ chart_descriptor, group_by, isMount = false }) => {
             }]
         }
     )
-    //chart_options.xaxis.categories  = chart_descriptor.categories
-
-    // if (!chart_descriptor.width)
-    //     console.log (`w: ${get_chart_width()}`)
-    //console.log (`New width is ${width}`)
-
-
+    
     return (<div>
         <Chart width={chart_descriptor.width} height={chart_descriptor.height}
                 options={chart_options} series={series} type='bar'/>
