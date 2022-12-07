@@ -312,7 +312,7 @@ export const MainApp = ({ astarte_client, device_id }) => {
         })
     }
     React.useEffect (() => {
-        console.log (`Updating chart from effect..`)
+        //console.log (`Updating chart from effect..`)
         update_chart (search_date, filter_by, time_period, group_by)
         
         if (update_chart_interval) {
@@ -752,13 +752,7 @@ const chart_options = {
         size: 0,
     },
     tooltip: {
-        enabled: true,
-        /*shared: false,
-        y: {
-            formatter: (val) => {
-                return val.toString().indexOf(".") == -1 ? val : val.toFixed(2)
-            }
-        }*/
+        enabled: false
     },
     series: [],
     xaxis: {
