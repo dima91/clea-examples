@@ -31,10 +31,10 @@ type Settings = {
 }
 
 const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
-    // TODO App config variables
-    const [publishInterval, setPublishInterval] = useState<Number | null>(null);
+    // App config variables
     const [introspection, setIntrospection]     = useState<Object | null>(null);
     const [isReady, setIsReady]                 = useState<Boolean>(false)
+    const [roomsList, setRoomsList]             = useState<Number[] | null> (null);
 
     // Setting up astarteClient
     const astarteInterface = useMemo(() => {
@@ -42,29 +42,29 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
     }, [astarteUrl, realm, token]);
 
     // TODO Retrieving initial information from external sources
-    useEffect(() => {
-        astarteInterface.getPublishInterval()
-        .then ((data : any) => {
-            setPublishInterval(data);
-        })
-    }, [astarteInterface]);
     useEffect (() => {
         astarteInterface.getIntrospection()
         .then ((data:any) => {
             setIntrospection (data)
         })
     }, [astarteInterface])
+    useEffect (() => {
+        astarteInterface.getRoomsList()
+        .then ((data:any) => {
+            setRoomsList (data["roomsIds"])
+        })
+    }, [astarteInterface])
 
 
     useEffect(() => {
-        if (publishInterval!=null && introspection!=null) {
+        if (introspection!=null && roomsList!=null) {
             setIsReady(true)
         }
-    }, [introspection, publishInterval])
+    }, [introspection, roomsList])
 
     return (
         <Fragment>
-            <MainApp publishInterval={publishInterval} astarteInterface={astarteInterface} introspection={introspection} isReady={isReady}/>
+            <MainApp astarteInterface={astarteInterface} roomsList={roomsList} introspection={introspection} isReady={isReady}/>
         </Fragment>
     );
 };

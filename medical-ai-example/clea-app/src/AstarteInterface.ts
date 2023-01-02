@@ -90,19 +90,23 @@ class AstarteInterface {
     // App related methods
 
 
-    async getPublishInterval(): Promise<Number> {
-        const interfaceName = `com.astarte.TesterPubInterval`
-        const path = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}`;
-        const requestUrl = new URL(path, this.getAppengineUrl());
-        return axios({
-            method: "get",
-            url: requestUrl.toString(),
-            headers: {
-                "Authorization": `Bearer ${this.astarteClient.getAuthorizationToken()}`,
-                "Content-type": "application/json;charset=UTF-8"
-            },
-        }).then((response) => response.data.data?.updateInterval_ms)
+    async getRoomsList () : Promise<Number[]> {
+        const interfaceName = "it.unisi.atlas.RoomsManagerDescriptor";
+        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}`;
+        const requestUrl    = new URL (path, this.getAppengineUrl());
+
+        return axios ({
+            method  : "get",
+            url     : requestUrl.toString(),
+            headers : {
+                "Authorization" : `Bearer ${this.getAuthorizationToken()}`,
+                "content-type"  : "application/json;charset=UTF-8"
+            }
+        }).then ((response) => response.data?.data)
     }
+
+
+    //async getLastEvents (count) : Promise<> {}
 }
 
 export default AstarteInterface;
