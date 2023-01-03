@@ -1,6 +1,9 @@
 
 import axios from 'axios';
 import AstarteClient from './AstarteClient';
+import { RoomDescriptor, Event, stringToPatientStatus } from './components/commons';
+import moment from 'moment';
+import { isArray } from 'lodash';
 
 type AstarteInterfaceProps = {
     astarteUrl: URL;
@@ -90,11 +93,11 @@ class AstarteInterface {
     // App related methods
 
 
-    async getRoomsList () : Promise<Number[]> {
+    getRoomsList () : Promise<Number[]> {
         const interfaceName = "it.unisi.atlas.RoomsManagerDescriptor";
         const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}`;
         const requestUrl    = new URL (path, this.getAppengineUrl());
-
+        
         return axios ({
             method  : "get",
             url     : requestUrl.toString(),
@@ -104,9 +107,98 @@ class AstarteInterface {
             }
         }).then ((response) => response.data?.data)
     }
+    
+    
+    getRoomDetails (roomId : number) : Promise<RoomDescriptor> {
+        const interfaceName = `it.unisi.atlas.RoomDescriptor`;
+        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
+        const requestUrl    = new URL (path, this.getAppengineUrl());
+
+        console.log (`Retrieving details for room ${roomId}`)
+
+        return axios ({
+            method  : "get",
+            url     : requestUrl.toString(),
+            headers : {
+                "Authorization" : `Bearer ${this.getAuthorizationToken()}`,
+                "content-type"  : "application/json;charset=UTF-8"
+            }
+        }).then (async (response) => {
+            let currRoom    = response.data.data
+
+            if(currRoom == undefined)
+                throw `[getRoomDetails] Wrong room identifier (${roomId})`
+
+            // Geting current patient status
+            let lastEvent   = await this.getLastEvent (roomId)
+
+            return {
+                roomId                      : roomId,
+                patientId                   : currRoom.patientId,
+                diagnosis                   : currRoom.diagnosis,
+                currentEvent                : lastEvent,
+                patientHospitalizationDate  : moment(currRoom.patientHospitalizationDate).valueOf(),
+                patientReleaseDate          : moment(currRoom.patientReleaseDate).valueOf()
+            }
+        })
+        .catch ((err) => {
+            console.log (`Error`)
+            console.log (err)
+            throw err
+        })
+    }
 
 
-    //async getLastEvents (count) : Promise<> {}
+    async getLastEvent (roomId:number) : Promise<Event> {
+        
+        const MS_IN_AN_HOUR = 86400000;
+        const IT_THRESHOLD     = 10;
+
+        const interfaceName = `it.unisi.atlas.Event5`;
+        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
+        const requestUrl    = new URL (path, this.getAppengineUrl());
+        const currTime      = moment().valueOf()
+        let timespan        = 0;
+        let result          = undefined;
+        let itCount         = 0;
+
+        while (result == undefined) {
+
+            timespan += MS_IN_AN_HOUR
+            let since   = moment (currTime - timespan)
+            let query : Record<string, string>  = {"since":since.format("YYYY-MM-DDTHH:mm:ss")};
+            requestUrl.search                   = new URLSearchParams(query).toString()
+
+            console.log (`New time limit: ${query.since}`)
+            
+
+            // Retrieving data in the current timespan
+            try {
+                let response    = await axios.get (requestUrl.toString(), {
+                    method  : "get",
+                    headers : {
+                        "Authorization" : `Bearer ${this.getAuthorizationToken()}`,
+                        "content-type"  : "application/json;charset=UTF-8"
+                    }
+                })
+
+                if (response.data.data != undefined && isArray (response.data.data) && response.data.data.length > 0) {
+                    result  = response.data.data[response.data.data.length-1]
+                }
+                    
+            } catch (err) {
+                if (++itCount > IT_THRESHOLD)
+                    throw undefined;
+            }
+        }
+
+        return result;
+    }
+
+
+    async getLastEvents (roomId:number | undefined, count:number) : Promise<Event[]> {
+        return []
+    }
 }
 
 export default AstarteInterface;

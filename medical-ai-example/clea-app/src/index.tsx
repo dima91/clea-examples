@@ -41,7 +41,7 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
         return new AstarteInterface({ astarteUrl, realm, token, deviceId });
     }, [astarteUrl, realm, token]);
 
-    // TODO Retrieving initial information from external sources
+    // Retrieving initial information from external sources
     useEffect (() => {
         astarteInterface.getIntrospection()
         .then ((data:any) => {

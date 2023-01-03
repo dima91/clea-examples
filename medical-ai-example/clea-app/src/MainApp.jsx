@@ -1,10 +1,11 @@
 
 import "core-js/stable"
 import "regenerator-runtime/runtime"
-import React, { Fragment } from "react";
+import React from "react";
 import RoomsOverview from "./components/RoomsOverview";
-import HistroyBox from "./components/HistoryBox";
-import RommDetails from "./components/RoomDetails";
+import HistoryBox from "./components/HistoryBox";
+import RoomDetails from "./components/RoomDetails";
+import { patientStatusToStringColor, stringToPatientStatus } from "./components/commons";
 
 import { Button, Col, Container, Card, Row, InputGroup, FormControl, ToggleButton,
             ToggleButtonGroup, Spinner, Navbar, Nav} from "react-bootstrap";
@@ -14,10 +15,10 @@ import DatePicker from "react-datepicker";
 import DatePickerStyle from "react-datepicker/dist/react-datepicker.css";
 import _ from 'lodash';
 import { render } from "react-dom";
-import RoomDetails from "./components/RoomDetails";
 
 // Global variables
-let ROOMS_ITEMS_PER_ROW = 3;
+const ROOMS_ITEMS_PER_ROW   = 3;
+const ROOMS_OVERVIEW_IDX    = -1;
 
 // Global functions
 
@@ -28,7 +29,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
     const deviceId                                      = astarteInterface.getDeviceId()
     const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])
-    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (0)
+    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)
 
 
     const handleChannelEvent = (e) => {
@@ -38,7 +39,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
 
 
-    React.useEffect(() => {
+    React.useEffect(async () => {
         if (isReady) {
             console.log (`Registering triggers and websockets for ${deviceId}..\n\nThis is the introspection:`)
             console.log (introspection)
@@ -46,33 +47,55 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             astarteInterface.getDeviceInformation()
             .then ((data) => {console.log (`Device info:`); console.log (data)})
 
-            /* TODO
-            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "com.astarte.Tester", "*", "/*")
-            .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})*/
-
             // Setting up roomsDescriptors
             let tmpRdescriptors     = []
-            let buildRoomDescriptor = (idx, text) => {
+            let buildRoomDescriptor = (descIdx, astarteDescriptor) => {
+
+                if (descIdx == ROOMS_OVERVIEW_IDX) {
+                    return {
+                        descriptorId    : descIdx,
+                        onclick         : (item) => {setFocusDescriptorIdx(descIdx)}
+                    }
+                }
+
                 return {
-                    text                : text,
-                    onclick             : (item) => {setFocusDescriptorIdx(idx)}
+                    descriptorId                : descIdx,
+                    roomId                      : astarteDescriptor.roomId,
+                    patientId                   : astarteDescriptor.patientId,
+                    currentEvent                : astarteDescriptor.currentEvent,
+                    diagnosis                   : astarteDescriptor.diagnosis,
+                    patientHospitalizationDate  : astarteDescriptor.patientHospitalizationDate,
+                    patientReleaseDate          : astarteDescriptor.patientReleaseDate,
+                    onclick                     : (item) => {setFocusDescriptorIdx(descIdx)}
                 }
             }
 
-            tmpRdescriptors.push (buildRoomDescriptor (0, "Overview"))
+            tmpRdescriptors.push (buildRoomDescriptor (ROOMS_OVERVIEW_IDX, undefined))
+
+            let astarteDescriptors  = []
+            for (let i=0; i<roomsList.length;i++) {
+                astarteDescriptors.push(astarteInterface.getRoomDetails (roomsList[i]))
+            }
 
             let initDescCount   = tmpRdescriptors.length
-            _.map (roomsList, (item, idx) => {
-                tmpRdescriptors.push (buildRoomDescriptor (initDescCount+idx, `Room ${item}`))
-            })
+            for (let i=0; i<astarteDescriptors.length; i++) {
+                let d   = await (astarteDescriptors[i])
+                console.log (`d`)
+                console.log (d)
+                tmpRdescriptors.push (buildRoomDescriptor (initDescCount+i, d))
+            }
 
             setRoomsDescriptors (tmpRdescriptors)
+
+            /* TODO
+            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "com.astarte.Tester", "*", "/*")
+            .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})*/
         }
     }, [isReady])
     
     
     
-    return isReady==false ?
+    return roomsDescriptors.length == 0 ?
     (
         <div className="p-4">
             <Container fluid className="text-center">
@@ -88,16 +111,23 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                 <Row>
                     {/* Overview buton + Rooms buttons */}
                     <Col sm={3} md={4}>
-                        <Card>
+                        <Card className="shadow rounded">
                             <Card.Body>
                                 <Nav variant="pills" defaultActiveKey="0" className="flex-column">
                                     {
                                         _.map (roomsDescriptors, (item, idx) => {
+                                            console.log (`Rendering item #${idx}`)
+                                            console.log (item)
+                                            
                                             return (
                                                 <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
-                                                        key={idx} variant={focusDescriptorIdx == idx ? "info" : ""}>
-                                                    <span className="dot bg-success"/>      {/*bg-success    bg-danger*/}
-                                                    {item.text}
+                                                        key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info" : ""}>
+                                                    {item.descriptorId == ROOMS_OVERVIEW_IDX ?
+                                                        <></> :
+                                                        <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }
+                                                    <span className={focusDescriptorIdx == item.descriptorId ? "text-white" : ""}>
+                                                        {item.descriptorId == ROOMS_OVERVIEW_IDX ? "Overview" : `Room ${item.roomId}`}
+                                                    </span>
                                                 </Button>
                                             )
                                         })
@@ -108,7 +138,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                     </Col>
 
                     <Col sm={9} md={8}>
-                        {focusDescriptorIdx == 0 ?
+                        {focusDescriptorIdx == ROOMS_OVERVIEW_IDX ?
                         <Row>
                             <RoomsOverview descriptors={roomsDescriptors.slice(1)} itemsPerRow={ROOMS_ITEMS_PER_ROW}></RoomsOverview>
                         </Row> : 
@@ -121,15 +151,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
 
                         <Row>
-                            <Card bg="info" className="counter-section rounded">
-                                <Card.Body >
-                                    <div className="counter-container text-center">
-                                        <div className="counter-title">
-                                            Statistics table...
-                                        </div>
-                                    </div>
-                                </Card.Body>
-                            </Card>
+                            <HistoryBox/>
                         </Row>
                     </Col>
                 </Row>

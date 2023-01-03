@@ -1,8 +1,25 @@
 
+/*background: linear-gradient(90deg, rgba(224,24,24,1) 0%, rgba(255,207,0,1) 100%);*/
+
 .dot {
     height: .8rem;
     width: .8rem;
     border-radius: 50%;
     margin-right: .3rem;
     display: inline-block;
+}
+
+.warning-gradient-bg {
+    background: rgb(224,24,24);
+    background: linear-gradient(90deg, rgba(255,160,0,1) 0%, rgba(255,190,0,1) 100%);
+}
+
+.alert-gradient-bg {
+    background: rgb(255,0,0);
+    background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,160,0,1) 100%);
+}
+
+
+.patient-status-text {
+    font-weight: bold;
 }

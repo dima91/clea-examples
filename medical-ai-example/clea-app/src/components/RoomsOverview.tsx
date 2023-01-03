@@ -1,26 +1,27 @@
 
-import _ from "lodash";
+import _, { values } from "lodash";
 import React from "react";
-import { Card, Table } from "react-bootstrap";
+import { Card, Col, Row, Table } from "react-bootstrap";
+import { RoomDescriptor, patientStatusToDescriptionString, stringToPatientStatus, patientStatusToGradientClass } from "./commons";
 
 
 type RoomsOverviewProps = {
-    descriptors : Array<Object>,
+    descriptors : Array<RoomDescriptor>,
     itemsPerRow : number
 };
 
 
 const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow}) => {
     
-    let currIdx = 0
-
-    let groupedDescriptors  = _.reduce (descriptors, (acc : Array<Object>, item) => {
+    let currIdx             = 0
+    let groupedDescriptors  = []
+    
+    // Grouping descriptors
+    for (currIdx = 0; currIdx<descriptors.length; currIdx++) {
         if (currIdx % itemsPerRow == 0) {
-            acc.push (descriptors.slice (currIdx, currIdx+itemsPerRow))
+            groupedDescriptors.push (descriptors.slice (currIdx, currIdx+itemsPerRow))
         }
-        currIdx++
-        return acc
-    }, [])
+    }
 
 
     return (
@@ -28,15 +29,27 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
             <tbody>
                 {
                     _.map (groupedDescriptors, (gitem, gidx) => {
-                        console.log (gidx)
-                        console.log (gitem)
-                        let content = _.map (gitem, (item, idx) => {
-                            console.log (`New key: ${gidx}${idx}`)
+                        let content = _.map (gitem, (room, idx) => {
+                            const patientStatus = stringToPatientStatus(room.currentEvent.eventType)
                             return (
                                 <td key={`${gidx}${idx}`}>
-                                    <Card>
-                                        <div>realtime</div>
-                                        <div>{item.text}</div>
+                                    <Card className={`rounded ${patientStatusToGradientClass(patientStatus)}`}>
+                                        <Card.Body className="text-white">
+                                            <Row className="m-0 p-0 mb-1">
+                                                    <div className="fs-10 m-0 p-0">Real time</div>
+                                            </Row>
+                                            <Row className="m-0 p-0">
+                                                {/*WRONG*/
+                                                /* Room {room.roomId}
+                                                {patientStatusToDescriptionString(patientStatus)} */}
+                                                {/*WRONG*/
+                                                /* <span className="fs-5 m-0 p-0">Room {room.roomId}</span>
+                                                <span className="text-end m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</span> */}
+                                                
+                                                <Col className="fs-5 m-0 p-0">Room {room.roomId}</Col>
+                                                <Col className="text-end fs-3 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
+                                            </Row>
+                                        </Card.Body>
                                     </Card>
                                 </td>
                             )
