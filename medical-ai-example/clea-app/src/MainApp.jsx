@@ -29,8 +29,8 @@ const ROOMS_OVERVIEW_IDX    = -1;
 export const MainApp = ({ astarteInterface, roomsList, introspection, isReady }) => {
 
     const deviceId                                      = astarteInterface.getDeviceId()
-    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])   // TODO Change to js oject {<value, setter>...}
-    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)    // Index of selected room in roomDescriptors array
+    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])                   // TODO Change to js object {<value, setter>...}
+    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)   // Index of selected room in roomDescriptors array
     const [tmpEvent, setTmpEvent]                       = React.useState ({})
 
 
@@ -148,7 +148,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                                             
                                             return (
                                                 <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
-                                                        key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info" : ""}>
+                                                        key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info shadow" : ""}>
                                                     {item.descriptorId == ROOMS_OVERVIEW_IDX ?
                                                         <></> :
                                                         <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }
