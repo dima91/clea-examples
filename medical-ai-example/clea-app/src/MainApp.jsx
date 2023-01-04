@@ -143,9 +143,6 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                                 <Nav variant="pills" defaultActiveKey="0" className="flex-column">
                                     {
                                         _.map (roomsDescriptors, (item, idx) => {
-                                            console.log (`Rendering item #${idx}`)
-                                            console.log (item)
-                                            
                                             return (
                                                 <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
                                                         key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info shadow" : ""}>
