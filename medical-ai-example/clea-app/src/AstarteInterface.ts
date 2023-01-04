@@ -192,6 +192,8 @@ class AstarteInterface {
             }
         }
 
+        result.timestamp    = moment(result.timestamp).valueOf()
+        result.roomId       = roomId
         return result;
     }
 

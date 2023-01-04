@@ -2,6 +2,7 @@
 import "core-js/stable"
 import "regenerator-runtime/runtime"
 import React from "react";
+import moment from 'moment';
 import RoomsOverview from "./components/RoomsOverview";
 import HistoryBox from "./components/HistoryBox";
 import RoomDetails from "./components/RoomDetails";
@@ -28,13 +29,41 @@ const ROOMS_OVERVIEW_IDX    = -1;
 export const MainApp = ({ astarteInterface, roomsList, introspection, isReady }) => {
 
     const deviceId                                      = astarteInterface.getDeviceId()
-    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])
-    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)
+    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])   // TODO Change to js oject {<value, setter>...}
+    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)    // Index of selected room in roomDescriptors array
+    const [tmpEvent, setTmpEvent]                       = React.useState ({})
 
 
     const handleChannelEvent = (e) => {
-        // TODO
+        /*console.log (`New event!!!`)
+        console.log (e)*/
+        setTmpEvent (e)
     };
+
+    React.useEffect (() => {
+        if (tmpEvent && 'timestamp' in tmpEvent && 'event' in tmpEvent && 'value' in tmpEvent.event) {            
+            let newEvent    = {
+                timestamp           : moment (tmpEvent.timestamp).valueOf(),
+                eventType           : tmpEvent.event.value.eventType,
+                confidence          : tmpEvent.event.value.confidence,
+                initFrameContent    : tmpEvent.event.value.initFrameContent,
+                initFrameURL        : tmpEvent.event.value.initFrameURL,
+                roomId              : Number(tmpEvent.event.path.slice(1))
+            }
+
+            // Updating event for target room
+            let tmpRdescriptors = []
+            for (let di in roomsDescriptors) {
+                let d   = roomsDescriptors[di]
+                if (d.roomId == newEvent.roomId) {
+                    d.currentEvent  = newEvent 
+                }
+
+                tmpRdescriptors.push (d)
+            }
+            setRoomsDescriptors (tmpRdescriptors)
+        }
+    }, [tmpEvent])
 
 
 
@@ -66,7 +95,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                     diagnosis                   : astarteDescriptor.diagnosis,
                     patientHospitalizationDate  : astarteDescriptor.patientHospitalizationDate,
                     patientReleaseDate          : astarteDescriptor.patientReleaseDate,
-                    onclick                     : (item) => {setFocusDescriptorIdx(descIdx)}
+                    onclick                     : (item) => {console.log (`Setting descriptor with ${descIdx}`); setFocusDescriptorIdx(descIdx)}
                 }
             }
 
@@ -80,16 +109,14 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             let initDescCount   = tmpRdescriptors.length
             for (let i=0; i<astarteDescriptors.length; i++) {
                 let d   = await (astarteDescriptors[i])
-                console.log (`d`)
-                console.log (d)
                 tmpRdescriptors.push (buildRoomDescriptor (initDescCount+i, d))
             }
 
             setRoomsDescriptors (tmpRdescriptors)
 
-            /* TODO
-            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "com.astarte.Tester", "*", "/*")
-            .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})*/
+            // Registering event handler
+            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "it.unisi.atlas.Event5", "*", "/*")
+            .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
         }
     }, [isReady])
     
@@ -144,7 +171,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                         </Row> : 
                         
                         <Row>
-                            <RoomDetails></RoomDetails>
+                            <RoomDetails roomDescriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
                         </Row>
                         }
 

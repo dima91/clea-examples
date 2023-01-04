@@ -8,6 +8,8 @@ export enum PatientStatus {
 
 
 export type Event = {
+    roomId              : number,
+    timestamp           : number,
     eventType           : string,
     confidence          : number,
     initFrameContent    : Uint8Array | undefined,
@@ -26,6 +28,9 @@ export type RoomDescriptor = {
 }
 
 
+// ======================================
+//    Patient status utility functions
+// ======================================
 export function stringToPatientStatus (s : string) {
     let res
 
@@ -108,7 +113,6 @@ export function patientStatusToStringColor (s : PatientStatus) {
 
     return res
 }
-
 
 export function patientStatusToGradientClass (s : PatientStatus) {
     let res
