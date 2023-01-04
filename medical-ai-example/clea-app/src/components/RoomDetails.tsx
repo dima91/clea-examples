@@ -6,8 +6,7 @@ import moment from "moment";
 
 
 type RoomDetailsProps = {
-    roomDescriptor  : RoomDescriptor,
-    // eventsList      : Array<Event>
+    roomDescriptor  : RoomDescriptor
 };
 
 
