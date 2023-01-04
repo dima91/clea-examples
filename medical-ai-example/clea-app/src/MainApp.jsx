@@ -182,16 +182,6 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                         </Row>
                     </Col>
                 </Row>
-
-                {/* <Row className="mt-5">
-                    <InputGroup className="mb-2">
-                        <Row>
-                            <InputGroup.Text>Counter</InputGroup.Text>
-                            <InputGroup.Text>Random</InputGroup.Text>
-                            <InputGroup.Text>Timestamp</InputGroup.Text>
-                        </Row>
-                    </InputGroup>
-                </Row> */}
             </Container>
         </div>
     );
