@@ -23,3 +23,12 @@
 .patient-status-text {
     font-weight: bold;
 }
+
+
+.room-details-title {
+    font-size: 3rem;
+}
+
+.room-details-date {
+    font-size: .8rem;
+}

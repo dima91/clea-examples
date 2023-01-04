@@ -1,5 +1,4 @@
 
-
 export enum PatientStatus {
     NORMAL  = 0,
     WARNING = 1,
@@ -31,6 +30,7 @@ export type RoomDescriptor = {
 // ======================================
 //    Patient status utility functions
 // ======================================
+
 export function stringToPatientStatus (s : string) {
     let res
 
@@ -132,6 +132,46 @@ export function patientStatusToGradientClass (s : PatientStatus) {
         break
     default:
         throw `[patientStatusToStringColor] Invalid parameter "${s}"`
+    }
+
+    return res
+}
+
+export function patientStatusToDatailsTitle (s: PatientStatus) {
+    let res
+
+    switch (s) {
+    case PatientStatus.NORMAL :
+        res = "No warning"
+        break
+    case PatientStatus.WARNING :
+        res = "Warning"
+        break
+    case PatientStatus.ALERT :
+        res = "Alert"
+        break
+    default:
+        throw `[patientStatusToDatailsTitle] Invalid parameter "${s}"`
+    }
+
+    return res
+}
+
+export function patientStatusToDatailsBody (s: PatientStatus) {
+    let res
+
+    switch (s) {
+    case PatientStatus.NORMAL :
+        res = "The patient is in good condition, CLEA Platform will alert you in time if any anomalies."
+        break
+    case PatientStatus.WARNING :
+        res = "Attention, the CLEA AI monitoring system detected a patient sitting. You should go and help him."
+        break
+    case PatientStatus.ALERT :
+        res = "Attention, the CLEA AI monitoring system detected a patient raised. You should go and help him."
+        break
+    default:
+        throw `[patientStatusToDatailsBody] Invalid parameter "${s}"`
     }
 
     return res
