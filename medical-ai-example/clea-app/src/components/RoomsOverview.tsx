@@ -47,7 +47,7 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
                                                 <span className="text-end m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</span> */}
                                                 
                                                 <Col className="fs-5 m-0 p-0">Room {room.roomId}</Col>
-                                                <Col className="text-end fs-3 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
+                                                <Col className="text-end fs-4 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
                                             </Row>
                                         </Card.Body>
                                     </Card>
