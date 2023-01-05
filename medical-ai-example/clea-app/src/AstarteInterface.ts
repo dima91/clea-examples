@@ -3,7 +3,7 @@ import axios from 'axios';
 import AstarteClient from './AstarteClient';
 import { RoomDescriptor, Event, stringToPatientStatus } from './components/commons';
 import moment from 'moment';
-import { isArray } from 'lodash';
+import _, { isArray, isObject, result } from 'lodash';
 
 type AstarteInterfaceProps = {
     astarteUrl: URL;
@@ -69,7 +69,7 @@ class AstarteInterface {
             });
         })
         .catch ((err) => {
-            console.error (`Cannot join toom ${roomName}:`)
+            console.error (`Cannot join room ${roomName}:`)
             console.error (err)
         })
     }
@@ -105,7 +105,7 @@ class AstarteInterface {
                 "Authorization" : `Bearer ${this.getAuthorizationToken()}`,
                 "content-type"  : "application/json;charset=UTF-8"
             }
-        }).then ((response) => response.data?.data)
+        }).then ((response) => response.data?.data["roomsIds"])
     }
     
     
@@ -114,7 +114,7 @@ class AstarteInterface {
         const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
         const requestUrl    = new URL (path, this.getAppengineUrl());
 
-        console.log (`Retrieving details for room ${roomId}`)
+        //console.log (`Retrieving details for room ${roomId}`)
 
         return axios ({
             method  : "get",
@@ -150,29 +150,40 @@ class AstarteInterface {
 
 
     async getLastEvent (roomId:number) : Promise<Event> {
-        
+        let result_a    = await this.getLastRoomEvents (roomId, 1, undefined)
+        return result_a[result_a.length-1]
+    }
+
+
+    /* Returns up to last "count" events published by the specific room "roomId", if specified.
+        If "until" is specified, last "count" events will be retrieved from that time point, otherwise "until" will assume the current timestamp.
+        Elements will be returned as an increasing timestamp sequence of Event objects
+     */
+    async getLastRoomEvents (roomId:number, count:number, until:moment.Moment|undefined) : Promise<Event[]> {
+        if (until == undefined) {
+            until   = moment()
+        }
+
         const MS_IN_AN_HOUR = 86400000;
-        const IT_THRESHOLD     = 10;
+        const IT_THRESHOLD  = 10;
 
-        const interfaceName = `it.unisi.atlas.Event5`;
-        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
-        const requestUrl    = new URL (path, this.getAppengineUrl());
-        const currTime      = moment().valueOf()
-        let timespan        = 0;
-        let result          = undefined;
-        let itCount         = 0;
+        const interfaceName     = `it.unisi.atlas.Event6`;
+        const path              = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
+        const requestUrl        = new URL (path, this.getAppengineUrl());
+        let timespan            = 0;
+        let results : Event[]   = [];
+        let itCount             = 0;
 
-        while (result == undefined) {
-
+        while (results.length<count && itCount<IT_THRESHOLD) {
+            let to      = moment (until.valueOf() - timespan)
             timespan += MS_IN_AN_HOUR
-            let since   = moment (currTime - timespan)
-            let query : Record<string, string>  = {"since":since.format("YYYY-MM-DDTHH:mm:ss")};
+            let since   = moment (until.valueOf() - timespan)
+            let query : Record<string, string>  = {"since":since.format("YYYY-MM-DDTHH:mm:ss"),
+                                                    "to":to.format('YYYY-MM-DDTHH:mm:ss')};
             requestUrl.search                   = new URLSearchParams(query).toString()
 
-            console.log (`New time limit: ${query.since}`)
+            // console.log (`[${roomId}] New time range =>\t${query.since} - ${query.to}`)
             
-
-            // Retrieving data in the current timespan
             try {
                 let response    = await axios.get (requestUrl.toString(), {
                     method  : "get",
@@ -182,24 +193,49 @@ class AstarteInterface {
                     }
                 })
 
-                if (response.data.data != undefined && isArray (response.data.data) && response.data.data.length > 0) {
-                    result  = response.data.data[response.data.data.length-1]
+                if (response.data.data!=undefined && isArray(response.data.data)) {
+                    _.map (response.data.data, (item, idx) => {
+                        item.timestamp  = moment(item.timestamp).valueOf()
+                        item.roomId     = roomId
+                        results.push (item)
+                    })
                 }
-                    
-            } catch (err) {
-                if (++itCount > IT_THRESHOLD)
-                    throw undefined;
+            } catch (err : any) {
+                // console.error (`Catched an error: ${err.message}`)
             }
+
+            itCount++
         }
 
-        result.timestamp    = moment(result.timestamp).valueOf()
-        result.roomId       = roomId
-        return result;
+        return results
     }
 
 
-    async getLastEvents (roomId:number | undefined, count:number) : Promise<Event[]> {
-        return []
+    /* Returns up to last "count" events published by the specific room "roomId", if specified.
+        If "until" is specified, last "count" events will be retrieved from that time point, otherwise "until" will assume the current timestamp.
+        Elements will be returned as an increasing timestamp sequence of Event objects
+     */
+    async getLastEvents (count:number, until:moment.Moment|undefined) : Promise<Event[]> {
+
+        const roomsList         = await this.getRoomsList();
+
+        let results : Event[]   = [];
+        let itCount             = 0;
+        let tmpResults          = [];
+
+        for (let i in roomsList) {
+            console.log (`i: ${i} -> ${roomsList[i]}`)
+            tmpResults.push (this.getLastRoomEvents (Number(roomsList[i]), count, until))
+        }
+
+        for (let i in tmpResults) {
+            let res = await tmpResults[i]
+            results = results.concat (res)
+        }
+
+        results.sort ((a, b) => a.timestamp - b.timestamp)
+        
+        return results
     }
 }
 
