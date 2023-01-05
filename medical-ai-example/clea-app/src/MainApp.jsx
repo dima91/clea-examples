@@ -17,20 +17,19 @@ import DatePickerStyle from "react-datepicker/dist/react-datepicker.css";
 import _ from 'lodash';
 import { render } from "react-dom";
 
-// Global variables
-const ROOMS_ITEMS_PER_ROW   = 3;
-const ROOMS_OVERVIEW_IDX    = -1;
-
-// Global functions
-
 
 
 
 export const MainApp = ({ astarteInterface, roomsList, introspection, isReady }) => {
 
+    const ROOMS_ITEMS_PER_ROW   = 3;
+    const ROOMS_OVERVIEW_IDX    = -1;
+    
     const deviceId                                      = astarteInterface.getDeviceId()
     const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])                   // TODO Change to js object {<value, setter>...}
-    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (1)   // Index of selected room in roomDescriptors array
+    const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (ROOMS_OVERVIEW_IDX)   // Index of selected room in roomDescriptors array
+    const [selectedRoomIdx, setSelectedRoomIdx]         = React.useState (ROOMS_OVERVIEW_IDX)
+    const [eventsList, setEventsList]                   = React.useState (undefined)
     const [tmpEvent, setTmpEvent]                       = React.useState ({})
 
 
@@ -76,14 +75,18 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             astarteInterface.getDeviceInformation()
             .then ((data) => {console.log (`Device info:`); console.log (data)})
 
+            // Querying for global events
+            let events  = astarteInterface.getLastEvents (8, undefined)
+
             // Setting up roomsDescriptors
             let tmpRdescriptors     = []
             let buildRoomDescriptor = (descIdx, astarteDescriptor) => {
 
                 if (descIdx == ROOMS_OVERVIEW_IDX) {
+
                     return {
                         descriptorId    : descIdx,
-                        onclick         : (item) => {setFocusDescriptorIdx(descIdx)}
+                        onclick         : (item) => {setFocusDescriptorIdx(descIdx); setSelectedRoomIdx(descIdx)}
                     }
                 }
 
@@ -95,7 +98,9 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                     diagnosis                   : astarteDescriptor.diagnosis,
                     patientHospitalizationDate  : astarteDescriptor.patientHospitalizationDate,
                     patientReleaseDate          : astarteDescriptor.patientReleaseDate,
-                    onclick                     : (item) => {console.log (`Setting descriptor with ${descIdx}`); setFocusDescriptorIdx(descIdx)}
+                    onclick                     : (item) => {   console.log (`Setting descriptor with ${descIdx}`);
+                                                                setFocusDescriptorIdx(descIdx);
+                                                                setSelectedRoomIdx(astarteDescriptor.roomId)}
                 }
             }
 
@@ -114,8 +119,12 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
             setRoomsDescriptors (tmpRdescriptors)
 
+            // Awaiting for events list
+            let evts    = await (events)
+            setEventsList (evts)
+
             // Registering event handler
-            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "it.unisi.atlas.Event5", "*", "/*")
+            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "it.unisi.atlas.Event6", "*", "/*")
             .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
         }
     }, [isReady])
@@ -128,7 +137,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             <Container fluid className="text-center">
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
-                    </Spinner>
+                </Spinner>
             </Container>
         </div>
     ) :
@@ -168,6 +177,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                         </Row> : 
                         
                         <Row>
+                            {/*FIXME: pass to RoomDetails element the roomDescriptors amd focusDescriptorIdx separately*/}
                             <RoomDetails roomDescriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
                         </Row>
                         }
@@ -175,7 +185,8 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
 
                         <Row>
-                            <HistoryBox/>
+                            <HistoryBox events={eventsList} selectedRoomIdx={selectedRoomIdx}
+                                        focusDescriptorIdx={focusDescriptorIdx} roomsDescriptors={roomsDescriptors.slice(1)}/>
                         </Row>
                     </Col>
                 </Row>

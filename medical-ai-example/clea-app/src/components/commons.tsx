@@ -79,7 +79,7 @@ export function patientStatusToDescriptionString (s : PatientStatus) {
         res = "Lying down"
         break
     case PatientStatus.WARNING :
-        res = "Sitting"
+        res = "Sat down"
         break
     case PatientStatus.ALERT :
         res = "Raised"
