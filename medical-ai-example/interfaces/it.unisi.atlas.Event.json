@@ -23,8 +23,13 @@
         },
         {
             "endpoint": "/%{roomId}/initFrameURL",
-            "type": "",
+            "type": "string",
             "ddescription" : "OPTIONAL FIELD: contains URL to retrieve the image captured from the camera that trigger the event"
+        },
+        {
+            "endpoint": "/%{roomId}/roomId",
+            "type": "integer",
+            "ddescription": "Room identifier that triggered the event"
         }
     ]
 }
