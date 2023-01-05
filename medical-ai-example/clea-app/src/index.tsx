@@ -51,7 +51,7 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
     useEffect (() => {
         astarteInterface.getRoomsList()
         .then ((data:any) => {
-            setRoomsList (data["roomsIds"])
+            setRoomsList (data)
         })
     }, [astarteInterface])
 
