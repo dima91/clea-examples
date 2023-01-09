@@ -12,7 +12,6 @@ type RoomDetailsProps = {
 
 const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
     
-    //let descriptor      = roomsDescriptors[focusDescriptorIdx]
     let patientStatus   = stringToPatientStatus (descriptor.currentEvent.eventType)
     let startigDate     = moment (descriptor.currentEvent.timestamp)
     let hDate           = moment (descriptor.patientHospitalizationDate)

@@ -36,8 +36,20 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
     const handleChannelEvent = (e) => {
         /*console.log (`New event!!!`)
         console.log (e)*/
-        setTmpEvent (e)
-        setEventsList ((prev) => {prev.push(e); return prev;})
+        let evt = e.event.value
+        setEventsList ((prev) => {
+            let newEvent    = {
+                roomId              : evt.roomId,
+                timestamp           : moment(e.timestamp).valueOf(),
+                eventType           : evt.eventType,
+                confidence          : evt.confidence,
+                initFrameURL        : evt.initFrameURL,
+                initFrameContent    : evt.initFrameContent
+            }
+            prev.push(newEvent);
+            setTmpEvent (e)
+            return prev;
+        })
     };
 
     React.useEffect (() => {
