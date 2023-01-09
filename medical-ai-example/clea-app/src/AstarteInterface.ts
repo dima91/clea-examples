@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 import AstarteClient from './AstarteClient';
-import { RoomDescriptor, Event, stringToPatientStatus } from './components/commons';
+import { RoomDescriptor, Event } from './components/commons';
 import moment from 'moment';
 import _, { isArray, isObject, result } from 'lodash';
 

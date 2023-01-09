@@ -6,27 +6,34 @@ import moment from "moment";
 
 
 type RoomDetailsProps = {
-    roomDescriptor  : RoomDescriptor
+    descriptor  : RoomDescriptor
 };
 
 
-const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
-    console.log (`Rendering this room (#${roomDescriptor.roomId})`)
-    console.log (roomDescriptor)
-    let patientStatus   = stringToPatientStatus (roomDescriptor.currentEvent.eventType)
-    let startigDate     = moment (roomDescriptor.currentEvent.timestamp)
-    let hDate           = moment (roomDescriptor.patientHospitalizationDate)
-    let rDate           = moment (roomDescriptor.patientReleaseDate)
+const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
+    
+    //let descriptor      = roomsDescriptors[focusDescriptorIdx]
+    let patientStatus   = stringToPatientStatus (descriptor.currentEvent.eventType)
+    let startigDate     = moment (descriptor.currentEvent.timestamp)
+    let hDate           = moment (descriptor.patientHospitalizationDate)
+    let rDate           = moment (descriptor.patientReleaseDate)
+    
+    console.log (`Rendering this room (#${descriptor.roomId})`)
+    console.log (descriptor)
 
 
     let getPatientImage = (e:Event) : React.ReactNode => {
-        let s   = stringToPatientStatus (e.eventType)
+        try {
+            let s   = stringToPatientStatus (e.eventType)
         
-        if (s != PatientStatus.NORMAL) {
-            if (e.initFrameURL != undefined && e.initFrameURL.length!=0)
-                return (<Image
-                            className="mt-4 d-flex justify-content-center shadow rounded"
-                            src={e.initFrameURL}/>)
+            if (s != PatientStatus.NORMAL) {
+                if (e.initFrameURL != undefined && e.initFrameURL.length!=0)
+                    return (<Image
+                                className="mt-4 d-flex justify-content-center shadow rounded"
+                                src={e.initFrameURL}/>)
+            }
+        } catch {
+            return <></>
         }
     }
 
@@ -43,9 +50,6 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
             <Col sm={6} md={6} lg={6}>
                 <Card className="rounded shadow bg-light h-100">
                     <Container fluid>
-                        {/* <Card.Title className='text-primary mt-3 fs-5'>
-                            Details
-                        </Card.Title> */}
                         <Card.Subtitle className="mt-3 text-primary">
                             Details
                         </Card.Subtitle>
@@ -56,7 +60,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
                                     <Form.Label className="fw-bold">Patient ID</Form.Label>
                                     <Form.Control
                                         readOnly
-                                        defaultValue={roomDescriptor.patientId}
+                                        placeholder={descriptor.patientId.toString()}
                                     />
                                 </Col>
                             </Row>
@@ -65,14 +69,14 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
                                     <Form.Label className="fw-bold">Hospitalization date</Form.Label>
                                     <Form.Control
                                         readOnly
-                                        defaultValue={`${hDate.format('DD/MM/YY')}`}
+                                        placeholder={`${hDate.format('DD/MM/YY')}`}
                                     />
                                 </Col>
                                 <Col sm={6} md={6}>
                                     <Form.Label className="fw-bold">Release date</Form.Label>
                                     <Form.Control
                                         readOnly
-                                        defaultValue={`${rDate.format('DD/MM/YY')}`}
+                                        placeholder={`${rDate.format('DD/MM/YY')}`}
                                     />
                                 </Col>
                             </Row>
@@ -81,7 +85,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
                                     <Form.Label className="fw-bold">Diagnosis</Form.Label>
                                     <Form.Control
                                         readOnly
-                                        defaultValue={roomDescriptor.diagnosis.length>0 ? roomDescriptor.diagnosis : "Unknown"}
+                                        placeholder={descriptor.diagnosis.length>0 ? descriptor.diagnosis : "Unknown"}
                                     />
                                 </Col>
                             </Row>
@@ -102,13 +106,13 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({roomDescriptor}) => {
                             <div className="room-details-title mt-1">{patientStatusToDatailsTitle(patientStatus)}</div>
 
                             <div>{patientStatusToDatailsBody(patientStatus)}</div>
-                            {getPatientImage(roomDescriptor.currentEvent)}
+                            {getPatientImage(descriptor.currentEvent)}
                             
                             {/* Bottom part */}
                             <div className="d-flex justify-content-end align-text-bottom room-details-date mt-4">
                                 Date: {startigDate.format('DD/MM/YY, HH:mm:SS')}
                             </div>
-                            {getEventConfidence(roomDescriptor.currentEvent)}
+                            {getEventConfidence(descriptor.currentEvent)}
                         </Card.Body>
                     </Container>
                 </Card>

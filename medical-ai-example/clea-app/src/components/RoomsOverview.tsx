@@ -30,10 +30,13 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
                 {
                     _.map (groupedDescriptors, (gitem, gidx) => {
                         let content = _.map (gitem, (room, idx) => {
-                            const patientStatus = stringToPatientStatus(room.currentEvent.eventType)
+                            let patientStatus   = undefined
+                            try {
+                                patientStatus   = stringToPatientStatus(room.currentEvent.eventType)
+                            } catch {}
                             return (
                                 <td key={`${gidx}${idx}`}>
-                                    <Card className={`rounded ${patientStatusToGradientClass(patientStatus)}`}>
+                                    <Card className={`rounded ${patientStatus!=undefined ? patientStatusToGradientClass(patientStatus) : ''}`}>
                                         <Card.Body className="text-white">
                                             <Row className="m-0 p-0 mb-1">
                                                     <div className="fs-10 m-0 p-0">Real time</div>
@@ -47,7 +50,9 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
                                                 <span className="text-end m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</span> */}
                                                 
                                                 <Col className="fs-5 m-0 p-0">Room {room.roomId}</Col>
-                                                <Col className="text-end fs-4 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
+                                                {patientStatus != undefined ?
+                                                    <Col className="text-end fs-4 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
+                                                : <></>}
                                             </Row>
                                         </Card.Body>
                                     </Card>
