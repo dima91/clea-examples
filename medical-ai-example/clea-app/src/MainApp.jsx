@@ -26,7 +26,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
     const ROOMS_OVERVIEW_IDX    = -1;
     
     const deviceId                                      = astarteInterface.getDeviceId()
-    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])                   // TODO Change to js object {<value, setter>...}
+    const [roomsDescriptors, setRoomsDescriptors]       = React.useState ([])
     const [focusDescriptorIdx, setFocusDescriptorIdx]   = React.useState (ROOMS_OVERVIEW_IDX)   // Index of selected room in roomDescriptors array
     const [selectedRoomIdx, setSelectedRoomIdx]         = React.useState (ROOMS_OVERVIEW_IDX)
     const [eventsList, setEventsList]                   = React.useState (undefined)
@@ -37,9 +37,12 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
         /*console.log (`New event!!!`)
         console.log (e)*/
         setTmpEvent (e)
+        setEventsList ((prev) => {prev.push(e); return prev;})
     };
 
     React.useEffect (() => {
+        console.log (`Handling tmpEvent..`)
+        
         if (tmpEvent && 'timestamp' in tmpEvent && 'event' in tmpEvent && 'value' in tmpEvent.event) {            
             let newEvent    = {
                 timestamp           : moment (tmpEvent.timestamp).valueOf(),
@@ -152,17 +155,21 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                                 <Nav variant="pills" defaultActiveKey="0" className="flex-column">
                                     {
                                         _.map (roomsDescriptors, (item, idx) => {
-                                            return (
-                                                <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
-                                                        key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info shadow" : ""}>
-                                                    {item.descriptorId == ROOMS_OVERVIEW_IDX ?
-                                                        <></> :
-                                                        <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }
-                                                    <span className={focusDescriptorIdx == item.descriptorId ? "text-white" : ""}>
-                                                        {item.descriptorId == ROOMS_OVERVIEW_IDX ? "Overview" : `Room ${item.roomId}`}
-                                                    </span>
-                                                </Button>
-                                            )
+                                            try {
+                                                return (
+                                                    <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
+                                                            key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info shadow" : ""}>
+                                                        {item.descriptorId == ROOMS_OVERVIEW_IDX ?
+                                                            <></> :
+                                                            <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }
+                                                        <span className={focusDescriptorIdx == item.descriptorId ? "text-white" : ""}>
+                                                            {item.descriptorId == ROOMS_OVERVIEW_IDX ? "Overview" : `Room ${item.roomId}`}
+                                                        </span>
+                                                    </Button>
+                                                )
+                                            } catch {
+                                                return <></>
+                                            }
                                         })
                                     }
                                 </Nav>
@@ -177,8 +184,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                         </Row> : 
                         
                         <Row>
-                            {/*FIXME: pass to RoomDetails element the roomDescriptors amd focusDescriptorIdx separately*/}
-                            <RoomDetails roomDescriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
+                            <RoomDetails descriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
                         </Row>
                         }
 
