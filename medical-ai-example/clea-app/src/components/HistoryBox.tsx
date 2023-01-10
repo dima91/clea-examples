@@ -1,10 +1,8 @@
 
 import React from "react";
-import { Button, ButtonGroup, Card, Container, Spinner, Table } from "react-bootstrap";
+import { Button, Card, Container, Spinner, Table } from "react-bootstrap";
 import { Event, patientStatusToDescriptionString, patientStatusToStringColor, RoomDescriptor, stringToPatientStatus } from "./commons";
-import _, { reduce } from "lodash";
 import moment from "moment";
-import { number, string } from "yup";
 
 
 type HistoryBoxProps = {
@@ -26,9 +24,9 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
     let roomEvents : Map<number, Event[]>       = new Map()
     let computeDuration                         = (curr:Event, prev:Event) => {
         let ms      = prev.timestamp-curr.timestamp
-        console.log (`computeduration`)
+        /*console.log (`computeduration`)
         console.log (curr)
-        console.log (prev)
+        console.log (prev)*/
         const res   = {
             hours   : Math.floor(ms / 3600000),
             minutes : Math.floor(ms / 60000) % 60,
@@ -114,12 +112,12 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
         setFocusedPageIndex (START_PAGE)
     }, [selectedRoomIdx])
     
-    console.log (`==========    Rerendering`)
+    /*console.log (`==========    Rerendering`)
     console.log (selectedRoomIdx)
     console.log (focusDescriptorIdx)
     console.log (roomsDescriptors)
     console.log (patientMap)
-    console.log (`Displaying ${revEvents.length} events`)
+    console.log (`Displaying ${revEvents.length} events`)*/
 
     
     return (
@@ -172,7 +170,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
                                             let minIdx  = focusedPageIndex*ITEMS_PER_PAGE
                                             let maxIdx  = minIdx+ITEMS_PER_PAGE-1
                                             if (minIdx<=idx && idx<=maxIdx) {
-                                                console.log (`${minIdx} -> ${maxIdx} (${idx})`)
+                                                //console.log (`${minIdx} -> ${maxIdx} (${idx})`)
                                                 return buildRow (item, (idx==0?undefined:array[idx-1]), idx, "mt-1 mb-1 row-style align-middle")
                                             }
                                             else
