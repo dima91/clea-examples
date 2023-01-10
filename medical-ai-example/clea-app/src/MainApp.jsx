@@ -51,6 +51,16 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             return prev;
         })
     };
+    
+    const onRoomsOverviewClick  = (id) => {
+        let i   = 0
+        while (i<roomsDescriptors.length && roomsDescriptors[i].roomId != id)
+            i++
+        if (i==roomsDescriptors.length)
+            throw `[onRoomsOverviewClick] Cannot find room with id ${id}`
+        
+        return i
+    }
 
     React.useEffect (() => {
         console.log (`Handling tmpEvent..`)
@@ -192,7 +202,11 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                     <Col sm={9} md={8}>
                         {focusDescriptorIdx == ROOMS_OVERVIEW_IDX ?
                         <Row>
-                            <RoomsOverview descriptors={roomsDescriptors.slice(1)} itemsPerRow={ROOMS_ITEMS_PER_ROW}></RoomsOverview>
+                            <RoomsOverview descriptors={roomsDescriptors.slice(1)} itemsPerRow={ROOMS_ITEMS_PER_ROW}
+                                            onclick={(id)=>{
+                                                setFocusDescriptorIdx(onRoomsOverviewClick(id))
+                                                setSelectedRoomIdx(id)
+                                            }}></RoomsOverview>
                         </Row> : 
                         
                         <Row>

@@ -5,13 +5,16 @@ import { Card, Col, Row, Table } from "react-bootstrap";
 import { RoomDescriptor, patientStatusToDescriptionString, stringToPatientStatus, patientStatusToGradientClass } from "./commons";
 
 
+type CardClickCallback  =   (id:number) => void;
 type RoomsOverviewProps = {
     descriptors : Array<RoomDescriptor>,
-    itemsPerRow : number
+    itemsPerRow : number,
+    onclick     : CardClickCallback
 };
 
 
-const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow}) => {
+const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow, onclick}) => {
+    // FIXME Prevent card dimension changing!
     
     let currIdx             = 0
     let groupedDescriptors  = []
@@ -36,19 +39,13 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
                             } catch {}
                             return (
                                 <td key={`${gidx}${idx}`}>
-                                    <Card className={`rounded ${patientStatus!=undefined ? patientStatusToGradientClass(patientStatus) : ''}`}>
+                                    <Card className={`clickable-card rounded ${patientStatus!=undefined ? patientStatusToGradientClass(patientStatus) : ''}`}
+                                            onClick={(it1) => {onclick(room.roomId)}}>
                                         <Card.Body className="text-white">
                                             <Row className="m-0 p-0 mb-1">
                                                     <div className="fs-10 m-0 p-0">Real time</div>
                                             </Row>
                                             <Row className="m-0 p-0">
-                                                {/*WRONG*/
-                                                /* Room {room.roomId}
-                                                {patientStatusToDescriptionString(patientStatus)} */}
-                                                {/*WRONG*/
-                                                /* <span className="fs-5 m-0 p-0">Room {room.roomId}</span>
-                                                <span className="text-end m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</span> */}
-                                                
                                                 <Col className="fs-5 m-0 p-0">Room {room.roomId}</Col>
                                                 {patientStatus != undefined ?
                                                     <Col className="text-end fs-4 m-0 p-0 patient-status-text">{patientStatusToDescriptionString(patientStatus)}</Col>
