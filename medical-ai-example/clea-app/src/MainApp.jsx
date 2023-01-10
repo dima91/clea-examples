@@ -179,8 +179,9 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                                         _.map (roomsDescriptors, (item, idx) => {
                                             try {
                                                 return (
-                                                    <Button className='mt-2 text-start' value={item.value} onClick={item.onclick}
-                                                            key={idx} variant={focusDescriptorIdx == item.descriptorId ? "info shadow" : ""}>
+                                                    <Button className={`mt-2 text-start ${focusDescriptorIdx==item.descriptorId?'primary-bg':''}`}
+                                                            value={item.value} onClick={item.onclick}
+                                                            key={idx} variant={focusDescriptorIdx == item.descriptorId ? "shadow" : ""}>
                                                         {item.descriptorId == ROOMS_OVERVIEW_IDX ?
                                                             <></> :
                                                             <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }

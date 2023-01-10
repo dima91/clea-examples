@@ -122,7 +122,7 @@ export function patientStatusToGradientClass (s : PatientStatus) {
         res = ""
         break
     case PatientStatus.NORMAL :
-        res = "bg-info"
+        res = "primary-bg"
         break
     case PatientStatus.WARNING :
         res = "warning-gradient-bg"

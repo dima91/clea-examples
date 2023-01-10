@@ -50,3 +50,7 @@
 .clickable-card {
     cursor: pointer;
 }
+
+.primary-bg {
+    background-color: #11B0EF;
+}
