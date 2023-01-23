@@ -176,3 +176,7 @@ export function patientStatusToDatailsBody (s: PatientStatus) {
 
     return res
 }
+
+export function normalizeConfidence (c: number) {
+    return Number(c.toFixed(4))
+}

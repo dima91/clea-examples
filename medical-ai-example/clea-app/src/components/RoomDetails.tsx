@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, Col, Container, Form, Row, Image } from "react-bootstrap";
-import { RoomDescriptor, Event, stringToPatientStatus, patientStatusToGradientClass, patientStatusToDatailsTitle, patientStatusToDatailsBody, PatientStatus } from "./commons";
+import { RoomDescriptor, Event, stringToPatientStatus, patientStatusToGradientClass, patientStatusToDatailsTitle, patientStatusToDatailsBody, PatientStatus, normalizeConfidence } from "./commons";
 import moment from "moment";
 
 
@@ -39,7 +39,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
     let getEventConfidence  = (e: Event): React.ReactNode => {
         if (e.confidence != undefined)
             return <div className="d-flex justify-content-end align-text-bottom room-details-date">
-                        Inference Confidence: {e.confidence*100}%
+                        Inference Confidence: {normalizeConfidence(e.confidence)*100}%
                     </div>
     }
 

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button, Card, Container, Spinner, Table } from "react-bootstrap";
-import { Event, patientStatusToDescriptionString, patientStatusToStringColor, RoomDescriptor, stringToPatientStatus } from "./commons";
+import { Event, normalizeConfidence, patientStatusToDescriptionString, patientStatusToStringColor, RoomDescriptor, stringToPatientStatus } from "./commons";
 import moment from "moment";
 
 
@@ -79,7 +79,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
                     </td>
                     <td>{moment(item.timestamp).format("DD/MM/YY - HH:mm:ss")}</td>
                     <td>{evts.length>1 ? computeDuration (item, evts[evts.indexOf(item)-1]) : '-'}</td>
-                    <td>{item.confidence ? item.confidence : `-`}</td>
+                    <td>{item.confidence ? normalizeConfidence(item.confidence) : `-`}</td>
                     <td>{patientMap.get(item.roomId)}</td>
                 </tr>
             )
@@ -94,7 +94,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
                     </td>
                     <td>{moment(item.timestamp).format("DD/MM/YY - HH:mm:ss")}</td>
                     <td>{prevItem!=undefined ? computeDuration (item, prevItem) : '-'}</td>
-                    <td>{item.confidence ? item.confidence : `-`}</td>
+                    <td>{item.confidence ? normalizeConfidence(item.confidence) : `-`}</td>
                 </tr>
             )
         }
