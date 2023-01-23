@@ -28,7 +28,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
             if (s != PatientStatus.NORMAL) {
                 if (e.initFrameURL != undefined && e.initFrameURL.length!=0)
                     return (<Image
-                                className="mt-4 d-flex justify-content-center shadow rounded"
+                                className="mt-4 d-flex justify-content-center shadow rounded w-100"
                                 src={e.initFrameURL}/>)
             }
         } catch {
