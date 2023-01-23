@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Button, Card, Container, Spinner, Table } from "react-bootstrap";
+import { Button, Card, Container, Spinner, Table, ThemeProvider } from "react-bootstrap";
 import { Event, normalizeConfidence, patientStatusToDescriptionString, patientStatusToStringColor, RoomDescriptor, stringToPatientStatus } from "./commons";
 import moment from "moment";
 
@@ -62,6 +62,21 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
         
         return `${numberToString(res.hours)}:${numberToString(res.minutes)}:${numberToString(res.seconds)} h`
     }
+    let searchPrevItem                          = (evts:Event[], evt:Event, idx:number) => {
+        let tmpIdx  = idx-1;
+        let result  = undefined
+        //console.log (`(${idx}) prev of ${evt.roomId}`)
+
+        while (result == undefined && tmpIdx>=0) {
+            if (evts[tmpIdx].roomId == evt.roomId)
+                result  = evts[tmpIdx]
+            tmpIdx--
+        }
+
+        console.log (result)
+        
+        return result
+    }
     let buildRow                                = (item:Event, prevItem:Event|undefined, idx:number, rowClassName:string) => {
         let status  = stringToPatientStatus (item.eventType)
         let evts    = roomEvents.get(item.roomId)
@@ -78,7 +93,8 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
                         {patientStatusToDescriptionString(status)}
                     </td>
                     <td>{moment(item.timestamp).format("DD/MM/YY - HH:mm:ss")}</td>
-                    <td>{evts.length>1 ? computeDuration (item, evts[evts.indexOf(item)-1]) : '-'}</td>
+                    <td>{prevItem!=undefined ? computeDuration (item, prevItem) : '-'}</td>
+                    {/* OLD_VERSION <td>{evts.length>1 ? computeDuration (item, evts[evts.indexOf(item)-1]) : '-'}</td> */}
                     <td>{item.confidence ? normalizeConfidence(item.confidence) : `-`}</td>
                     <td>{patientMap.get(item.roomId)}</td>
                 </tr>
@@ -202,7 +218,8 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
                                             let maxIdx  = minIdx+ITEMS_PER_PAGE-1
                                             if (minIdx<=idx && idx<=maxIdx) {
                                                 //console.log (`${minIdx} -> ${maxIdx} (${idx})`)
-                                                return buildRow (item, (idx==0?undefined:array[idx-1]), idx, "mt-1 mb-1 row-style align-middle")
+                                                // OLD_VERSION return buildRow (item, (idx==0?undefined:array[idx-1]), idx, "mt-1 mb-1 row-style align-middle")
+                                                return buildRow (item, searchPrevItem(revEvents, item, idx), idx, "mt-1 mb-1 row-style align-middle")
                                             }
                                             else
                                                 return <></>
