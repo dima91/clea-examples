@@ -50,7 +50,7 @@ class App:
 
     def add_interfaces (self) -> None :
         # Event interface
-        self.interface_name     = "it.unisi.atlas.Event5"   # FIXME The interface name should be "it.unisi.atlas.Event"
+        self.interface_name     = "it.unisi.atlas.Event"
         interface_descriptor    = {
             "interface_name": self.interface_name,
             "version_major": 0,
@@ -74,6 +74,10 @@ class App:
                 {
                     "endpoint": "/%{roomId}/initFrameURL",
                     "type": "string"
+                },
+                {
+                    "endpoint": "/%{roomId}/roomId",
+                    "type": "integer"
                 }
             ]
         }
@@ -137,7 +141,6 @@ class App:
 
 
     def publish_image (self) -> None:
-        #TODO
         files   = {
                     'file': self.f
                 }
@@ -153,7 +156,7 @@ class App:
     def astarte_conection_cb (self, dvc) -> None:
         print ('\n================\nDevice connected\n================\n\n')
 
-        # TODO Publishing rooms information
+        # Publishing rooms information
         rs_info = [7, 12, 14, 20, 25]
         self.astarte_device.send ("it.unisi.atlas.RoomsManagerDescriptor", f'/roomsIds', rs_info)
 
@@ -216,8 +219,8 @@ class App:
             a_data  = {}
             if c != -1 :
                 a_data["confidence"]    = c
-            a_data["eventType"]     = t
-            a_data["initFrameURL"]  = t
+            a_data["eventType"]         = t
+            a_data["roomId"]            = i
             
             self.astarte_device.send_aggregate (self.interface_name, f'/{i}', a_data)
 
