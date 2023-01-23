@@ -167,7 +167,7 @@ class AstarteInterface {
         const MS_IN_AN_HOUR = 86400000;
         const IT_THRESHOLD  = 10;
 
-        const interfaceName     = `it.unisi.atlas.Event6`;
+        const interfaceName     = `it.unisi.atlas.Event`;
         const path              = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
         const requestUrl        = new URL (path, this.getAppengineUrl());
         let timespan            = 0;

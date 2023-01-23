@@ -149,7 +149,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             setEventsList (evts)
 
             // Registering event handler
-            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "it.unisi.atlas.Event6", "*", "/*")
+            astarteInterface.registerIncomingDataTrigger (handleChannelEvent, "it.unisi.atlas.Event", "*", "/*")
             .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
         }
     }, [isReady])
