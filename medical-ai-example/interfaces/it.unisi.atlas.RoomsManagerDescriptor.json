@@ -1,0 +1,14 @@
+{
+    "interface_name": "it.unisi.atlas.RoomsManagerDescriptor",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "device",
+    "mappings": [
+        {
+            "endpoint": "/roomsIds",
+            "type": "integerarray",
+            "description": "List of rooms IDs handled by the board"
+        }
+    ]
+}

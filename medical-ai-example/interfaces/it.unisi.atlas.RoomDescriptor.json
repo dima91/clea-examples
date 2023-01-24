@@ -1,0 +1,28 @@
+{
+    "interface_name": "it.unisi.atlas.RoomDescriptor",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "device",
+    "mappings": [
+        {
+            "endpoint": "/%{roomId}/patientId",
+            "type": "integer",
+            "description": "Patient identifier"
+        },
+        {
+            "endpoint": "/%{roomId}/diagnosis",
+            "type": "string",
+            "description": "Brief diagnosis description"
+        },
+        {
+            "endpoint": "/%{roomId}/patientHospitalizationDate",
+            "type": "datetime"
+        },
+        {
+            "endpoint": "/%{roomId}/patientReleaseDate",
+            "type": "datetime",
+            "description": "Expected release date"
+        }
+    ]
+}

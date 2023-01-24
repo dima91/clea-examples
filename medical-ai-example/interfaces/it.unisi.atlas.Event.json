@@ -1,0 +1,35 @@
+{
+    "interface_name": "it.unisi.atlas.Event",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "datastream",
+    "ownership": "device",
+    "aggregation": "object",
+    "mappings": [
+        {
+            "endpoint": "/%{roomId}/eventType",
+            "type": "string",
+            "ddescription":"MANDATORY FIELD: identify the triggered event type. Possible values are NORMAL, WARNING, ALERT"
+        },
+        {
+            "endpoint": "/%{roomId}/confidence",
+            "type": "double",
+            "ddescription" : "OPTIONAL FIELD: contains the confidence resulting from the inference process, in case event has type ALERT or WARNING"
+        },
+        {
+            "endpoint": "/%{roomId}/initFrameContent",
+            "type": "binaryblob",
+            "ddescription" : "OPTIONAL FIELD: contains the image captured from the camera that triggers the event"
+        },
+        {
+            "endpoint": "/%{roomId}/initFrameURL",
+            "type": "string",
+            "ddescription" : "OPTIONAL FIELD: contains URL to retrieve the image captured from the camera that trigger the event"
+        },
+        {
+            "endpoint": "/%{roomId}/roomId",
+            "type": "integer",
+            "ddescription": "Room identifier that triggered the event"
+        }
+    ]
+}
