@@ -1,0 +1,4 @@
+
+PyQt6==6.4.1
+pyserial==3.5
+git+https://github.com/astarte-platform/astarte-device-sdk-python.git@master
