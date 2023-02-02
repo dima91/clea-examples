@@ -1,6 +1,7 @@
 
-from enum import Enum
 import os
+from enum import Enum
+from PySide6.QtCore import Qt
 
 
 class Status(Enum):
@@ -16,5 +17,37 @@ class Status(Enum):
     DISPENSED           = 8
 
 
+def status_to_string (s) :
+    result  = ""
+    if s == Status.INITIALIZING:
+        result  = "INITIALIZING"
+    elif s == Status.STANDBY:
+        result  = "STANDBY"
+    elif s == Status.RECOGNITION:
+        result  = "RECOGNITION"
+    elif s == Status.SUGGESTION:
+        result  = "SUGGESTION"
+    elif s == Status.SELECTION:
+        result  = "SELECTION"
+    elif s == Status.PAYMENT_REQUESTED:
+        result  = "PAYMENT_REQUESTED"
+    elif s == Status.PAYMENT_PROCESSING:
+        result  = "PAYMENT_PROCESSING"
+    elif s == Status.PAYMENT_ACCEPTED:
+        result  = "PAYMENT_ACCEPTED"
+    elif s == Status.DISPENSING:
+        result  = "DISPENSING"
+    elif s == Status.DISPENSED:
+        result  = "DISPENSED"
+    else :
+        result  = "<UNKNOWN STATE>"
+
+    return result
+
+
 def get_abs_path (base_folder, file_name) :
     return os.path.abspath(os.path.join(base_folder, file_name))
+
+
+def resize_image (curr_pixmap, target_size) :
+    return curr_pixmap.scaled(target_size, Qt.KeepAspectRatio)

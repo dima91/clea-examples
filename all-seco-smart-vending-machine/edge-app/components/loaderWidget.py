@@ -1,27 +1,56 @@
 
 from PySide6.QtCore import QRect, QSize, Qt
-from PySide6.QtWidgets import QWidget, QLabel, QFrame
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout
 from PySide6.QtGui import QMovie
 
 
 class LoaderWidget (QWidget) :
 
-    def __init__(self, root_window, config) -> None:
+    ##########
+    ## Members
+    ##########
+    __movie = None
+    ##########
+
+
+    def __init__(self, config) -> None:
         super().__init__()
 
-        print (f'Loading loader -> {config["loader"]["loader_path"]}')
+        loader_path = config["loader"]["loader_path"]
+        print (f'Loading loader -> {loader_path}')
 
-        self.label = QLabel(self)
-        self.movie = QMovie(config["loader"]["loader_path"])
-        self.label.setMovie(self.movie)
-        #print (Qt.AlignmentFlag)
-        #self.label.setAlignment (Qt.AlignmentFlag.AlignCenter)
-        
-        self.movie.jumpToFrame (0)
-        movie_w     = self.movie.currentImage().size().width()
-        movie_h     = self.movie.currentImage().size().height()
-        print (f"{movie_w} - {movie_h}")
-        
+        # Loading GIF
+        self.__movie    = QMovie(loader_path)
+        self.__movie.jumpToFrame (0)
+        movie_w = self.__movie.currentImage().size().width()
+        movie_h = self.__movie.currentImage().size().height()
         self.setGeometry(QRect(0, 0, movie_w, movie_h))
-        
-        self.movie.start()
+
+        # Assigning GIF to label
+        label   = QLabel (self)
+        label.setMovie(self.__movie)
+
+        # Placing label centered in parent class
+        hbox = QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(label)
+        hbox.addStretch(1)
+
+        vbox = QVBoxLayout()
+        vbox.addStretch(1)
+        vbox.addLayout(hbox)
+        vbox.addStretch(1)
+
+        self.setLayout(vbox)
+
+    
+    def start (self) :
+        self.__movie.start()
+
+    def stop (self) :
+        self.__movie.stop()
+
+    def restart (self):
+        self.__movie.stop()
+        self.__movie.jumpToFrame(0)
+        self.__movie.start()
