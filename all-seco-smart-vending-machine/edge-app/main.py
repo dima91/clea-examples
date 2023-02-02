@@ -1,6 +1,6 @@
 
 import sys, argparse, configparser
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 from mainWindow import MainWindow
 
 
@@ -16,7 +16,7 @@ def main (args) :
     with open(f"style/{config['app']['style_file']}", 'r') as f:
         app.setStyleSheet(f.read().replace('\n', ''))
     
-    main_window.show()
+    main_window.showFullScreen()
     sys.exit(app.exec())
     
 
