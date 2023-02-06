@@ -47,7 +47,7 @@ class MainWindow (QMainWindow) :
         loader.restart()
         self.__widgets_stack.setCurrentIndex (self.__widgets_stack.addWidget(loader))
 
-        self.__standby_window   = StandbyWindow(config, self.screen_sizes)
+        self.__standby_window   = StandbyWindow(config, self.screen_sizes, self.__async_loop)
         self.__standby_window.pause()
 
         # Registering signals
