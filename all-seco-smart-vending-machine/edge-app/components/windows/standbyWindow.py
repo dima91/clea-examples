@@ -1,12 +1,16 @@
 
 import os
 from utils import commons
+from components.widgets.footerWidget import FooterWidget
+
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 
+# TODO Create and edit a custom qss file to border the images
 
-class StandbyWidget (QWidget) :
+
+class StandbyWindow (QWidget) :
 
     ##########
     ## Members
@@ -31,30 +35,16 @@ class StandbyWidget (QWidget) :
                 tmp_pixmap  = commons.resize_image(QPixmap(full_path), QSize(screen_sizes.width()*0.8, screen_sizes.height()*0.8))
                 self.__images.append(tmp_pixmap)
 
-        # TODO Loading footer images
-        hbox    = QHBoxLayout()
-        hbox.addWidget (self.__load_icon(config['digital_signage']['seco_logo_path']))
-        hbox.addStretch(1)
-        hbox.addWidget (self.__load_icon(config['digital_signage']['clea_logo_path']))
-        footer  = QWidget()
-        footer.setLayout(hbox)
-
 
         vbox                = QVBoxLayout()
         self.__image_label  = QLabel()
         self.__image_label.setPixmap(self.__images[0])
         vbox.addWidget(self.__image_label)
         vbox.addStretch(1)
-        vbox.addWidget(footer)
+        # TODO Create label with correct font size and style
+        vbox.addWidget(FooterWidget(config, self.__icon_size, QLabel("Come closer!")))
 
         self.setLayout(vbox)
-
-
-    def __load_icon(self, path) :
-        tmp_pixmap  = commons.resize_image(QPixmap(path), self.__icon_size)
-        tmp_label   = QLabel()
-        tmp_label.setPixmap(tmp_pixmap)
-        return tmp_label
         
 
 
@@ -63,6 +53,6 @@ class StandbyWidget (QWidget) :
         pass
 
 
-    def stop(self) :
+    def pause(self) :
         #TODO
         pass

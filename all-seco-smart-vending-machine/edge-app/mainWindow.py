@@ -5,8 +5,8 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import Signal, QSize
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 from components.astarteClient import AstarteClient
-from components.standbyWidget import StandbyWidget
-from components.loaderWidget import LoaderWidget
+from components.widgets.loaderWidget import LoaderWidget
+from components.windows.standbyWindow import StandbyWindow
 
 
 class MainWindow (QMainWindow) :
@@ -24,7 +24,7 @@ class MainWindow (QMainWindow) :
     __widgets_stack     = None
     __async_loop        = None
     __astarte_client    = None
-    __standby_widget    = None
+    __standby_window    = None
 
 
     def __init__(self, config, app_loop) -> None:
@@ -47,8 +47,8 @@ class MainWindow (QMainWindow) :
         loader.restart()
         self.__widgets_stack.setCurrentIndex (self.__widgets_stack.addWidget(loader))
 
-        self.__standby_widget   = StandbyWidget(config, self.screen_sizes)
-        self.__standby_widget.stop()
+        self.__standby_window   = StandbyWindow(config, self.screen_sizes)
+        self.__standby_window.pause()
 
         # Registering signals
         self.__astarte_client.NewConnectionStatus.connect (self.__astarteConnectionStatusChangesHandler)
@@ -68,17 +68,27 @@ class MainWindow (QMainWindow) :
         print (f"[{self.__change_status.__name__}] Changing status from  {commons.status_to_string(self.__current_status)}  "
                 f"to  {commons.status_to_string(new_status)}")
 
-        if self.__current_status == commons.Status.INITIALIZING and new_status == commons.Status.STANDBY:
-            # Adding and enabling standby widget
-            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_widget))
-            self.__standby_widget.start ()
+        # Updating current status
+        old_status              = self.__current_status
+        self.__current_status   = new_status
+
+        if old_status == commons.Status.INITIALIZING and self.__current_status == commons.Status.STANDBY:
+            # Adding and enabling standby widnows
+            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
+            self.__standby_window.start ()
+        #elif
+        else :
+            # Incompatible status! Notifying it and reverting 
+            print (f"[{self.__change_status.__name__}] Error handling new status update!")
+
+        # Notifying new status to subscribers
+        self.NewStatus.emit (self.__current_status)
         
         # TODO Performing something
-        # TODO Assigning and notifying the new status
 
-        pass
 
     def __astarteConnectionStatusChangesHandler (self, new_status) :
+        # TODO Retrieve products and all their information
         if new_status == True :
             self.__change_status (commons.Status.STANDBY)
         else :
