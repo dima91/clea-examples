@@ -8,6 +8,7 @@ from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
 from components.widgets.loaderWidget import LoaderWidget
 from components.windows.standbyWindow import StandbyWindow
+from components.windows.videoLoggerWindow import VideoLoggerWindow
 
 
 class MainWindow (QMainWindow) :
@@ -28,6 +29,8 @@ class MainWindow (QMainWindow) :
     __astarte_client    = None
     __video_thread      = None
     __standby_window    = None
+
+    __video_logger      = None
 
 
     def __init__(self, config, app_loop) -> None:
@@ -52,13 +55,18 @@ class MainWindow (QMainWindow) :
         # Creating VideoThread object
         self.__video_thread = VideoThread(self, config)
 
-        # Creating base window widgets
+        # Creating base windows
         loader  = LoaderWidget(config)
         loader.restart()
         self.__widgets_stack.setCurrentIndex (self.__widgets_stack.addWidget(loader))
 
         self.__standby_window   = StandbyWindow(config, self.screen_sizes, self.__async_loop)
         self.__standby_window.pause()
+
+        if bool(config["app"]["show_video_logger"]) == True:
+            self.__video_logger     = VideoLoggerWindow(self.__video_thread, QSize(float(config["app"]["video_resolution_width"]),
+                                                        float(config["app"]["video_resolution_height"])))
+            self.__video_logger.show()
 
         # Registering signals
         self.__astarte_client.NewConnectionStatus.connect (self.__astarteConnectionStatusChangesHandler)
