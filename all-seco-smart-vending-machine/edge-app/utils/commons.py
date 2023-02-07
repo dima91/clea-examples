@@ -45,6 +45,12 @@ def status_to_string (s) :
     return result
 
 
+def create_logger (logging_ns, name):
+    logger  = logging_ns.getLogger(name)
+    return logger
+
+
+
 def get_abs_path (base_folder, file_name) :
     return os.path.abspath(os.path.join(base_folder, file_name))
 

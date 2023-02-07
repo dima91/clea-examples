@@ -17,7 +17,6 @@ class LoaderWidget (QWidget) :
         super().__init__()
 
         loader_path = config["loader"]["loader_path"]
-        print (f'Loading loader -> {loader_path}')
 
         # Loading GIF
         self.__movie    = QMovie(loader_path)

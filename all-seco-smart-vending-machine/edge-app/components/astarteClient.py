@@ -1,5 +1,6 @@
 
-import os
+import os, logging
+from utils import commons
 from astarte.device import Device
 from PySide6.QtCore import QObject, Signal
 
@@ -13,6 +14,7 @@ class AstarteClient(QObject) :
     ## Private members
     __device    = None
     __loop      = None
+    __logger    = None
 
 
     def __init__(self, config, loop) -> None:
@@ -21,6 +23,7 @@ class AstarteClient(QObject) :
         super().__init__()
 
         self.__loop     = loop
+        self.__logger   = commons.create_logger (logging, __name__)
 
         # Checking direcotry existence
         persistency_path    = astarte_config['persistency_dir']
@@ -44,29 +47,33 @@ class AstarteClient(QObject) :
 
         # TODO Registering interfaces
 
-        # Connecting Astarte client
-        self.__device.connect()
-
 
     def __astarte_connection_cb (self, dvc) :
-        print ('Device connected')
+        self.__logger.info ('Device connected')
         self.NewConnectionStatus.emit(True)
 
 
     def __astarte_disconnecton_cb (self, dvc, boh) :
-        print ("Device disconnected")
+        self.__logger.warning ("Device disconnected")
         self.NewConnectionStatus.emit(False)
 
     
     def __astarte_data_cb (self, data) :
-        print ("Received server data")
-        # TODO Emite signal
+        self.__logger.info ("Received server data")
+        # TODO Emit signal
 
     
     def __astarte_aggregated_data_cb (self, data) :
-        print ("Received aggregated server data")
-        # TODO Emite signal
+        self.__logger.info ("Received aggregated server data")
+        # TODO Emit signal
 
+
+    def connect_device(self):
+        self.__device.connect()
+
+
+    def disconnect_device(self):
+        self.__device.disconnect()
 
 
     def is_connected (self) -> bool :

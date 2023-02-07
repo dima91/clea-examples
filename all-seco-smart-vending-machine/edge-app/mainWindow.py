@@ -1,10 +1,11 @@
 
-import asyncio
+import asyncio, logging
 from utils import commons
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtCore import Signal, QSize
+from PySide6.QtCore import Signal, QSize, QTimer
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 from components.astarteClient import AstarteClient
+from components.videoThread import VideoThread
 from components.widgets.loaderWidget import LoaderWidget
 from components.windows.standbyWindow import StandbyWindow
 
@@ -20,10 +21,12 @@ class MainWindow (QMainWindow) :
     NewStatus       = Signal(commons.Status)        # This notify when the current status of application changes
     screen_sizes    = QSize()
     ##########
+    __logger            = None
     __current_status    = None
     __widgets_stack     = None
     __async_loop        = None
     __astarte_client    = None
+    __video_thread      = None
     __standby_window    = None
 
 
@@ -35,12 +38,19 @@ class MainWindow (QMainWindow) :
         self.__astarte_client   = AstarteClient(config, self.__async_loop)
         self.__current_status   = commons.Status.INITIALIZING
 
+        # Initializing logging
+        logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s : %(name)s.%(funcName)s]  %(message)s')
+        self.__logger   = commons.create_logger (logging, __name__)
+
         # Getting screen sizes
         self.screen_sizes   = QGuiApplication.primaryScreen().geometry().size()
-        print (f"Screen (w,h): ({self.screen_sizes.width()}, {self.screen_sizes.height()})")
+        self.__logger.info (f"Screen (w,h): ({self.screen_sizes.width()}, {self.screen_sizes.height()})")
 
         self.setWindowTitle ("All SECO Smart Vending Machine")
         self.setCentralWidget (self.__widgets_stack)
+
+        # Creating VideoThread object
+        self.__video_thread = VideoThread(self, config)
 
         # Creating base window widgets
         loader  = LoaderWidget(config)
@@ -52,6 +62,10 @@ class MainWindow (QMainWindow) :
 
         # Registering signals
         self.__astarte_client.NewConnectionStatus.connect (self.__astarteConnectionStatusChangesHandler)
+        self.__astarte_client.connect_device()
+
+
+        logging.info ("Setup done!")
 
 
     ####################
@@ -65,21 +79,23 @@ class MainWindow (QMainWindow) :
     ## Private methods ##
 
     def __change_status (self, new_status) :
-        print (f"[{self.__change_status.__name__}] Changing status from  {commons.status_to_string(self.__current_status)}  "
+        self.__logger.info (f"Changing status from  {commons.status_to_string(self.__current_status)}  "
                 f"to  {commons.status_to_string(new_status)}")
 
         # Updating current status
         old_status              = self.__current_status
         self.__current_status   = new_status
 
+
         if old_status == commons.Status.INITIALIZING and self.__current_status == commons.Status.STANDBY:
             # Adding and enabling standby widnows
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
-            self.__standby_window.start ()
+            self.__standby_window.start()
+            self.__video_thread.start()
         #elif
         else :
             # Incompatible status! Notifying it and reverting 
-            print (f"[{self.__change_status.__name__}] Error handling new status update!")
+            self.__logger.error (f"Error handling new status update!")
 
         # Notifying new status to subscribers
         self.NewStatus.emit (self.__current_status)
@@ -88,8 +104,8 @@ class MainWindow (QMainWindow) :
 
 
     def __astarteConnectionStatusChangesHandler (self, new_status) :
-        # TODO Retrieve products and all their information
         if new_status == True :
+            # TODO Retrieve products and all their information
             self.__change_status (commons.Status.STANDBY)
         else :
             print ("[FAILURE] Astarte disconnected!")
