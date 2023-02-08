@@ -1,10 +1,10 @@
 
-import cv2 as cv, numpy as np, pandas, logging, time
+import cv2 as cv, numpy as np, pandas, logging, math
 
 from utils import commons
 from openvino.inference_engine import IECore
 
-from PySide6.QtCore import Signal, QThread
+from PySide6.QtCore import Signal, QThread, QPoint
 from PySide6.QtWidgets import QWidget
 
 
@@ -29,38 +29,47 @@ class Network :
 
 
 class Detection :
-    x_min   = None
-    y_min   = None
-    x_max   = None
-    y_max   = None
+    min     = None
+    max     = None
     conf    = None
 
     def __init__(self, x_min, y_min, x_max, y_max, conf) -> None:
-        self.x_min  = x_min
-        self.y_min  = y_min
-        self.x_max  = x_max
-        self.y_max  = y_max
+        self.min    = QPoint(x_min, y_min)
+        self.max    = QPoint(x_max, y_max)
         self.conf   = conf
 
 
 class VideoThread (QThread) :
 
     ## Signals
-    NewImage    = Signal (object, Detection) # TODO Define signal type
+                            # frame, detections, remaining time for detection (possibly None)
+    NewImage        = Signal (object, Detection, int)   # Signal sent every time a new frame is processed
+    NewPerson       = Signal ()                         # Signal sent when a person (possible customer) is detected
+    EscapedPerson   = Signal ()                         # Signal sent when a person go out from camera frame
+                            # frame, detection, customer_info
+    NewCustomer     = Signal (object, object, object)   # TODO Signal sent when a new customer is detected -> image frizzed
     ## Members
-    __logger        = None
-    __video_source  = None
-    __freezed_image = None
-    __networks      = None
-    __min_conf      = None
+    __logger                    = None
+    __video_source              = None
+    __networks                  = None
+    __min_conf                  = None
+    __current_status            = None
+    __new_person_threshold      = None
+    __new_customer_threshold    = None
+
+    __freezed_frame             = None
+    __target_detection          = None
+    __customer_info             = None
 
 
     def __init__(self, main_window, config) -> None:
         super().__init__()
 
-        self.__min_conf     = float(config["ai"]["face_deection_minimum_confidence"])
+        self.__min_conf                 = float(config["ai"]["face_deection_minimum_confidence"])
+        self.__new_person_threshold     = int (config["ai"]["new_person_threshold_ms"])
+        self.__new_customer_threshold   = int (config["ai"]["new_customer_threshold_ms"])
 
-        self.__logger       = commons.create_logger(logging, __name__)
+        self.__logger                   = commons.create_logger(logging, __name__)
         
         self.__logger.debug(f"Loading networks..")
         self.__logger.debug(f'All networks loaded in {self.__load_ai_networks(config["ai"])} seconds')
@@ -70,9 +79,11 @@ class VideoThread (QThread) :
         self.__video_source.set(cv.CAP_PROP_FRAME_HEIGHT, int(config["app"]["video_resolution_height"]))
         self.__logger.info (f'Camera resolution {self.__video_source.get(cv.CAP_PROP_FRAME_WIDTH)}x{self.__video_source.get(cv.CAP_PROP_FRAME_HEIGHT)}')
 
+        main_window.NewStatus.connect(self.__on_main_status_change)
+
 
     def __load_ai_networks(self, ai_config) -> int:
-        start_t         = time.time()
+        start_t         = commons.ms_timestamp()
         ie              = IECore()
         self.__networks = {
             "face"          : Network(ie, ai_config['face_detection_net_executor'], ai_config['face_detection_model_prefix']),
@@ -80,7 +91,16 @@ class VideoThread (QThread) :
             "emotions"      : Network(ie, ai_config['emotions_net_executor'], ai_config['emotions_model_prefix'])
         }
         
-        return time.time() - start_t
+        return commons.ms_timestamp() - start_t
+
+
+    def __on_main_status_change(self, new_status, old_status):
+        self.__current_status   = new_status
+        if new_status == commons.Status.STANDBY or new_status == commons.Status.RECOGNITION:
+            self.start()
+        else:
+            # Do nothing
+            pass
 
 
     def __perform_face_detection(self, curr_frame):
@@ -120,17 +140,122 @@ class VideoThread (QThread) :
         return final_results
 
 
+    def __infer_age_emotions (self, face_frame) :
+
+        customer_info   = {
+            "emotion"   : None,
+            "age"       : None,
+            "gender"    : None
+        }
+
+        ag_net  = self.__networks["age-gender"]
+        em_net  = self.__networks["emotions"]
+
+        resized_custome_face_ag = cv.resize(face_frame, (ag_net.width, ag_net.height))
+        resized_custome_face_em = cv.resize(face_frame, (em_net.width, em_net.height))
+        input_custome_face_ag   = np.expand_dims(resized_custome_face_ag.transpose(2, 0, 1), 0)
+        input_custome_face_em   = np.expand_dims(resized_custome_face_em.transpose(2, 0, 1), 0)
+        age_gender_prediction   = ag_net.executor.infer(inputs={ag_net.input_info: input_custome_face_ag})
+        emotions_prediction     = em_net.executor.infer(inputs={em_net.input_info: input_custome_face_em})['prob_emotion'][0, :, 0, 0]
+
+        if np.argmax(age_gender_prediction["prob"]) == 0:
+            customer_info["gender"] = "F"
+        elif np.argmax(age_gender_prediction["prob"]) == 1:
+            customer_info["gender"] = "M"
+        customer_info["emotions"]   = commons.emotions[np.argmax(emotions_prediction)]
+        customer_info["age"]        = int(age_gender_prediction["age_conv3"][0,0,0,0]*100)
+
+        return customer_info
+
+
+    def __get_target_face_idx(self, frame, detections):
+        # Chosing the target face by considering the distance from the center of frame
+        new_frame       = frame.copy()
+        res_x           = frame.shape[1]
+        res_y           = frame.shape[0]
+        frame_center    = np.array([int(res_x/2), int(res_y/2)])
+        min_dist        = None
+        target_det_idx  = None
+        
+        cv.circle(new_frame, (frame_center[0], frame_center[1]), 5, (255, 0, 0), 2)
+
+        for i in range(len(detections)):
+            d           = detections[i]
+            tl          = np.array([d.min.x(), d.min.y()])
+            br          = np.array([d.max.x(), d.max.y()])
+            curr_center = commons.midpoint(tl, br)
+            print (f"tl {tl}")
+            print (f"br {br}")
+            print (f"curr_center {curr_center}")
+
+            if i==0 :
+                min_dist        = math.dist(frame_center, curr_center)
+                target_det_idx  = i
+                print (f"min_dist {min_dist}")
+            else :
+                curr_dist    = math.dist(frame_center, curr_center)
+                if curr_dist < min_dist :
+                    min_dist        = curr_dist
+                    target_det_idx  = i
+                print (f"min_dist {min_dist}")
+
+
+        return target_det_idx
+
+
+
     def run(self):
-        time_point  = 0
-        while True:
+        start_time_detection    = None  
+        customer_found          = False
+        self.__freezed_frame    = None
+        self.__target_detection = None
+        self.__customer_info    = None
+
+        while not customer_found:
             try :
-                time_point      = time.time()
                 status,frame    = self.__video_source.read()
                 final_frame     = cv.flip(cv.cvtColor(frame, cv.COLOR_BGR2RGB),1)
                 detections      = self.__perform_face_detection(final_frame)
-                
-                self.NewImage.emit(final_frame.copy(), detections)
-                
+                curr_time       = commons.ms_timestamp()
+
+                if self.__current_status == commons.Status.STANDBY:
+                    self.NewImage.emit(final_frame.copy(), detections, 0)
+
+                    if len(detections)>0:
+                        if start_time_detection == None:
+                            start_time_detection    = commons.ms_timestamp()
+                        elif curr_time-start_time_detection >= self.__new_person_threshold :
+                            self.NewPerson.emit()
+                            pass
+                    else:
+                        start_time_detection    = None
+
+                elif self.__current_status == commons.Status.RECOGNITION:
+                    # Still retrieving camera frames and providing them to subscribers
+                    self.NewImage.emit(final_frame.copy(), detections, 0)
+
+                    if len(detections) == 0:
+                        self.EscapedPerson.emit()
+
+                    elif curr_time-start_time_detection >= self.__new_customer_threshold :
+                        # Freezing image and face
+                        customer_found          = True
+                        self.__freezed_frame    = final_frame.copy()
+                        # Retrieving the target detection from all the detections
+                        freezed_face_idx        = self.__get_target_face_idx(self.__freezed_frame, detections)
+                        self.__target_detection = detections[freezed_face_idx]
+                        # Inferring emotion and age values on freezed face
+                        d                       = self.__target_detection
+                        freezed_face            = self.__freezed_frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :]
+                        self.__customer_info    = self.__infer_age_emotions (freezed_face)
+                        # Go to SUGGESTION status
+                        self.NewImage.emit(self.__freezed_frame, [self.__target_detection], None)
+                        self.NewCustomer.emit(self.__freezed_frame, self.__target_detection, self.__customer_info)
+                    else:
+                        # Do nothing
+                        pass
+                else:
+                    self.__logger.error("Wrong status: VideoThread should be stopped!")
 
             except RuntimeError as re:
                 self.__logger.error (f"Catched this runtime error: {re}")
@@ -139,13 +264,15 @@ class VideoThread (QThread) :
             except Exception as e:
                 self.__logger.error (f"Catched this generic exception: {e}")
 
+        self.__logger.info ("EXITING FROM MAIN LOOP")
+
 
     def start(self):
         # Starting the thread task
         if not self.isRunning():
             super().start()
         else:
-            self.__logger.error("Thread already running!")
+            self.__logger.warning("Thread already running!")
 
 
     def activate(self):
@@ -166,3 +293,7 @@ class VideoThread (QThread) :
     def get_current_frame(self):
         # TODO Retrieving current (maybe freezed) image
         pass
+
+
+    def get_last_inference_info(self):
+        return (self.__freezed_frame, self.__target_detection, self.__customer_info)

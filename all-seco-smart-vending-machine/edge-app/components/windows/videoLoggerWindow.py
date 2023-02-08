@@ -3,7 +3,7 @@ import cv2 as cv
 from utils import commons
 from components.videoThread import VideoThread
 
-from PySide6.QtCore import Qt, QSize, QTimer
+from PySide6.QtCore import Qt, QSize, QRect
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 
@@ -33,6 +33,5 @@ class VideoLoggerWindow (QWidget) :
     def __on_new_image(self, frame, detections):
         for i in range(len(detections)) :
             d   = detections[i]
-            cv.rectangle(frame, (d.x_min, d.y_min), (d.x_max, d.y_max), (255,105,225), 3)
-        
+            cv.rectangle(frame, (d.min.x(), d.min.y()), (d.max.x(), d.max.y()), (255,105,225), 3)
         self.__img_label.setPixmap(commons.cv_img_to_qt_pixmap(frame, self.__resolution))
