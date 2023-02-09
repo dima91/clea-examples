@@ -47,7 +47,7 @@ class VideoThread (QThread) :
     NewPerson       = Signal ()                         # Signal sent when a person (possible customer) is detected
     EscapedPerson   = Signal ()                         # Signal sent when a person go out from camera frame
                             # frame, detection, customer_info
-    NewCustomer     = Signal (object, object, object)   # TODO Signal sent when a new customer is detected -> image frizzed
+    NewCustomer     = Signal (object, object, object)   # Signal sent when a new customer is detected -> image frizzed
     ## Members
     __logger                    = None
     __video_source              = None
@@ -184,20 +184,15 @@ class VideoThread (QThread) :
             tl          = np.array([d.min.x(), d.min.y()])
             br          = np.array([d.max.x(), d.max.y()])
             curr_center = commons.midpoint(tl, br)
-            print (f"tl {tl}")
-            print (f"br {br}")
-            print (f"curr_center {curr_center}")
 
             if i==0 :
                 min_dist        = math.dist(frame_center, curr_center)
                 target_det_idx  = i
-                print (f"min_dist {min_dist}")
             else :
                 curr_dist    = math.dist(frame_center, curr_center)
                 if curr_dist < min_dist :
                     min_dist        = curr_dist
                     target_det_idx  = i
-                print (f"min_dist {min_dist}")
 
 
         return target_det_idx
@@ -235,6 +230,7 @@ class VideoThread (QThread) :
                     self.NewImage.emit(final_frame.copy(), detections, 0)
 
                     if len(detections) == 0:
+                        # TODO Add a timeout to prevent oscillations
                         self.EscapedPerson.emit()
 
                     elif curr_time-start_time_detection >= self.__new_customer_threshold :

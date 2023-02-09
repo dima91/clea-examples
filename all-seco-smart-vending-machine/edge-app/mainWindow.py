@@ -78,13 +78,21 @@ class MainWindow (QMainWindow) :
                                                         float(config["app"]["video_resolution_height"])))
             self.__video_logger.show()
 
-        # Registering signals
+        # AstarteClient signals
         self.__astarte_client.NewConnectionStatus.connect(self.__astarte_connection_status_changes)
         self.__astarte_client.connect_device()
-
+        # VideoThread signals
         self.__video_thread.NewPerson.connect(self.__on_new_person)
         self.__video_thread.EscapedPerson.connect(self.__on_escaped_person)
         self.__video_thread.NewCustomer.connect(self.__on_new_customer)
+        # VideoLoggerWindow signals
+        # StandbyWindow signals
+        # RecognitionWindow signals
+        # SuggestionWindow signals
+        self.__suggestion_window.EscapedCustomer.connect(self.__on_escaped_customer)
+        # SelectionWindow signals
+        # PaymentWindow signals
+        # DispensingWindow signals
 
         logging.info ("Setup done!")
 
@@ -104,6 +112,7 @@ class MainWindow (QMainWindow) :
                 f"to  {commons.status_to_string(new_status)}")
 
         # Updating current status
+        has_error               = False
         old_status              = self.__current_status
         self.__current_status   = new_status
 
@@ -117,26 +126,30 @@ class MainWindow (QMainWindow) :
         elif old_status == Status.RECOGNITION and self.__current_status == Status.STANDBY:                      # escaped_person / EscapedPerson
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
-            #shown_widget    = self.__widgets_stack.currentWidget()
-            #self.__widgets_stack.removeWidget(shown_widget)
             commons.remove_shown_widget(self.__widgets_stack)
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__suggestion_window))
         #TODO elif old_status == Status.RECOGNITION and self.__current_status == Status.SELECTION :                   # product_selected / ProductSelected
         #TODO elif old_status == Status.SUGGESTION and self.__current_status == Status.SELECTION :                    # product_selected / ProductSelected
         #TODO elif old_status == Status.SELECTION and self.__current_status == Status.SUGGESTION :                    # product_rejected / ProductRejected
-        #TODO elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY                        # escaped_customer / EscapedCustomer
-        #TODO elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED               # selection_confirmed / SelectionConfirmed
-        #TODO elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED        # payment_accepted / PaymentAccepted
-        #TODO elif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING       # TODO
-        #TODO elif old_status == Status.PAYMENT_PROCESSING and self.__current_status == Status.DISPENSING             # payment_done / PaymentDone
-        #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.DISPENSED                      # product_dispensed / ProductDispensed
-        #TODO elif old_status == Status.DISPENSED and self.__current_status == Status.STANDBY                         # reset / Reset
+        elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY :                      # escaped_customer / EscapedCustomer
+            commons.remove_shown_widget(self.__widgets_stack)
+            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
+        #TODO elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
+        #TODO elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED :      # payment_accepted / PaymentAccepted
+        #TODO elif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING :     # TODO
+        #TODO elif old_status == Status.PAYMENT_PROCESSING and self.__current_status == Status.DISPENSING :           # payment_done / PaymentDone
+        #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.DISPENSED :                    # product_dispensed / ProductDispensed
+        #TODO elif old_status == Status.DISPENSED and self.__current_status == Status.STANDBY :                       # reset / Reset
         else :
             # Incompatible status! Notifying it and reverting 
-            self.__logger.error (f"Error handling new status update: cannot find a matching (old_status,new_status) pair")
+            oss = commons.status_to_string(old_status)
+            nss = commons.status_to_string(self.__current_status)
+            self.__logger.error (f"Error handling new status update: cannot find a matching (old_status,new_status) pair -> {oss},{nss}")
+            has_error   = True
 
-        # Notifying new status to subscribers
-        self.NewStatus.emit (self.__current_status, old_status)
+        # Notifying new status to subscribers if no error
+        if not has_error:
+            self.NewStatus.emit (self.__current_status, old_status)
 
 
     def __astarte_connection_status_changes (self, new_status) :
@@ -155,6 +168,9 @@ class MainWindow (QMainWindow) :
         # Querying to change status into STANDBY
         self.__change_status(Status.STANDBY)
 
-    def __on_new_customer(self, ):
+    def __on_new_customer(self, frame, detection, customer_info):
         # Querying to change status into SUGGESION
         self.__change_status(Status.SUGGESTION)
+        
+    def __on_escaped_customer(self):
+        self.__change_status(Status.STANDBY)
