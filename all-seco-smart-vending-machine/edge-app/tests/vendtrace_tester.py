@@ -1,5 +1,5 @@
 
-from utils.vendtraceMessage import VendtraceMessage
+from utils.vendtraceMessage import VendtraceMessage, ErrorType
 from components.vmcInterfaceThread import VmcInterface
 
 from PySide6.QtWidgets import QApplication, QMainWindow
@@ -33,7 +33,7 @@ class TesterThread (QThread) :
 
     def __message_callback (self, m:VendtraceMessage) :
         p   = m.payload_to_string()
-        print (f"Received a new message:\t{p}")
+        print (f"[TesterThread]  Received a new message:\t{p}")
 
 
     def run(self):

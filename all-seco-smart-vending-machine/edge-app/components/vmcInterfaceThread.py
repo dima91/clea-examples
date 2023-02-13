@@ -1,6 +1,6 @@
 
 from utils import commons
-from utils.vendtraceMessage import VendtraceMessage
+from utils.vendtraceMessage import VendtraceMessage, MessageDirection
 
 from PySide6.QtCore import QThread, Signal, QMutex
 
@@ -60,7 +60,7 @@ class VmcInterface (QThread) :
 
 
     def send_message(self, msg) :
-        message                 = VendtraceMessage(msg)
+        message                 = VendtraceMessage(msg, MessageDirection.PC_TO_VMC)
 
         # Adding message to "output_messages" list
         self.__out_messages_mux.lock()
@@ -92,18 +92,24 @@ class VmcInterface (QThread) :
                 dc  = c.decode()
                 
                 if len(dc) > 0:
+                    if dc == b'\x00':
+                        print ("------------------------ Don't include it!!!")
+
                     if curr_status == 0 and dc != self.CR:
                         payload += dc
                     elif curr_status == 0 and dc == self.CR:
                         curr_status = 1
                     elif curr_status == 1 and dc == self.LF:
-                        msg = VendtraceMessage(payload)
-                        
-                        # TODO Do something with the message
-                        # Replying with an ACK message
-                        self.send_message("OK")
-                        # Emitting NewMessage signal
-                        self.NewMessage.emit(msg)
+                        try :
+                            # Building incoming message
+                            msg = VendtraceMessage(payload, MessageDirection.VMC_TO_PC)
+                            # Replying with an ACK message
+                            self.send_message("OK")
+                            # TODO Do something with the message
+                            # Emitting NewMessage signal
+                            self.NewMessage.emit(msg)
+                        except Exception as e:
+                            self.__logger.error(f"Catched this exception during message handling\n\t{e}")
                         
                         payload     = ""
                         curr_status = 0
