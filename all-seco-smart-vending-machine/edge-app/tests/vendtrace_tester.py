@@ -1,5 +1,5 @@
 
-from utils import vendtrace_protocol_parser
+from utils.vendtraceMessage import VendtraceMessage
 from components.vmcInterfaceThread import VmcInterface
 
 from PySide6.QtWidgets import QApplication, QMainWindow
@@ -17,21 +17,36 @@ tester_thread                   = None
 class TesterThread (QThread) :
     ___vmc      = None
     __still_run = None
+    __messages  = []
 
     
     def __init__(self) -> None:
         global vmc_interface
         super().__init__()
         
-        self.___vmc         = vmc_interface
         self.__still_run    = True
+        self.___vmc         = vmc_interface
+        self.___vmc.NewMessage.connect(self.__message_callback)
+
+        self.__messages.append("VER*0*14*")
+
+
+    def __message_callback (self, m:VendtraceMessage) :
+        p   = m.payload_to_string()
+        print (f"Received a new message:\t{p}")
 
 
     def run(self):
+        last_op_t           = time.time()
+        messages_interval   = 8 #seconds
+
         while self.__still_run:
-            time.sleep (1)
-            #TODO
-            #self.___vmc.send_message("OK")
+            time.sleep (.2)
+            if time.time() - last_op_t > messages_interval:
+                last_op_t   = time.time()
+                if (len(self.__messages) > 0):
+                    print ("Sending something..")
+                    self.___vmc.send_message(self.__messages.pop(0))
 
 
     def close(self):

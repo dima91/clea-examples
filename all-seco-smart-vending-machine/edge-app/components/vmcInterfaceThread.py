@@ -1,7 +1,6 @@
 
 from utils import commons
 from utils.vendtraceMessage import VendtraceMessage
-from utils.vendtraceProtocolParser import VendTraceParser
 
 from PySide6.QtCore import QThread, Signal, QMutex
 
@@ -13,7 +12,6 @@ class VmcInterface (QThread) :
     __logger            = None
     __serial_port       = None
     __serial_port_mutex = None
-    __parser            = None
     __still_run         = None
     __still_run_mux     = None
     ##########
@@ -34,9 +32,25 @@ class VmcInterface (QThread) :
         self.__serial_port      = serial.Serial(config["vmc"]["port"], int(config["vmc"]["baud"]), int(config["vmc"]["byte_size"]),
                                                 config["vmc"]["parity"], int(config["vmc"]["stop_bit"]), .2)
         self.__serial_port_mux  = QMutex()
-        self.__parser           = VendTraceParser()
+        self.__out_messages     = []
+        self.__out_messages_mux = QMutex()
         self.__still_run        = True
         self.__still_run_mux    = QMutex()
+
+
+    def __send_message(self, msg):
+        serialized_message      = msg.serialize()
+        serialized_message_str  = msg.serialize().decode()
+        serialized_message_len  = len(serialized_message)
+        
+        #self.__logger.debug(f"Sending {serialized_message_str} ({serialized_message_len} bytes)")
+
+        self.__serial_port_mux.lock()
+        c   = self.__serial_port.write(serialized_message)
+        self.__serial_port_mux.unlock()
+
+        if c!=len(serialized_message):
+            self.__logger.error(f"Wrote {c} bytes, message len is {serialized_message_len}. Message is:\n\t\t{serialized_message_str}")
 
 
     def close(self) :
@@ -46,19 +60,18 @@ class VmcInterface (QThread) :
 
 
     def send_message(self, msg) :
-        message                 = self.__parser.parse_message(msg)
-        serialized_message      = message.serialize()
-        serialized_message_str  = message.serialize().decode()
-        
-        self.__logger.debug(f"sending {serialized_message_str} ({len(serialized_message)} bytes)")
+        message                 = VendtraceMessage(msg)
 
-        # TODO Add message to "output_messages" list
-        # FIXME Remove me!! -> TEST
-        self.__serial_port_mux.lock()
-        c   = self.__serial_port.write(message.serialize())
-        self.__serial_port_mux.unlock()
-        
-        self.__logger.debug(f"Wrote {c} bytes\n")
+        # Adding message to "output_messages" list
+        self.__out_messages_mux.lock()
+        self.__out_messages.append(message)
+        self.__out_messages_mux.unlock()
+
+        # Checking for messages in "output_messages" list
+        self.__out_messages_mux.lock()
+        if len(self.__out_messages) > 0 :
+            self.__send_message(self.__out_messages.pop())
+        self.__out_messages_mux.unlock()
 
 
     def run(self) -> None:
@@ -77,26 +90,25 @@ class VmcInterface (QThread) :
                 self.__serial_port_mux.unlock()
                 
                 dc  = c.decode()
-
-                if curr_status == 0 and dc != self.CR:
-                    payload += dc
-                elif curr_status == 0 and dc == self.CR:
-                    curr_status = 1
-                elif curr_status == 1 and dc == self.LF:
-                    msg         = self.__parser.parse_message(payload)
-                    
-                    # TODO Do something with the message
-                    # Replying with an ACK message
-                    self.send_message("OK")
-                    # Emitting NewMessage signal
-                    self.NewMessage.emit(msg)
-                    
-                    payload     = ""
-                    curr_status = 0
-
-                    # TODO Checking for messages in "output_messages" list
-                else :
-                    self.__logger.critical(f"ERROR DURING READING: received {c.decode()} in state {curr_status}")
+                
+                if len(dc) > 0:
+                    if curr_status == 0 and dc != self.CR:
+                        payload += dc
+                    elif curr_status == 0 and dc == self.CR:
+                        curr_status = 1
+                    elif curr_status == 1 and dc == self.LF:
+                        msg = VendtraceMessage(payload)
+                        
+                        # TODO Do something with the message
+                        # Replying with an ACK message
+                        self.send_message("OK")
+                        # Emitting NewMessage signal
+                        self.NewMessage.emit(msg)
+                        
+                        payload     = ""
+                        curr_status = 0
+                    else :
+                        self.__logger.critical(f"ERROR DURING READING: received {c.decode()} in state {curr_status}")
             else:
                 self.__still_run_mux.unlock()
                 break
