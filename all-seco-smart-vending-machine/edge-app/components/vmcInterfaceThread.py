@@ -50,7 +50,7 @@ class VmcInterface (QThread) :
         self.__serial_port_mux.unlock()
 
         if c!=len(serialized_message):
-            self.__logger.error(f"Wrote {c} bytes, message len is {serialized_message_len}. Message is:\n\t\t{serialized_message_str}")
+            self.__logger.error(f"Wrote {c} bytes, message len is {serialized_message_len}.\nMessage is:\t{serialized_message_str}")
 
 
     def close(self) :
@@ -90,6 +90,7 @@ class VmcInterface (QThread) :
                 self.__serial_port_mux.unlock()
                 
                 dc  = c.decode()
+                #print(f"dc {dc}")
                 
                 if len(dc) > 0:
                     if dc == b'\x00':

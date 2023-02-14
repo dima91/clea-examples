@@ -29,28 +29,60 @@ class TesterThread (QThread) :
         self.___vmc.NewMessage.connect(self.__message_callback)
 
         self.__messages.append("VER*0*14*")
+        self.__messages.append("")
+        self.__messages.append("")
+        self.__messages.append("")
+        self.__messages.append("")
+        self.__messages.append("")
+        # Sending pressed item [1 || 2 || 3 || 10 || 17] -> Wahl
+        self.__messages.append("Wahl*1*")
 
 
     def __message_callback (self, m:VendtraceMessage) :
         p   = m.payload_to_string()
-        print (f"[TesterThread]  Received a new message:\t{p}")
+        print (f"[TesterThread]  Received a new message:     {p}\n\t\t{m.get_message()}\n")
 
 
     def run(self):
         last_op_t           = time.time()
-        messages_interval   = 8 #seconds
+        messages_interval   = 4 #seconds
 
         while self.__still_run:
             time.sleep (.2)
             if time.time() - last_op_t > messages_interval:
                 last_op_t   = time.time()
                 if (len(self.__messages) > 0):
-                    print ("Sending something..")
-                    self.___vmc.send_message(self.__messages.pop(0))
+                    m   = self.__messages.pop(0)
+                    if len(m) > 0:
+                        print (f"Sending  {m}")
+                        self.___vmc.send_message(m)
+                    else :
+                        pass
+                        #print ("Sgnoring it")
 
 
     def close(self):
         self.__still_run    = False
+
+
+
+
+def bit_testing():
+    for v in ErrorType:
+        print (f"name, value -> {v.name}, {v.value}")
+
+    print (f"\n")
+    err0_t  = ErrorType.ERROR_CARD_PAYMENT_SYSTEM
+    err1_t  = ErrorType.AT_LEAST_ONE_SHAFT_DEFECTIVE
+    print (f"err: {err0_t.value}")
+    print (f"err: {format(err0_t.value, 'b')}")
+    print (f"err: {type(format(err0_t.value, 'b'))}")
+
+    err_cmp = ErrorType.AT_LEAST_ONE_SHAFT_EMPTY.value | ErrorType.ERROR_COIN_CHANGER.value
+    print (f"err_cmp: {err_cmp} -> {format(err_cmp, 'b')}")
+    for v in ErrorType:
+        if err_cmp & v.value :
+            print (f"err_cmp matches with {v.name}")
 
 
 
@@ -60,6 +92,8 @@ def main(args) :
     global tester_thread
 
     logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s : %(name)s.%(funcName)s @ %(asctime)s]  %(message)s')
+
+    #bit_testing()
 
     config                  = configparser.ConfigParser ()
     config.read (args.config)
