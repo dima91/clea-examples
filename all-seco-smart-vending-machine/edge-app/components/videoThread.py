@@ -260,8 +260,6 @@ class VideoThread (QThread) :
             except Exception as e:
                 self.__logger.error (f"Catched this generic exception: {e}")
 
-        self.__logger.info ("EXITING FROM MAIN LOOP")
-
 
     def start(self):
         # Starting the thread task
