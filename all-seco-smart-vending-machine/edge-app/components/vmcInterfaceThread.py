@@ -85,11 +85,18 @@ class VmcInterface (QThread) :
             if self.__still_run :
                 self.__still_run_mux.unlock()
                 
+                c   = bytes()
                 self.__serial_port_mux.lock()
-                c   = self.__serial_port.read()
+                try :
+                    c   = self.__serial_port.read()
+                except serial.SerialException as se:
+                    self.__logger.error ("Cannot read from serial port!")
                 self.__serial_port_mux.unlock()
                 
-                dc  = c.decode()
+                try:
+                    dc  = c.decode()
+                except Exception as e:
+                    self.__logger (f'Error while parsing the character {c}! -> {e}')
                 #print(f"dc {dc}")
                 
                 if len(dc) > 0:
