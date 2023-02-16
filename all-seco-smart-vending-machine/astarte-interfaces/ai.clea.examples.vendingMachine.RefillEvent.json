@@ -1,0 +1,26 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.RefillEvent",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "datastream",
+    "ownership": "server",
+    "aggregation": "object",
+    "mappings": [
+        {
+            "endpoint": "/refill/note",
+            "type": "string",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        },
+        {
+            "endpoint": "/refill/refillerID",
+            "type": "string",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        }
+    ]
+}

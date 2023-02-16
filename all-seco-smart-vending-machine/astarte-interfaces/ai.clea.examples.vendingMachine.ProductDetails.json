@@ -1,0 +1,29 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.ProductDetails",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "server",
+    "mappings": [
+        {
+            "endpoint": "/%{prodID}/ID",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{prodID}/name",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{prodID}/currentPrice",
+            "type": "double"
+        },
+        {
+            "endpoint": "/%{prodID}/currentCost",
+            "type": "double"
+        },
+        {
+            "endpoint": "/%{prodID}/imagePath",
+            "type": "string"
+        }
+    ]
+}

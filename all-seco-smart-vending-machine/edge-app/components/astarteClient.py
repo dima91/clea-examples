@@ -1,5 +1,5 @@
 
-import os, logging
+import os, logging, glob, json
 from utils import commons
 from astarte.device import Device
 from PySide6.QtCore import QObject, Signal
@@ -45,7 +45,12 @@ class AstarteClient(QObject) :
         self.__device.on_aggregate_data_received    = self.__astarte_aggregated_data_cb
         
 
-        # TODO Registering interfaces
+        # Registering interfaces
+        for filename in glob.iglob(f'{astarte_config["interfaces_dir_path"]}/*.json'):
+            path    = os.path.join(astarte_config["interfaces_dir_path"], filename)
+            if os.path.isfile(path) :
+                print (f"Loading interface in {path}...")
+                self.__device.add_interface (json.load(open(path)))
 
 
     def __astarte_connection_cb (self, dvc) :

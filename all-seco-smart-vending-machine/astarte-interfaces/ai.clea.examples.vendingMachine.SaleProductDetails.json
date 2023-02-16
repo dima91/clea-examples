@@ -1,0 +1,30 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.SaleProductDetails",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "device",
+    "aggregation": "object",
+    "mappings": [
+        {
+            "endpoint": "/%{prodID}/totalSalesCount",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{prodID}/totalProductCost",
+            "type": "double"
+        },
+        {
+            "endpoint": "/%{prodID}/totalProductProfit",
+            "type": "double"
+        },
+        {
+            "endpoint": "/%{prodID}/remainingItems",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{prodID}/maxItemsCount",
+            "type": "integer"
+        }
+    ]
+}

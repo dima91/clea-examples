@@ -1,0 +1,50 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.Transaction",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "datastream",
+    "ownership": "device",
+    "aggregation": "object",
+    "mappings": [
+        {
+            "endpoint": "/transaction/productID",
+            "type": "string",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        },
+        {
+            "endpoint": "/transaction/paymentMode",
+            "type": "string",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        },
+        {
+            "endpoint": "/transaction/tansactionID",
+            "type": "string",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        },
+        {
+            "endpoint": "/transaction/sellingCost",
+            "type": "double",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        },
+        {
+            "endpoint": "/transaction/sellingPrice",
+            "type": "double",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 63072000,
+            "retention":"stored",
+            "expiry":3600
+        }
+    ]
+}

@@ -1,0 +1,81 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.DeviceSetup",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "server",
+    "mappings": [
+        {
+            "endpoint": "/device/shownProducts",
+            "type": "stringarray"
+        },
+        {
+            "endpoint": "/device/targetTemperature",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/maxTemperature",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/minTemperature",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/maxVibration",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/minVibration",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/maxPower",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/minPower",
+            "type": "double"
+        },
+        {
+            "endpoint": "/device/lightOutput",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/device/standbyLightOutput",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d1",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d2",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d3",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d4",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d5",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d6",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d7",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/dispenserStatus/d8",
+            "type": "boolean"
+        }
+    ]
+}

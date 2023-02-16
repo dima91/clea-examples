@@ -1,0 +1,73 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.AdvertisementData",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "server",
+    "mappings": [
+        {
+            "endpoint": "/%{advID}/creationTime",
+            "type" : "datetime"
+        },
+        {
+            "endpoint": "/%{advID}/ID",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/name",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/brand",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/category",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/description",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/startDate",
+            "type": "datetime"
+        },
+        {
+            "endpoint": "/%{advID}/endDate",
+            "type": "datetime"
+        },
+        {
+            "endpoint": "/%{advID}/startScheduleTime",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{advID}/endScheduleTime",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{advID}/targetedAdv",
+            "type": "boolean"
+        },
+        {
+            "endpoint": "/%{advID}/minAge",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{advID}/maxAge",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{advID}/emotions",
+            "type": "stringarray"
+        },
+        {
+            "endpoint": "/%{advID}/imagePath",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{advID}/currentStatus",
+            "type": "string"
+        }
+    ]
+}
