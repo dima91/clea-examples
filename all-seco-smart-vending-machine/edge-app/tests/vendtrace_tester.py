@@ -1,4 +1,15 @@
 
+# Normally, you send $Wahl - then the VMC answers successful (like my example) or failed (like your current situation).
+#   If it's successful you have to wait for the payment. If the customer doesn't pay, the choice will be reset after a
+#   timeout ($Wahl*0*0*) and is back in standby. The customer can also load a credit before a he choose a product
+#   (preauthorization) you can detect that with the $Kredit command that tells you that there is a credit available or
+#   not (1€ in your messages above).
+#
+# When the payment is successful and the dispense process start, you receive a $WA*1*.... and if it is finished, you
+#   receive a $WA*0*.... If there is an error, you can detect it with the status in $WA. $WA*2*... for example is also
+#   provided if the dispenser is empty.
+
+
 from utils.vendtraceMessage import VendtraceMessage, ErrorType
 from components.vmcInterfaceThread import VmcInterface
 
@@ -28,14 +39,14 @@ class TesterThread (QThread) :
         self.___vmc         = vmc_interface
         self.___vmc.NewMessage.connect(self.__message_callback)
 
-        self.__messages.append("VER*0*14*")
+        #self.__messages.append("VER*0*14*")
         self.__messages.append("")
         self.__messages.append("")
         self.__messages.append("")
         self.__messages.append("")
         self.__messages.append("")
         # Sending pressed item [1 || 2 || 3 || 10 || 17] -> Wahl
-        self.__messages.append("Wahl*1*")
+        self.__messages.append("Wahl*3*")
 
 
     def __message_callback (self, m:VendtraceMessage) :
@@ -58,7 +69,7 @@ class TesterThread (QThread) :
                         self.___vmc.send_message(m)
                     else :
                         pass
-                        #print ("Sgnoring it")
+                        print ("...")
 
 
     def close(self):
