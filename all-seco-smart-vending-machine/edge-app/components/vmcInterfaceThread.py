@@ -109,10 +109,10 @@ class VmcInterface (QThread) :
                         curr_status = 1
                     elif curr_status == 1 and dc == self.LF:
                         try :
-                            # Building incoming message
-                            msg = VendtraceMessage(payload, MessageDirection.VMC_TO_PC)
                             # Replying with an ACK message
                             self.send_message("OK")
+                            # Building incoming message
+                            msg = VendtraceMessage(payload, MessageDirection.VMC_TO_PC)
                             # TODO Do something with the message
                             # Emitting NewMessage signal
                             self.NewMessage.emit(msg)
