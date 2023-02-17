@@ -17,15 +17,14 @@ class StandbyWindow (QWidget) :
     ## Members
     ##########
     __signage_slideshow = None
-    __icon_size         = QSize(170, 170)
+    __icon_size         = QSize(140, 140)
     __images_size       = None
 
 
     def __init__(self, config, main_window, async_loop) -> None:
         super().__init__()
         
-        screen_sizes                = main_window.screen_sizes
-        self.__images_size          = QSize(screen_sizes.width()*0.8, screen_sizes.height()*0.8)
+        self.__images_size          = main_window.screen_sizes_percentage(.8)
         self.__signage_slideshow    = SlideshowWidget (config['digital_signage']['base_folder'], self.__images_size,
                                                         int(config['digital_signage']['update_interval_ms']))
 
@@ -36,7 +35,7 @@ class StandbyWindow (QWidget) :
         vbox.addWidget(self.__signage_slideshow)
         vbox.addStretch(1)
         # TODO Create label with correct font size and style
-        vbox.addWidget(FooterWidget(config, self.__icon_size, QLabel("Come closer!")))
+        vbox.addWidget(FooterWidget(config, self.__icon_size, "Come closer!"))
 
         self.setLayout(vbox)
 

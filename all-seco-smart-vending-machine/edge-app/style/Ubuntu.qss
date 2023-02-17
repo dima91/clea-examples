@@ -494,3 +494,14 @@ QTimeEdit, QToolBox, QToolBox::tab, QToolBox::tab:selected {
 	color:rgb(81,72,65);
 	background-color: #ffffff;
 }
+
+
+
+/*  **********########################**********
+                    CUSTOM STYLE
+    **********########################***********/
+
+QLabel#FooterText {
+    color:black;
+    font-size: 56px;
+}

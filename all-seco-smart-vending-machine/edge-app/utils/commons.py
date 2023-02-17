@@ -69,6 +69,9 @@ def remove_shown_widget (widgets_stack) :
         widgets_stack.removeWidget(shown_widget)
 
 
+## Images functions
+
+        
 def resize_image (curr_pixmap, target_size) :
     return curr_pixmap.scaled(target_size, Qt.KeepAspectRatio)
 

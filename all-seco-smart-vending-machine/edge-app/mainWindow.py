@@ -25,7 +25,7 @@ class MainWindow (QMainWindow) :
     ##########
                             # new_status        old_status
     NewStatus       = Signal(Status, Status)        # This notify when the current status of application changes
-    screen_sizes    = QSize()
+    __screen_sizes  = QSize()
     ##########
     __logger            = None
     __current_status    = None
@@ -53,8 +53,8 @@ class MainWindow (QMainWindow) :
         self.__logger   = commons.create_logger (logging, __name__)
 
         # Getting screen sizes
-        self.screen_sizes   = QGuiApplication.primaryScreen().geometry().size()
-        self.__logger.info (f"Screen (w,h): ({self.screen_sizes.width()}, {self.screen_sizes.height()})")
+        self.__screen_sizes = QGuiApplication.primaryScreen().geometry().size()
+        self.__logger.info (f"Screen (w,h): ({self.__screen_sizes.width()}, {self.__screen_sizes.height()})")
 
         self.setWindowTitle ("All SECO Smart Vending Machine")
         self.setCentralWidget (self.__widgets_stack)
@@ -102,6 +102,11 @@ class MainWindow (QMainWindow) :
     
     def get_current_status(self) -> Status :
         return self.__current_status
+    
+
+    def screen_sizes_percentage(self, p) -> QSize() :
+        #return QSize (int(float(self.__screen_sizes.width)*p), int(floarself.__screen_sizes.height*p))
+        return QSize (float(self.__screen_sizes.width())*p, float(self.__screen_sizes.height())*p)
 
 
     #####################
