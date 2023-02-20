@@ -92,11 +92,10 @@ def get_cv_img_resolution(cv_img):
 def crop_image(cv_img, resolution, a, b) :
     # Cropping Pixmap && matrix
     img_pixmap      = cv_img_to_qt_pixmap(cv_img, resolution)
-    img_cropped     = img_pixmap.copy(QRect(a.x, a.y, b.x-a.x, b.y-a.y))
-    frame_cropped   = cv_img[a.y:b.y, a.x:b.x, :]
+    img_cropped     = img_pixmap.copy(QRect(a.x(), a.y(), b.x()-a.x(), b.y()-a.y()))
+    frame_cropped   = cv_img[a.y():b.y(), a.x():b.x(), :]
     return (img_cropped, frame_cropped)
 
 
 def midpoint(a, b):
-    # TODO Find better solution
     return [((a[0]+b[0])/2), ((a[1]+b[1])/2)]
