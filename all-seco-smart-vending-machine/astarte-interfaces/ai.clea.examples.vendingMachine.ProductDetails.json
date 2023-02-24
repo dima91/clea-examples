@@ -24,6 +24,14 @@
         {
             "endpoint": "/%{prodID}/imagePath",
             "type": "string"
+        },
+        {
+            "endpoint": "/%{prodID}/ingredients",
+            "type":"stringarray"
+        },
+        {
+            "endpoint": "/%{prodID}/menuSection",
+            "type":"string"
         }
     ]
 }
