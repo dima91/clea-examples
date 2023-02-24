@@ -1,0 +1,22 @@
+{
+    "data"  : {
+        "shownProducts" : ["yvvaJi0LNm", "9SwSOVa_yD", "AVTUlW_tdw", "IY7pnokSgy", "rucVgKAy_o", "h6oat_cgRm", "zKCU0ZBDZ4"],
+        "targetTemp"            : 0.0,
+        "maxTemp"               : 0.0,
+        "minTemp"               : 0.0,
+        "maxVibr"               : 0.0,
+        "minVibr"               : 0.0,
+        "maxPower"              : 0.0,
+        "minPower"              : 0.0,
+        "lightOutput"           : true,
+        "standbyLightOutput"    : false,
+        "disp1"                 : true,
+        "disp2"                 : true,
+        "disp3"                 : false,
+        "disp4"                 : true,
+        "disp5"                 : false,
+        "disp6"                 : false,
+        "disp7"                 : true,
+        "disp8"                 : true
+    }
+}

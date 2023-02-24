@@ -1,0 +1,67 @@
+{
+    "data"  : {
+      "yvvaJi0LNm"  : {
+        "ID"            : "yvvaJi0LNm",
+        "name"          : "Coca Cola",
+        "currentPrice"  : 1.00,
+        "currentCost"   : 0.45,
+        "imagePath"     : "media/products/coke.png",
+        "ingredients"   : [],
+        "menuSection"   : "Drink"
+      },
+      "9SwSOVa_yD"  : {
+        "ID"            : "9SwSOVa_yD",
+        "name"          : "Fanta",
+        "currentPrice"  : 1.20,
+        "currentCost"   : 0.55,
+        "imagePath"     : "media/products/fanta.png",
+        "ingredients"   : [],
+        "menuSection"   : "Drink"
+      },
+      "AVTUlW_tdw"  : {
+        "ID"            : "AVTUlW_tdw",
+        "name"          : "Espresso",
+        "currentPrice"  : 1.00,
+        "currentCost"   : 0.30,
+        "imagePath"     : "media/products/coffee.png",
+        "ingredients"   : ["Coffee"],
+        "menuSection"   : "Coffee drinks"
+      },
+      "IY7pnokSgy"  : {
+        "ID"            : "IY7pnokSgy",
+        "name"          : "Americano",
+        "currentPrice"  : 1.20,
+        "currentCost"   : 0.55,
+        "imagePath"     : "media/products/americano.png",
+        "ingredients"   : ["Coffee"],
+        "menuSection"   : "Coffee drinks"
+      },
+      "rucVgKAy_o"  : {
+        "ID"            : "rucVgKAy_o",
+        "name"          : "Cappuccino",
+        "currentPrice"  : 1.50,
+        "currentCost"   : 0.80,
+        "imagePath"     : "media/products/cappuccino.png",
+        "ingredients"   : ["Milk", "Coffee"],
+        "menuSection"   : "Coffee drinks"
+      },
+      "h6oat_cgRm"  : {
+        "ID"            : "h6oat_cgRm",
+        "name"          : "Lay's",
+        "currentPrice"  : 1.50,
+        "currentCost"   : 0.55,
+        "imagePath"     : "media/products/chips.png",
+        "ingredients"   : [],
+        "menuSection"   : "Snack"
+      },
+      "zKCU0ZBDZ4"  : {
+        "ID"            : "zKCU0ZBDZ4",
+        "name"          : "Cheeze-it",
+        "currentPrice"  : 1.20,
+        "currentCost"   : 0.55,
+        "imagePath"     : "media/products/cheez_it.png",
+        "ingredients"   : [],
+        "menuSection"   : "Snack"
+      }
+    }
+  }
