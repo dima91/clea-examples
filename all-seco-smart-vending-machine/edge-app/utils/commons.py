@@ -1,9 +1,10 @@
 
-import os, cv2, datetime
+import os, datetime, logging
 import numpy as np
 from enum import Enum
+
 from PySide6.QtCore import Qt, QRect, QSize
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtGui import QPixmap, QImage, QPainter, QPainterPath
 
 
 class Status(Enum):
@@ -54,8 +55,8 @@ def ms_timestamp():
     return int(datetime.datetime.now().timestamp()*1000)
 
 
-def create_logger (logging_ns, name):
-    logger  = logging_ns.getLogger(name)
+def create_logger (name):
+    logger  = logging.getLogger(name)
     return logger
 
 
@@ -69,6 +70,7 @@ def remove_shown_widget (widgets_stack) :
         widgets_stack.removeWidget(shown_widget)
 
 
+###################
 ## Images functions
 
         
@@ -99,3 +101,19 @@ def crop_image(cv_img, resolution, a, b) :
 
 def midpoint(a, b):
     return [((a[0]+b[0])/2), ((a[1]+b[1])/2)]
+
+
+def apply_border_radius(in_pix:QPixmap, radius, size) -> QPixmap:
+    out_pix = QPixmap(size)
+    out_pix.fill(Qt.transparent)
+
+    path = QPainterPath()
+    path.addRoundedRect(0, 0, in_pix.width(), in_pix.height(), radius, radius)
+    
+    painter = QPainter(out_pix)
+    painter.setRenderHint(QPainter.Antialiasing, True)
+    painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+    painter.setClipPath(path)
+    painter.drawPixmap(0, 0, in_pix)
+
+    return out_pix

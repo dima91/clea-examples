@@ -505,3 +505,28 @@ QLabel#FooterText {
     color:black;
     font-size: 56px;
 }
+
+
+MainWindow {
+    background-color:rgb(255,255,255)
+}
+
+
+RecognitionWindow {
+}
+VideoWidget {
+}
+SuggestionWidget {
+}
+QLabel#SuggestionText, QLabel#ProductsLabel {
+    color:black;
+    font-size: 30px;
+}
+
+
+DispensingWindow {
+}
+
+
+SelectionWindow {
+}

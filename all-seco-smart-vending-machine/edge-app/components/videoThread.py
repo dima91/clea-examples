@@ -8,6 +8,9 @@ from PySide6.QtCore import Signal, QThread, QPoint
 from PySide6.QtWidgets import QWidget
 
 
+# TODO Move inference operations to InferenceEngine class
+
+
 class Network :
     network     = None
     executor    = None
@@ -69,7 +72,7 @@ class VideoThread (QThread) :
         self.__new_person_threshold     = int (config["ai"]["new_person_threshold_ms"])
         self.__new_customer_threshold   = int (config["ai"]["new_customer_threshold_ms"])
 
-        self.__logger                   = commons.create_logger(logging, __name__)
+        self.__logger                   = commons.create_logger(__name__)
         
         self.__logger.debug(f"Loading networks..")
         self.__logger.debug(f'All networks loaded in {self.__load_ai_networks(config["ai"])} seconds')
@@ -291,3 +294,7 @@ class VideoThread (QThread) :
 
     def get_last_inference_info(self):
         return (self.__freezed_frame, self.__target_detection, self.__customer_info)
+    
+
+    def has_freezed_frame(self):
+        return (self.__freezed_frame != None)

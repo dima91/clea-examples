@@ -22,7 +22,7 @@ class SlideshowWidget (QWidget) :
     def __init__(self, base_folder, target_size, duration_ms) -> None:
         super().__init__()
 
-        self.__logger       = commons.create_logger (logging, __name__)
+        self.__logger       = commons.create_logger (__name__)
 
         self.__async_timer  = QTimer(self)
         self.__async_timer.timeout.connect (self.__on_timer_timeout)

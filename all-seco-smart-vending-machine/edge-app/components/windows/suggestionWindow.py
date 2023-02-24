@@ -1,9 +1,13 @@
 
 from utils import commons
 from utils.commons import Status
+from components.widgets.videoWidget import VideoWidget
+from components.widgets.suggestionWidget import SuggestionWidget
+from components.widgets.footerWidget import FooterWidget
+from components.widgets.productsWidget import ProductsWidget
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PySide6.QtCore import Signal, QTimer
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PySide6.QtCore import Signal, QTimer, QSize
 
 import logging
 
@@ -12,7 +16,8 @@ class SuggestionWindow (QWidget):
 
     __logger            = None
     __timer             = None
-    __timer_interval    = None
+    __main_window       = None
+    __products_widget   = None
     ##########
     EscapedCustomer = Signal()
 
@@ -20,10 +25,11 @@ class SuggestionWindow (QWidget):
     ##########
 
 
-    def __init__(self, config, main_window) -> None:
+    def __init__(self, config, main_window, video_thread) -> None:
         super().__init__()
 
-        self.__logger   = commons.create_logger(logging, __name__)
+        self.__logger       = commons.create_logger(__name__)
+        self.__main_window  = main_window
         # Adding a timeout to came back to standby
         timer_interval  = int(config["ai"]["escaped_customer_threshold_ms"])
         self.__timer    = QTimer()
@@ -34,10 +40,11 @@ class SuggestionWindow (QWidget):
         main_window.NewStatus.connect(self.__on_main_status_change)
 
 
-        # FIXME TEST
-        vbox    = QVBoxLayout()
-        vbox.addWidget (QLabel("suggestionWindow"))
-        self.setLayout(vbox)
+        hbox        = QHBoxLayout()
+        hbox.addLayout(self.__build_lbox_layout(config, video_thread))
+        hbox.addLayout(self.__build_rbox_layout())
+
+        self.setLayout(hbox)
 
 
     def __on_main_status_change(self, new_status, old_status):
@@ -49,3 +56,41 @@ class SuggestionWindow (QWidget):
 
     def __on_escaped_customer_timer_timeout(self) -> None:
         self.EscapedCustomer.emit()
+
+
+    def __build_lbox_layout(self, config, video_thread):
+        layout  = QVBoxLayout()
+
+        # Video widget
+        vw_layout   = QHBoxLayout ()
+        vw_layout.addStretch(1)
+        vw_layout.addWidget(VideoWidget(self.__main_window, video_thread))
+        vw_layout.addStretch(1)
+        layout.addLayout(vw_layout)
+
+        # Suggestion widget
+        layout.addWidget(SuggestionWidget(self.__main_window, {}))  # TODO Add target_products
+        #layout.addStretch(1)
+        layout.addWidget(FooterWidget(config, QSize(100, 100), None))
+
+        return layout
+
+
+    def __build_rbox_layout(self):
+        layout                  = QVBoxLayout()
+        self.__products_widget  = ProductsWidget(self.__main_window)
+        self.__products_widget.SelectedProduct.connect(self.__on_product_selected)
+        layout.addWidget(self.__products_widget)
+
+        return layout
+    
+
+    def __on_product_selected(self, id) :
+        self.__logger.debug (f"Selected product with id {id}. Do something!!!")
+
+
+    def get_selected_products_tab(self):
+        return self.__products_widget.get_selected_proucts_tab()
+    
+    def set_selected_products_tab(self, tab_idx):
+        return self.__products_widget.set_selected_proucts_tab(tab_idx)

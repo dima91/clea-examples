@@ -8,3 +8,4 @@ pandas~=1.1.5
 numpy==1.22.0
 openvino==2021.4.2
 openvino-dev==2021.4.2
+validators==0.20.0

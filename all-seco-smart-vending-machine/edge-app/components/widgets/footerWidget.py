@@ -33,5 +33,5 @@ class FooterWidget (QWidget) :
         tmp_pixmap  = commons.resize_image(QPixmap(path), size)
         tmp_label   = QLabel()
         tmp_label.setPixmap(tmp_pixmap)
-        print (f"----> {path} : {tmp_label.geometry()}")
+        #print (f"----> {path} : {tmp_label.geometry()}")
         return tmp_label

@@ -13,7 +13,7 @@ class LoaderWidget (QWidget) :
     ##########
 
 
-    def __init__(self, config) -> None:
+    def __init__(self, config, scale_sizes) -> None:
         super().__init__()
 
         loader_path = config["loader"]["loader_path"]
@@ -28,6 +28,7 @@ class LoaderWidget (QWidget) :
         # Assigning GIF to label
         label   = QLabel (self)
         label.setMovie(self.__movie)
+        label.setScaledContents(True)
 
         # Placing label centered in parent class
         hbox = QHBoxLayout()
