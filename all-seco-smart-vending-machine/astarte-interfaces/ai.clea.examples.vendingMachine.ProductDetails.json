@@ -32,6 +32,10 @@
         {
             "endpoint": "/%{prodID}/menuSection",
             "type":"string"
+        },
+        {
+            "endpoint": "/%{prodID}/needsSugar",
+            "type":"boolean"
         }
     ]
 }
