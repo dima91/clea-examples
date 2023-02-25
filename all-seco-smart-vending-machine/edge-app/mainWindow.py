@@ -124,6 +124,7 @@ class MainWindow (QMainWindow) :
             self.__suggestion_window.set_selected_products_tab(self.__recognition_window.get_selected_products_tab())
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
+            #TODO self.__suggestion_window.update_suggested_products(session)
             self.__suggestion_window.set_selected_products_tab(self.__recognition_window.get_selected_products_tab())
             commons.remove_shown_widget(self.__widgets_stack)
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__suggestion_window))
