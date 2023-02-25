@@ -20,6 +20,11 @@ class Status(Enum):
     DISPENSED           = 8
 
 
+class ProductsCardSize(Enum):
+    SMALL   = 0
+    LARGE   = 1
+
+
 def status_to_string (s) :
     result  = ""
     if s == Status.INITIALIZING:

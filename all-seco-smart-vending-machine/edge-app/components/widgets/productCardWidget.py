@@ -11,14 +11,16 @@ import requests, validators, os
 class ProductCardBox (QWidget):
 
     __id            = None
+    __logger        = None
     ##########
     SelectedItem    = Signal(str)
 
 
-    def __init__(self, id, name, current_price, image_path, ingredients, target_size) -> None:
+    def __init__(self, id, name, current_price, image_path, ingredients, target_image_size, product_size) -> None:
         super().__init__()
         
         self.__id           = id
+        self.__logger       = commons.create_logger(__name__)
         self.setObjectName("ProductCardBox")
 
         inner_layout        = QVBoxLayout()
@@ -40,7 +42,7 @@ class ProductCardBox (QWidget):
         else :
             pixmap.load(image_path)
 
-        pixmap_label.setPixmap(commons.resize_image(pixmap, target_size))
+        pixmap_label.setPixmap(commons.resize_image(pixmap, target_image_size))
 
         inner_layout.addLayout(self.__h_center_widget(pixmap_label))
         inner_layout.addLayout(self.__h_center_widget(name_label))
@@ -48,9 +50,9 @@ class ProductCardBox (QWidget):
         inner_layout.addLayout(self.__h_center_widget(price_label))
 
         root_label  = QLabel()
-        root_label.setObjectName("product_card_root_label")
+        root_label.setObjectName("product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm")
         root_label.setLayout(inner_layout)
-        root_label.setMinimumWidth(250)
+        #root_label.setStyleSheet ("QLabel{padding-left:30px; padding-right:30px;}")
         root_label.adjustSize()
         root_layout = QBoxLayout(QBoxLayout.BottomToTop)
         root_layout.addWidget(root_label)
@@ -72,7 +74,6 @@ class ProductCardBox (QWidget):
 
 
     def __card_pressed_handler(self, evt):
-        print (f"Chosen item {self.__id}")
         self.SelectedItem.emit(self.__id)
         
 

@@ -14,31 +14,40 @@ class SuggestionWidget (QLabel):
     __suggestion_text       = None
     __suggestion_content    = None
     ##########
+    SelectedProduct         = Signal(str)
 
 
-    ##########
-
-
-    def __init__(self, main_window, target_products) -> None:
+    def __init__(self, main_window, session) -> None:
         super().__init__()
 
         self.__logger               = commons.create_logger(__name__)
         self.__main_window          = main_window
 
-        self.__suggestion_text      = QLabel("I suggest you..." if target_products == None else "Based on your current emotion,\nI suggest you...")
+        self.__suggestion_text      = QLabel("I suggest you..." if session == None else "Based on your current emotion,\nI suggest you...")
         self.__suggestion_text.setObjectName("SuggestionText")
         self.__suggestion_text.setStyleSheet("QLabel {margin-left:10px}")
-        if target_products == None :
+        if session == None :
             self.__suggestion_content   = LoaderWidget(main_window.get_config(), True)
             self.__suggestion_content.start()
         else :
-            self.__suggestion_content   = ProductsWidget(self.__main_window)
+            #FIXME TEST
+            self.__suggestion_content   = ProductsWidget(self.__main_window, False, False, ["yvvaJi0LNm", "yvvaJi0LNm", "yvvaJi0LNm"], self.__main_window.products_details)
+            #self.__suggestion_content   = ProductsWidget(self.__main_window, False, False, [], {})
     
         layout                      = QVBoxLayout()
         layout.addWidget(self.__suggestion_text)
         layout.addWidget(self.__suggestion_content)
 
         self.setLayout(layout)
+
+
+    def __on_selected_product(self, e):
+        self.SelectedProduct.emit(e)
+
+
+    def update_suggested_products(self, session):
+        # TODO Basing on current customer_info, let's select tree products
+        pass
 
 
     def get_main_window(self):

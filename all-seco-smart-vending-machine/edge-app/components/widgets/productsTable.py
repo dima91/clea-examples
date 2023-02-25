@@ -18,7 +18,7 @@ class ProductsTable (QWidget) :
     SelectedProduct = Signal(str)
 
 
-    def __init__ (self, main_window, section_name) -> None:
+    def __init__ (self, main_window, prods_id, products_details, products_size) -> None:
         super().__init__()
 
         self.__logger           = commons.create_logger(__name__)
@@ -30,13 +30,13 @@ class ProductsTable (QWidget) :
 
         # Building products list
         products    = []
-        for i in main_window.device_setup["shownProducts"] :
-            p   = main_window.products_details[i]
-            if p['menuSection'] == section_name:
-                products.append(p)
+        for id in prods_id:
+            products.append(products_details[id])
 
         prod_conf           = main_window.get_config()['products']
-        products_image_size = QSize(int(prod_conf['image_width']), int(prod_conf['image_height']))
+        # products_image_size = QSize(int(prod_conf['image_width']), int(prod_conf['image_height']))
+        products_image_size = QSize(int(prod_conf['image_width']), int(prod_conf['image_height'])) if products_size == commons.ProductsCardSize.LARGE \
+                                else QSize(int(prod_conf['image_width'])/2, int(prod_conf['image_height'])/2)
 
         # Defining widgets layouts
         v_layout    = QVBoxLayout()
@@ -47,7 +47,7 @@ class ProductsTable (QWidget) :
         for i in range (0, min(self.__COLS_COUNT, len(products))):
             p   = products[i]
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size)
+            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r0_layout.addWidget(card_box)
 
@@ -55,7 +55,7 @@ class ProductsTable (QWidget) :
         for i in range (0, min(self.__COLS_COUNT, len(products)-self.__COLS_COUNT)):
             p   = products[i+self.__COLS_COUNT]
             # Create productCardWidget
-            r1_layout.addWidget(ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"]. products_image_size))
+            r1_layout.addWidget(ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size))
 
 
         # Ignoring remaining products!

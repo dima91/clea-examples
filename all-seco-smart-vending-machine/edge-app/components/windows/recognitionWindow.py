@@ -55,7 +55,8 @@ class RecognitionWindow (QWidget):
 
     def __build_rbox_layout(self) -> QVBoxLayout:
         layout                  = QVBoxLayout()
-        self.__products_widget  = ProductsWidget(self.__main_window)
+        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["shownProducts"],
+                                                 self.__main_window.products_details)
         self.__products_widget.SelectedProduct.connect(self.__on_product_selected)
         layout.addWidget(self.__products_widget)
 

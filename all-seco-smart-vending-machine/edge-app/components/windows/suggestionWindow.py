@@ -69,7 +69,9 @@ class SuggestionWindow (QWidget):
         layout.addLayout(vw_layout)
 
         # Suggestion widget
-        layout.addWidget(SuggestionWidget(self.__main_window, {}))  # TODO Add target_products
+        self.__suggestion_widget   = SuggestionWidget(self.__main_window, {})  # TODO Add customer_info
+        self.__suggestion_widget.SelectedProduct.connect(self.__on_suggested_product_select)
+        layout.addWidget(self.__suggestion_widget)
         #layout.addStretch(1)
         layout.addWidget(FooterWidget(config, QSize(100, 100), None))
 
@@ -78,7 +80,8 @@ class SuggestionWindow (QWidget):
 
     def __build_rbox_layout(self):
         layout                  = QVBoxLayout()
-        self.__products_widget  = ProductsWidget(self.__main_window)
+        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["shownProducts"],
+                                                 self.__main_window.products_details)
         self.__products_widget.SelectedProduct.connect(self.__on_product_selected)
         layout.addWidget(self.__products_widget)
 
@@ -89,8 +92,15 @@ class SuggestionWindow (QWidget):
         self.__logger.debug (f"Selected product with id {id}. Do something!!!")
 
 
+    def __on_suggested_product_select(self, id):
+        self.__logger.debug (f"Selected SUGGESTED product with id {id}. Do something!!!")
+
+
     def get_selected_products_tab(self):
         return self.__products_widget.get_selected_proucts_tab()
     
     def set_selected_products_tab(self, tab_idx):
         return self.__products_widget.set_selected_proucts_tab(tab_idx)
+    
+    def update_suggested_products(self, session):
+        self.__suggestion_widget.update_suggested_products(session)
