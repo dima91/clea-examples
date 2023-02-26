@@ -40,7 +40,6 @@ class SuggestionWindow (QWidget):
         # Registering slot for session change
         main_window.SessionUpdate.connect(self.__on_session_change)
 
-
         hbox        = QHBoxLayout()
         hbox.addLayout(self.__build_lbox_layout(config, video_thread))
         hbox.addLayout(self.__build_rbox_layout())

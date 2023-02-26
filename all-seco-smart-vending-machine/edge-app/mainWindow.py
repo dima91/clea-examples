@@ -11,6 +11,7 @@ from components.widgets.loaderWidget import LoaderWidget
 from components.windows.standbyWindow import StandbyWindow
 from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
+from components.windows.selectionWindow import SelectionWindow
 
 from components.windows.videoLoggerWindow import VideoLoggerWindow
 
@@ -47,6 +48,7 @@ class MainWindow (QMainWindow) :
     __standby_window        = None
     __recognition_window    = None
     __suggestion_window     = None
+    __selection_window      = None
 
     __video_logger      = None
 
@@ -162,8 +164,10 @@ class MainWindow (QMainWindow) :
         self.__standby_window   = StandbyWindow(self.__config, self, self.__async_loop)
         self.__standby_window.pause()
 
+        # Creating windows
         self.__recognition_window   = RecognitionWindow(self.__config, self, self.__video_thread)
         self.__suggestion_window    = SuggestionWindow(self.__config, self, self.__video_thread)
+        self.__selection_window     = SelectionWindow(self.__config, self, self.__video_thread)
 
         if self.__config["app"].getboolean("show_video_logger") == True:
             self.__video_logger     = VideoLoggerWindow(self.__video_thread, QSize(float(self.__config["app"]["video_resolution_width"]),
