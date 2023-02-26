@@ -1,7 +1,7 @@
 
 import asyncio, logging
 from utils import commons
-from utils.commons import Status
+from utils.commons import Status, CustomerSession
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import Signal, QSize, QTimer
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
@@ -23,8 +23,7 @@ class MainWindow (QMainWindow) :
     ##########
     ## Members
     ##########
-                            # new_status        old_status
-    NewStatus       = Signal(Status, Status)        # This notify when the current status of application changes
+    SessionUpdate   = Signal(CustomerSession)       # This signal notifies
 
     introspection       = None
     device_setup        = None
@@ -32,6 +31,7 @@ class MainWindow (QMainWindow) :
     ##########
     __screen_sizes      = None
     __logger            = None
+    __current_session   = None
     __current_status    = None
     __widgets_stack     = None
     __async_loop        = None
@@ -57,8 +57,8 @@ class MainWindow (QMainWindow) :
         self.__widgets_stack    = QStackedWidget(self)
         self.__async_loop       = app_loop
         self.__astarte_client   = AstarteClient(config, self.__async_loop)
-        self.__current_status   = Status.INITIALIZING
         self.__config           = config
+        self.__current_status   = Status.INITIALIZING
 
         # Initializing logging
         logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s : %(name)s.%(funcName)s]  %(message)s')
@@ -93,8 +93,8 @@ class MainWindow (QMainWindow) :
         return self.__config
     
     
-    def get_current_status(self) -> Status :
-        return self.__current_status
+    def get_current_session(self) -> CustomerSession :
+        return self.__current_session
     
 
     def screen_sizes_percentage(self, p) -> QSize() :
@@ -116,27 +116,28 @@ class MainWindow (QMainWindow) :
 
 
         if old_status == Status.INITIALIZING and self.__current_status == Status.STANDBY:                       # astarte_initialized
-            # Adding and showing standby widnows
+            self.__current_session  = CustomerSession()
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
         elif old_status == Status.STANDBY and self.__current_status == Status.RECOGNITION:                      # new_person / NewPerson
+            self.__current_session.start_time   = commons.ms_timestamp()
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__recognition_window))
         elif old_status == Status.RECOGNITION and self.__current_status == Status.STANDBY:                      # escaped_person / EscapedPerson
-            self.__suggestion_window.set_selected_products_tab(self.__recognition_window.get_selected_products_tab())
+            self.__current_session  = CustomerSession()
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
-            #TODO self.__suggestion_window.update_suggested_products(session)
-            self.__suggestion_window.set_selected_products_tab(self.__recognition_window.get_selected_products_tab())
-            commons.remove_shown_widget(self.__widgets_stack)
-            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__suggestion_window))
-        #TODO elif old_status == Status.RECOGNITION and self.__current_status == Status.SELECTION :                   # product_selected / ProductSelected
-            #self.__suggestion_window.set_selected_products_tab(self.__recognition_window.get_selected_products_tab())
-        #TODO elif old_status == Status.SUGGESTION and self.__current_status == Status.SELECTION :                    # product_selected / ProductSelected
-            #self.__recognition_window.set_selected_products_tab(self.__suggestion_window.get_selected_products_tab())
+            #TODO self.__suggestion_window.update_suggested_products(session) -> do this by SuggestionWindow during session update
+            self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__suggestion_window)
+        elif old_status == Status.RECOGNITION and self.__current_status == Status.SELECTION :                   # product_selected / ProductSelected
+            self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
+        elif old_status == Status.SUGGESTION and self.__current_status == Status.SELECTION :                    # product_selected / ProductSelected
+            self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
         #TODO elif old_status == Status.SELECTION and self.__current_status == Status.SUGGESTION :                    # product_rejected / ProductRejected
         elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY :                      # escaped_customer / EscapedCustomer
-            self.__recognition_window.set_selected_products_tab(self.__suggestion_window.get_selected_products_tab())
-            commons.remove_shown_widget(self.__widgets_stack)
-            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
+            self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
         #TODO elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
         #TODO elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED :      # payment_accepted / PaymentAccepted
         #TODO elif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING :     # TODO
@@ -152,7 +153,9 @@ class MainWindow (QMainWindow) :
 
         # Notifying new status to subscribers if no error
         if not has_error:
-            self.NewStatus.emit (self.__current_status, old_status)
+            self.__current_session.previous_status  = old_status
+            self.__current_session.current_status   = self.__current_status
+            self.SessionUpdate.emit(self.__current_session)
 
 
     def __create_windows(self) :
@@ -174,8 +177,10 @@ class MainWindow (QMainWindow) :
         # VideoLoggerWindow signals
         # StandbyWindow signals
         # RecognitionWindow signals
+        self.__recognition_window.SelectedProduct.connect(self.__on_selected_product)
         # SuggestionWindow signals
         self.__suggestion_window.EscapedCustomer.connect(self.__on_escaped_customer)
+        self.__suggestion_window.SelectedProduct.connect(self.__on_selected_product)
         # SelectionWindow signals
         # PaymentWindow signals
         # DispensingWindow signals
@@ -203,8 +208,16 @@ class MainWindow (QMainWindow) :
         self.__change_status(Status.STANDBY)
 
     def __on_new_customer(self, frame, detection, customer_info):
-        # Querying to change status into SUGGESION
+        self.__current_session.frame                    = frame
+        self.__current_session.face_detection_results   = detection
+        self.__current_session.inference_results        = customer_info
         self.__change_status(Status.SUGGESTION)
         
     def __on_escaped_customer(self):
         self.__change_status(Status.STANDBY)
+
+    def __on_selected_product(self, prod_id, is_suggested):
+        self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}")
+        self.__current_session.chosen_product_id            = prod_id
+        self.__current_session.is_suggested_chosen_product  = is_suggested
+        self.__change_status(Status.SELECTION)

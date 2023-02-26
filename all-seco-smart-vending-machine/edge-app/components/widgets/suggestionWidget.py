@@ -17,22 +17,23 @@ class SuggestionWidget (QLabel):
     SelectedProduct         = Signal(str)
 
 
-    def __init__(self, main_window, session) -> None:
+    def __init__(self, main_window, show_loader) -> None:
         super().__init__()
 
         self.__logger               = commons.create_logger(__name__)
         self.__main_window          = main_window
 
-        self.__suggestion_text      = QLabel("I suggest you..." if session == None else "Based on your current emotion,\nI suggest you...")
+        self.__suggestion_text      = QLabel("I suggest you..." if show_loader == True else "Based on your current emotion,\nI suggest you...")
         self.__suggestion_text.setObjectName("SuggestionText")
         self.__suggestion_text.setStyleSheet("QLabel {margin-left:10px}")
-        if session == None :
+        if show_loader == True :
             self.__suggestion_content   = LoaderWidget(main_window.get_config(), True)
             self.__suggestion_content.start()
         else :
             #FIXME TEST
             self.__suggestion_content   = ProductsWidget(self.__main_window, False, False, ["yvvaJi0LNm", "yvvaJi0LNm", "yvvaJi0LNm"], self.__main_window.products_details)
             #self.__suggestion_content   = ProductsWidget(self.__main_window, False, False, [], {})
+            self.__suggestion_content.SelectedProduct.connect(self.__on_selected_product)
     
         layout                      = QVBoxLayout()
         layout.addWidget(self.__suggestion_text)

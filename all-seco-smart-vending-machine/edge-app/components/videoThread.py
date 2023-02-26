@@ -56,7 +56,7 @@ class VideoThread (QThread) :
     __video_source              = None
     __networks                  = None
     __min_conf                  = None
-    __current_status            = None
+    __current_session           = None
     __new_person_threshold      = None
     __new_customer_threshold    = None
 
@@ -82,7 +82,7 @@ class VideoThread (QThread) :
         self.__video_source.set(cv.CAP_PROP_FRAME_HEIGHT, int(config["app"]["video_resolution_height"]))
         self.__logger.info (f'Camera resolution {self.__video_source.get(cv.CAP_PROP_FRAME_WIDTH)}x{self.__video_source.get(cv.CAP_PROP_FRAME_HEIGHT)}')
 
-        main_window.NewStatus.connect(self.__on_main_status_change)
+        main_window.SessionUpdate.connect(self.__on_session_change)
 
 
     def __load_ai_networks(self, ai_config) -> int:
@@ -97,9 +97,10 @@ class VideoThread (QThread) :
         return commons.ms_timestamp() - start_t
 
 
-    def __on_main_status_change(self, new_status, old_status):
-        self.__current_status   = new_status
-        if new_status == commons.Status.STANDBY or new_status == commons.Status.RECOGNITION:
+    def __on_session_change(self, current_session):
+        self.__current_session  = current_session
+        curr_status             = current_session.current_status
+        if curr_status == commons.Status.STANDBY or curr_status == commons.Status.RECOGNITION:
             self.start()
         else:
             # Do nothing
@@ -216,7 +217,7 @@ class VideoThread (QThread) :
                 detections      = self.__perform_face_detection(final_frame)
                 curr_time       = commons.ms_timestamp()
 
-                if self.__current_status == commons.Status.STANDBY:
+                if self.__current_session.current_status == commons.Status.STANDBY:
                     self.NewImage.emit(final_frame.copy(), detections, 0)
 
                     if len(detections)>0:
@@ -228,7 +229,7 @@ class VideoThread (QThread) :
                     else:
                         start_time_detection    = None
 
-                elif self.__current_status == commons.Status.RECOGNITION:
+                elif self.__current_session.current_status == commons.Status.RECOGNITION:
                     # Still retrieving camera frames and providing them to subscribers
                     self.NewImage.emit(final_frame.copy(), detections, 0)
 

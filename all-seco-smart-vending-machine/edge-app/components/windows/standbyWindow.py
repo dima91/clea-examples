@@ -28,20 +28,19 @@ class StandbyWindow (QWidget) :
         self.__signage_slideshow    = SlideshowWidget (config['digital_signage']['base_folder'], self.__images_size,
                                                         int(config['digital_signage']['update_interval_ms']))
 
-        # Registering slot to get status changes
-        main_window.NewStatus.connect(self.__on_main_status_change)
+        # Registering slot to get session changes
+        main_window.SessionUpdate.connect(self.__on_session_change)
 
         vbox    = QVBoxLayout()
         vbox.addWidget(self.__signage_slideshow)
         vbox.addStretch(1)
-        # TODO Create label with correct font size and style
         vbox.addWidget(FooterWidget(config, self.__icon_size, "Come closer!"))
 
         self.setLayout(vbox)
 
 
-    def __on_main_status_change(self, new_status, old_status):
-        if new_status == commons.Status.STANDBY:
+    def __on_session_change(self, current_session):
+        if current_session.current_status == commons.Status.STANDBY:
             self.start()
         else:
             self.pause()

@@ -20,6 +20,7 @@ class SuggestionWindow (QWidget):
     __products_widget   = None
     ##########
     EscapedCustomer = Signal()
+    SelectedProduct = Signal(str, bool)     # product_id, is_suggested
 
 
     ##########
@@ -36,8 +37,8 @@ class SuggestionWindow (QWidget):
         self.__timer.timeout.connect (self.__on_escaped_customer_timer_timeout)
         self.__timer.setSingleShot(True)
         self.__timer.setInterval(timer_interval)
-        # Registering slot for status change
-        main_window.NewStatus.connect(self.__on_main_status_change)
+        # Registering slot for session change
+        main_window.SessionUpdate.connect(self.__on_session_change)
 
 
         hbox        = QHBoxLayout()
@@ -47,8 +48,9 @@ class SuggestionWindow (QWidget):
         self.setLayout(hbox)
 
 
-    def __on_main_status_change(self, new_status, old_status):
-        if new_status == Status.SUGGESTION :
+    def __on_session_change(self, current_session):
+        if current_session.current_status == Status.SUGGESTION :
+            # TODO Update suggestions in suggestion_widget
             self.__timer.start()
         else :
             self.__timer.stop()
@@ -69,7 +71,7 @@ class SuggestionWindow (QWidget):
         layout.addLayout(vw_layout)
 
         # Suggestion widget
-        self.__suggestion_widget   = SuggestionWidget(self.__main_window, {})  # TODO Add customer_info
+        self.__suggestion_widget   = SuggestionWidget(self.__main_window, False)
         self.__suggestion_widget.SelectedProduct.connect(self.__on_suggested_product_select)
         layout.addWidget(self.__suggestion_widget)
         #layout.addStretch(1)
@@ -90,10 +92,12 @@ class SuggestionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}. Do something!!!")
+        self.SelectedProduct.emit (id, False)
 
 
     def __on_suggested_product_select(self, id):
         self.__logger.debug (f"Selected SUGGESTED product with id {id}. Do something!!!")
+        self.SelectedProduct.emit (id, True)
 
 
     def get_selected_products_tab(self):

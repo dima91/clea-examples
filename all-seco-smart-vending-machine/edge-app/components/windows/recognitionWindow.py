@@ -17,9 +17,7 @@ class RecognitionWindow (QWidget):
     __logger            = None
     __products_widget   = None
     ##########
-
-
-    ##########
+    SelectedProduct     = Signal(str, bool)
 
 
     def __init__(self, config, main_window, video_thread) -> None:
@@ -46,7 +44,7 @@ class RecognitionWindow (QWidget):
         layout.addLayout(vw_layout)
 
         # Suggestion widget
-        layout.addWidget(SuggestionWidget(self.__main_window, None))
+        layout.addWidget(SuggestionWidget(self.__main_window, True))
         #layout.addStretch(1)
         layout.addWidget(FooterWidget(config, QSize(100, 100), None))
 
@@ -65,6 +63,7 @@ class RecognitionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}. Do something!!!")
+        self.SelectedProduct.emit(id, False)
 
 
     def get_selected_products_tab(self):

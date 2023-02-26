@@ -15,7 +15,7 @@ class VideoWidget (QLabel):
     __logger            = None
     __resolution        = None
     __video_thread      = None
-    __current_status    = None
+    __current_session   = None
     ##########
 
 
@@ -27,9 +27,9 @@ class VideoWidget (QLabel):
         self.__logger           = commons.create_logger(__name__)
         self.__video_thread     = video_thread
         self.__resolution       = QSize(float(config["app"]["video_resolution_width"]), float(config["app"]["video_resolution_height"]))
-        self.__current_status   = main_window.get_current_status()
+        self.__current_session  = main_window.get_current_session()
         video_thread.NewImage.connect (self.__on_new_image)
-        main_window.NewStatus.connect(self.__on_main_status_change)
+        main_window.SessionUpdate.connect(self.__on_session_change)
         self.setObjectName("VideoWidget")
         self.setStyleSheet("QLabel#VideoWidget {border-radius: 10px;}")
 
@@ -41,5 +41,5 @@ class VideoWidget (QLabel):
         self.setPixmap(commons.apply_border_radius(commons.cv_img_to_qt_pixmap(frame, self.__resolution), self.__BORDER_RADIUS, self.__resolution))
 
 
-    def __on_main_status_change(self, new_status, old_status):
-        self.__current_status   = new_status
+    def __on_session_change (self, current_session):
+        self.__current_session  = current_session

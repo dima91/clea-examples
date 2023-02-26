@@ -20,6 +20,29 @@ class Status(Enum):
     DISPENSED           = 8
 
 
+'''
+Session performed by the customer, starting from its detection by the camera and ending when it returns in the STANDBY status
+It contains all the information taken in each step
+'''
+class CustomerSession():
+
+    previous_status = None
+    current_status  = None
+
+    start_time                  = None
+    frame                       = None
+    face_detection_results      = None
+    inference_results           = None
+    current_product_tab_id      = None
+    shown_advertisement_id      = None
+    chosen_product_id           = None
+    is_suggested_chosen_product = None
+
+    def __init__(self) -> None:
+        self.current_status         = Status.STANDBY
+        self.current_product_tab_id = 0
+
+
 class ProductsCardSize(Enum):
     SMALL   = 0
     LARGE   = 1
@@ -73,6 +96,11 @@ def remove_shown_widget (widgets_stack) :
     shown_widget    = widgets_stack.currentWidget()
     if shown_widget:
         widgets_stack.removeWidget(shown_widget)
+
+
+def remove_and_set_new_shown_widget (widgets_stack, new_widget):
+    remove_shown_widget(widgets_stack)
+    widgets_stack.setCurrentIndex(widgets_stack.addWidget(new_widget))
 
 
 ###################
