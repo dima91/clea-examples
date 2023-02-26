@@ -54,6 +54,7 @@ class VideoThread (QThread) :
     ## Members
     __logger                    = None
     __video_source              = None
+    __customer_found            = None
     __networks                  = None
     __min_conf                  = None
     __current_session           = None
@@ -103,8 +104,7 @@ class VideoThread (QThread) :
         if curr_status == commons.Status.STANDBY or curr_status == commons.Status.RECOGNITION:
             self.start()
         else:
-            # Do nothing
-            pass
+            self.stop()
 
 
     def __perform_face_detection(self, curr_frame):
@@ -205,12 +205,12 @@ class VideoThread (QThread) :
 
     def run(self):
         start_time_detection    = None  
-        customer_found          = False
+        self.__customer_found   = False
         self.__freezed_frame    = None
         self.__target_detection = None
         self.__customer_info    = None
 
-        while not customer_found:
+        while not self.__customer_found:
             try :
                 status,frame    = self.__video_source.read()
                 final_frame     = cv.flip(cv.cvtColor(frame, cv.COLOR_BGR2RGB),1)
@@ -239,7 +239,7 @@ class VideoThread (QThread) :
 
                     elif curr_time-start_time_detection >= self.__new_customer_threshold :
                         # Freezing image and face
-                        customer_found          = True
+                        self.__customer_found   = True
                         self.__freezed_frame    = final_frame.copy()
                         # Retrieving the target detection from all the detections
                         freezed_face_idx        = self.__get_target_face_idx(self.__freezed_frame, detections)
@@ -284,8 +284,8 @@ class VideoThread (QThread) :
 
 
     def stop(self):
-        # TODO Stopping the thread task
-        pass
+        # Stopping the thread task
+        self.__customer_found   = True
 
 
     def get_current_frame(self):

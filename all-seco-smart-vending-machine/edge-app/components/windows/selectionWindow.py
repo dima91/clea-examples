@@ -56,4 +56,5 @@ class SelectionWindow(QWidget):
     def __build_rbox_layout(self):
         vlayout = QVBoxLayout()
         vlayout.addWidget(QPushButton("Super lol"))
-        pass
+        
+        return vlayout
