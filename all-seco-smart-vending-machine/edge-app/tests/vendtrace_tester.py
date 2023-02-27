@@ -5,6 +5,9 @@
 #   (preauthorization) you can detect that with the $Kredit command that tells you that there is a credit available or
 #   not (1€ in your messages above).
 #
+# ->        $Wahl*#*
+# <-        
+#
 # When the payment is successful and the dispense process start, you receive a $WA*1*.... and if it is finished, you
 #   receive a $WA*0*.... If there is an error, you can detect it with the status in $WA. $WA*2*... for example is also
 #   provided if the dispenser is empty.
@@ -39,19 +42,24 @@ class TesterThread (QThread) :
         self.___vmc         = vmc_interface
         self.___vmc.NewMessage.connect(self.__message_callback)
 
-        #self.__messages.append("VER*0*14*")
+        self.__messages.append("")
+        self.__messages.append("VER*0*14*")
         self.__messages.append("")
         self.__messages.append("")
         self.__messages.append("")
+        self.__messages.append("Kredit*100*")
+        # Sending chosen item [1 || 2 || 3 || 10 || 17 || 22] -> Wahl
         self.__messages.append("")
+        self.__messages.append("Wahl*2*")
         self.__messages.append("")
-        # Sending pressed item [1 || 2 || 3 || 10 || 17] -> Wahl
-        self.__messages.append("Wahl*3*")
 
 
     def __message_callback (self, m:VendtraceMessage) :
-        p   = m.payload_to_string()
-        print (f"[TesterThread]  Received a new message:     {p}\n\t\t{m.get_message()}\n")
+        RED     = '\033[0;31m'
+        NO_COL  = '\033[0m'
+        p       = m.payload_to_string()
+        #print (f"[TesterThread]  Received a new message:  {p}\t\t{m.get_message()}\n")
+        print (f"[TesterThread]  Received a new message:  {RED}{p}{NO_COL}\n{m.get_message()}\n")
 
 
     def run(self):

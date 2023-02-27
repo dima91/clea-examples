@@ -26,7 +26,7 @@ class VmcInterface (QThread) :
     def __init__(self, config) -> None:
         super().__init__()
 
-        self.__logger           = commons.create_logger(logging, __name__)
+        self.__logger           = commons.create_logger(__name__)
 
         # Opening serial port
         self.__serial_port      = serial.Serial(config["vmc"]["port"], int(config["vmc"]["baud"]), int(config["vmc"]["byte_size"]),
@@ -93,11 +93,11 @@ class VmcInterface (QThread) :
                     self.__logger.error ("Cannot read from serial port!")
                 self.__serial_port_mux.unlock()
                 
+                dc  = ""
                 try:
                     dc  = c.decode()
                 except Exception as e:
-                    self.__logger (f'Error while parsing the character {c}! -> {e}')
-                #print(f"dc {dc}")
+                    self.__logger.error (f'Error while parsing the character {c}! -> {e}')
                 
                 if len(dc) > 0:
                     if dc == b'\x00':
@@ -123,6 +123,9 @@ class VmcInterface (QThread) :
                         curr_status = 0
                     else :
                         self.__logger.critical(f"ERROR DURING READING: received {c.decode()} in state {curr_status}")
+                else :
+                    # print ("\r")
+                    pass
             else:
                 self.__still_run_mux.unlock()
                 break
