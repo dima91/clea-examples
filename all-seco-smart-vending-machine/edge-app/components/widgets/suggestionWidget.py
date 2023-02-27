@@ -1,6 +1,6 @@
 
 from utils import commons
-from components.widgets.loaderWidget import LoaderWidget
+from components.widgets.gifPlayerWidget import GifPlayerWidget
 from components.widgets.productsWidget import ProductsWidget
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
@@ -27,7 +27,7 @@ class SuggestionWidget (QLabel):
         self.__suggestion_text.setObjectName("SuggestionText")
         self.__suggestion_text.setStyleSheet("QLabel {margin-left:10px}")
         if show_loader == True :
-            self.__suggestion_content   = LoaderWidget(main_window.get_config(), True)
+            self.__suggestion_content   = GifPlayerWidget(main_window.get_config()["loader"]["loader_path"], True)
             self.__suggestion_content.start()
         else :
             #FIXME TEST

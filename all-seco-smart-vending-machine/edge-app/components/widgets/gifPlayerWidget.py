@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLa
 from PySide6.QtGui import QMovie
 
 
-class LoaderWidget (QWidget) :
+class GifPlayerWidget (QWidget) :
 
     ##########
     ## Members
@@ -13,13 +13,11 @@ class LoaderWidget (QWidget) :
     ##########
 
 
-    def __init__(self, config, scale_sizes) -> None:
+    def __init__(self, gif_path, scale_sizes) -> None:
         super().__init__()
 
-        loader_path = config["loader"]["loader_path"]
-
         # Loading GIF
-        self.__movie    = QMovie(loader_path)
+        self.__movie    = QMovie(gif_path)
         self.__movie.jumpToFrame (0)
         movie_w = self.__movie.currentImage().size().width()
         movie_h = self.__movie.currentImage().size().height()
@@ -28,7 +26,7 @@ class LoaderWidget (QWidget) :
         # Assigning GIF to label
         label   = QLabel (self)
         label.setMovie(self.__movie)
-        label.setScaledContents(True)
+        label.setScaledContents(scale_sizes)
 
         # Placing label centered in parent class
         hbox = QHBoxLayout()

@@ -7,7 +7,7 @@ from PySide6.QtCore import Signal, QSize, QTimer
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
-from components.widgets.loaderWidget import LoaderWidget
+from components.widgets.gifPlayerWidget import GifPlayerWidget
 from components.windows.standbyWindow import StandbyWindow
 from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
@@ -78,7 +78,7 @@ class MainWindow (QMainWindow) :
         self.__video_thread = VideoThread(self, config)
 
         # Creating base window
-        loader  = LoaderWidget(config, False)
+        loader  = GifPlayerWidget(config["loader"]["loader_path"], False)
         loader.restart()
         self.__widgets_stack.setCurrentIndex (self.__widgets_stack.addWidget(loader))
 
