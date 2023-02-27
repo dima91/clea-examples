@@ -4,6 +4,7 @@ import numpy as np
 from enum import Enum
 
 from PySide6.QtCore import Qt, QRect, QSize
+from PySide6.QtWidgets import QHBoxLayout
 from PySide6.QtGui import QPixmap, QImage, QPainter, QPainterPath
 
 
@@ -13,11 +14,8 @@ class Status(Enum):
     RECOGNITION         = 1
     SUGGESTION          = 2
     SELECTION           = 3
-    PAYMENT_REQUESTED   = 4
-    PAYMENT_PROCESSING  = 5
-    PAYMENT_ACCEPTED    = 6
-    DISPENSING          = 7
-    DISPENSED           = 8
+    PAYMENT             = 4
+    DISPENSING          = 5
 
 
 '''
@@ -60,16 +58,10 @@ def status_to_string (s) :
         result  = "SUGGESTION"
     elif s == Status.SELECTION:
         result  = "SELECTION"
-    elif s == Status.PAYMENT_REQUESTED:
-        result  = "PAYMENT_REQUESTED"
-    elif s == Status.PAYMENT_PROCESSING:
-        result  = "PAYMENT_PROCESSING"
-    elif s == Status.PAYMENT_ACCEPTED:
-        result  = "PAYMENT_ACCEPTED"
+    elif s == Status.PAYMENT:
+        result  = "PAYMENT"
     elif s == Status.DISPENSING:
         result  = "DISPENSING"
-    elif s == Status.DISPENSED:
-        result  = "DISPENSED"
     else :
         result  = "<UNKNOWN STATE>"
 
@@ -150,3 +142,16 @@ def apply_border_radius(in_pix:QPixmap, radius, size) -> QPixmap:
     painter.drawPixmap(0, 0, in_pix)
 
     return out_pix
+
+
+###################
+## Layout functions
+
+def h_center_widget (w) -> QHBoxLayout:
+        h_layout    = QHBoxLayout()
+
+        h_layout.addStretch(1)
+        h_layout.addWidget(w)
+        h_layout.addStretch(1)
+
+        return h_layout

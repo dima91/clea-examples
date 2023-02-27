@@ -44,10 +44,14 @@ class ProductCardBox (QWidget):
 
         pixmap_label.setPixmap(commons.resize_image(pixmap, target_image_size))
 
-        inner_layout.addLayout(self.__h_center_widget(pixmap_label))
-        inner_layout.addLayout(self.__h_center_widget(name_label))
-        inner_layout.addLayout(self.__h_center_widget(ingredients_label))
-        inner_layout.addLayout(self.__h_center_widget(price_label))
+        pixmap_label.setObjectName("ProductDescItem")
+        inner_layout.addLayout(commons.h_center_widget(pixmap_label))
+        name_label.setObjectName("ProductDescItem")
+        inner_layout.addLayout(commons.h_center_widget(name_label))
+        ingredients_label.setObjectName("ProductDescItem")
+        inner_layout.addLayout(commons.h_center_widget(ingredients_label))
+        price_label.setObjectName("ProductDescItem")
+        inner_layout.addLayout(commons.h_center_widget(price_label))
 
         root_label  = QLabel()
         root_label.setObjectName("product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm")
@@ -75,16 +79,3 @@ class ProductCardBox (QWidget):
 
     def __card_pressed_handler(self, evt):
         self.SelectedItem.emit(self.__id)
-        
-
-
-    def __h_center_widget (self, w) -> QHBoxLayout:
-        h_layout    = QHBoxLayout()
-
-        h_layout.addStretch(1)
-        h_layout.addWidget(w)
-        h_layout.addStretch(1)
-        
-        w.setObjectName("ProductDescItem")
-
-        return h_layout

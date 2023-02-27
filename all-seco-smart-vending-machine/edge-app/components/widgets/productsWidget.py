@@ -33,6 +33,7 @@ class ProductsWidget (QWidget):
         self.__logger           = commons.create_logger(__name__)
         self.__main_window      = main_window
         self.__show_sections    = separate_in_sections
+        self.__main_window.SessionUpdate.connect(self.__on_session_change)
         # Collecting sections
         self.__sections = []
         if separate_in_sections :
@@ -84,6 +85,10 @@ class ProductsWidget (QWidget):
         root_layout.addWidget(self.__tables_stack)
 
         self.setLayout(root_layout)
+
+
+    def __on_session_change(self, session):
+        self.set_selected_proucts_tab(session.current_product_tab_id)
 
 
     def __handle_l_button_pressed(self, evt) :

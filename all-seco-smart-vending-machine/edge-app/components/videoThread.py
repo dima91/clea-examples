@@ -233,6 +233,10 @@ class VideoThread (QThread) :
                     # Still retrieving camera frames and providing them to subscribers
                     self.NewImage.emit(final_frame.copy(), detections, 0)
 
+                    # Needed when customer move from SELECTION status to RECOGNITION one
+                    if start_time_detection == None:
+                        start_time_detection    = commons.ms_timestamp()
+
                     if len(detections) == 0:
                         # TODO Add a timeout to prevent oscillations
                         self.EscapedPerson.emit()

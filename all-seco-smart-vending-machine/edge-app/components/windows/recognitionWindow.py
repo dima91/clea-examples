@@ -62,7 +62,7 @@ class RecognitionWindow (QWidget):
     
 
     def __on_product_selected(self, id) :
-        self.__logger.debug (f"Selected product with id {id}. Do something!!!")
+        self.__logger.debug (f"Selected product with id {id}")
         self.SelectedProduct.emit(id, False)
 
 

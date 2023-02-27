@@ -90,12 +90,12 @@ class SuggestionWindow (QWidget):
     
 
     def __on_product_selected(self, id) :
-        self.__logger.debug (f"Selected product with id {id}. Do something!!!")
+        self.__logger.debug (f"Selected product with id {id}")
         self.SelectedProduct.emit (id, False)
 
 
     def __on_suggested_product_select(self, id):
-        self.__logger.debug (f"Selected SUGGESTED product with id {id}. Do something!!!")
+        self.__logger.debug (f"Selected SUGGESTED product with id {id}")
         self.SelectedProduct.emit (id, True)
 
 

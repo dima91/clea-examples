@@ -12,6 +12,7 @@ from components.windows.standbyWindow import StandbyWindow
 from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
 from components.windows.selectionWindow import SelectionWindow
+from components.windows.paymentWindow import PaymentWindow
 
 from components.windows.videoLoggerWindow import VideoLoggerWindow
 
@@ -120,9 +121,11 @@ class MainWindow (QMainWindow) :
         if old_status == Status.INITIALIZING and self.__current_status == Status.STANDBY:                       # astarte_initialized
             self.__current_session  = CustomerSession()
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
+
         elif old_status == Status.STANDBY and self.__current_status == Status.RECOGNITION:                      # new_person / NewPerson
             self.__current_session.start_time   = commons.ms_timestamp()
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__recognition_window))
+            
         elif old_status == Status.RECOGNITION and self.__current_status == Status.STANDBY:                      # escaped_person / EscapedPerson
             self.__current_session  = CustomerSession()
             commons.remove_shown_widget(self.__widgets_stack)
@@ -133,19 +136,32 @@ class MainWindow (QMainWindow) :
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SELECTION :                   # product_selected / ProductSelected
             self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
+            
         elif old_status == Status.SUGGESTION and self.__current_status == Status.SELECTION :                    # product_selected / ProductSelected
             self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
-        #TODO elif old_status == Status.SELECTION and self.__current_status == Status.SUGGESTION :                    # product_rejected / ProductRejected
         elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY :                      # escaped_customer / EscapedCustomer
-            self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
+            self.__current_session  = CustomerSession()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
-        #TODO elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
-        #TODO elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED :      # payment_accepted / PaymentAccepted
-        #TODO elif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING :     # TODO
-        #TODO elif old_status == Status.PAYMENT_PROCESSING and self.__current_status == Status.DISPENSING :           # payment_done / PaymentDone
-        #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.DISPENSED :                    # product_dispensed / ProductDispensed
-        #TODO elif old_status == Status.DISPENSED and self.__current_status == Status.STANDBY :                       # reset / Reset
+        
+        elif old_status == Status.SELECTION and self.__current_status == Status.RECOGNITION :                    # product_rejected / ProductRejected
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__recognition_window)
+        elif old_status == Status.SELECTION and self.__current_status == Status.SUGGESTION :                    # product_rejected / ProductRejected
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__suggestion_window)
+        elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT :                       # selection_confirmed / SelectionConfirmed
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__payment_window)
+        
+        #TODO elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_accepted / PaymentAccepted
+        
+        #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
+
+        # FIXME Not needed!
+        #TODO FIXME elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
+        #TODO FIXME elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED :      # payment_accepted / PaymentAccepted
+        #TODO FIXMEelif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING :     # TODO
+        #TODO FIXME elif old_status == Status.PAYMENT_PROCESSING and self.__current_status == Status.DISPENSING :           # payment_done / PaymentDone
+        #TODO FIXME elif old_status == Status.DISPENSING and self.__current_status == Status.DISPENSED :                    # product_dispensed / ProductDispensed
+        #TODO FIXME elif old_status == Status.DISPENSED and self.__current_status == Status.STANDBY :                       # reset / Reset
         else :
             # Incompatible status! Notifying it and reverting 
             oss = commons.status_to_string(old_status)
@@ -168,6 +184,7 @@ class MainWindow (QMainWindow) :
         self.__recognition_window   = RecognitionWindow(self.__config, self, self.__video_thread)
         self.__suggestion_window    = SuggestionWindow(self.__config, self, self.__video_thread)
         self.__selection_window     = SelectionWindow(self.__config, self, self.__video_thread)
+        self.__payment_window       = PaymentWindow(self.__config, self)
 
         if self.__config["app"].getboolean("show_video_logger") == True:
             self.__video_logger     = VideoLoggerWindow(self.__video_thread, QSize(float(self.__config["app"]["video_resolution_width"]),
@@ -186,6 +203,7 @@ class MainWindow (QMainWindow) :
         self.__suggestion_window.EscapedCustomer.connect(self.__on_escaped_customer)
         self.__suggestion_window.SelectedProduct.connect(self.__on_selected_product)
         # SelectionWindow signals
+        self.__selection_window.SelectionConfirmed.connect(self.__on_selection_confirmed)
         # PaymentWindow signals
         # DispensingWindow signals
 
@@ -225,3 +243,10 @@ class MainWindow (QMainWindow) :
         self.__current_session.chosen_product_id            = prod_id
         self.__current_session.is_suggested_chosen_product  = is_suggested
         self.__change_status(Status.SELECTION)
+
+    def __on_selection_confirmed (self, is_confirmed):
+        self.__logger.debug(f"Is selection confirmed? {is_confirmed}")
+        if is_confirmed:
+            self.__change_status(Status.PAYMENT)
+        else:
+            self.__change_status(self.__current_session.previous_status)
