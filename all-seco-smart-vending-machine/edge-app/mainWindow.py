@@ -5,6 +5,7 @@ from utils.commons import Status, CustomerSession
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import Signal, QSize, QTimer
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
+from components.vmcInterfaceThread import VmcInterface
 from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
 from components.widgets.gifPlayerWidget import GifPlayerWidget
@@ -13,6 +14,7 @@ from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
 from components.windows.selectionWindow import SelectionWindow
 from components.windows.paymentWindow import PaymentWindow
+from components.windows.dispensingWindow import DispensingWindow
 
 from components.windows.videoLoggerWindow import VideoLoggerWindow
 
@@ -39,6 +41,7 @@ class MainWindow (QMainWindow) :
     __async_loop        = None
     __astarte_client    = None
     __config            = None
+    __vmc_interface     = None
     
     ## Widgets
     __video_thread          = None
@@ -85,6 +88,9 @@ class MainWindow (QMainWindow) :
         # AstarteClient signals
         self.__astarte_client.NewConnectionStatus.connect(self.__astarte_connection_status_changes)
         self.__astarte_client.connect_device()
+
+        # VMC interface thread
+        self.__vmc_interface    = VmcInterface(self.__config)
 
         logging.info ("Setup done!")
 
@@ -151,7 +157,8 @@ class MainWindow (QMainWindow) :
         elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT :                       # selection_confirmed / SelectionConfirmed
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__payment_window)
         
-        #TODO elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_accepted / PaymentAccepted
+        elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_done / PaymentDone
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__dispensing_window)
         
         #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
 
@@ -184,7 +191,8 @@ class MainWindow (QMainWindow) :
         self.__recognition_window   = RecognitionWindow(self.__config, self, self.__video_thread)
         self.__suggestion_window    = SuggestionWindow(self.__config, self, self.__video_thread)
         self.__selection_window     = SelectionWindow(self.__config, self, self.__video_thread)
-        self.__payment_window       = PaymentWindow(self.__config, self)
+        self.__payment_window       = PaymentWindow(self.__config, self, self.__video_thread, self.__vmc_interface)
+        self.__dispensing_window    = DispensingWindow(self.__config, self, self.__video_thread, self.__vmc_interface)
 
         if self.__config["app"].getboolean("show_video_logger") == True:
             self.__video_logger     = VideoLoggerWindow(self.__video_thread, QSize(float(self.__config["app"]["video_resolution_width"]),
@@ -205,6 +213,7 @@ class MainWindow (QMainWindow) :
         # SelectionWindow signals
         self.__selection_window.SelectionConfirmed.connect(self.__on_selection_confirmed)
         # PaymentWindow signals
+        self.__payment_window.PaymentDone.connect(self.__on_payment_done)
         # DispensingWindow signals
 
 
@@ -216,6 +225,7 @@ class MainWindow (QMainWindow) :
             self.products_details   = self.__astarte_client.get_products_details()["data"]
 
             self.__create_windows()
+            self.__vmc_interface.start()
             self.__change_status (Status.STANDBY)
         else :
             print ("[FAILURE] Astarte disconnected!")
@@ -250,3 +260,10 @@ class MainWindow (QMainWindow) :
             self.__change_status(Status.PAYMENT)
         else:
             self.__change_status(self.__current_session.previous_status)
+
+    def __on_payment_done(self, is_done):
+        self.__logger.debug(f"Is payment done? {is_done}")
+        if not is_done:
+            self.__logger.critical("NFC payment end with error!")
+
+        self.__change_status(Status.DISPENSING)

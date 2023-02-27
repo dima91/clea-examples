@@ -24,9 +24,14 @@ class AdvertisingWidget (QWidget) :
     def on_session_change(self, session):
         if session.current_status == Status.SELECTION:
             #### TODO Choosing the right promo to be shown and updating the __adv_label_image
-            self.__logger.debug("Choosing the right advertisement!")
-            # TODO Collecting active advertisements
-            #advs    = self.__main__window.get_advertisements()
-            # TODO Selecting those that can be used
-            # TODO Randomly choosing an item
-            pass
+
+            if session.shown_advertisement_id == None:
+                self.__logger.debug("Choosing the right advertisement!")
+                # TODO Collecting active advertisements
+                #advs    = self.__main__window.get_advertisements()
+                # TODO Selecting those that can be used
+                # TODO Randomly choosing an item
+                session.shown_advertisement_id  = 15
+            else:
+                # TODO If the adv is already selected, display it
+                pass
