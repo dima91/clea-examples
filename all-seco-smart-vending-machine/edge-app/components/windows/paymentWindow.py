@@ -79,17 +79,24 @@ class PaymentWindow (QWidget):
 
             # FIXME TEST section
             self.__test_timer_status    = 0
-            self.__test_timer           = QTimer()
+            self.__test_timer           = QTimer(self)
+            self.__test_timer.setSingleShot(True)
+            self.__test_timer.setInterval(500) #FIXME ORIGINAL -> self.__test_timer.setInterval(2000)
             self.__test_timer.timeout.connect(self.__on_test_timer_cb)
-            self.__test_timer.setInterval(2000)
             self.__test_timer.start()
         else:
             self.__is_active    = False
+            if self.__payed_timer:
+                self.__payed_timer.stop()
 
 
     def __on_vmc_message(self, vmc_message):
 
         if self.__is_active:
+            ''' TODO Restore me!
+            content = vmc_message.get_content()
+            self.__logger.log(f"VMC message: {vmc_message.payload_to_string()}")
+            '''
 
             #FIXME TEST section
             if vmc_message == "scanned":
@@ -100,19 +107,17 @@ class PaymentWindow (QWidget):
                 accepted_gif    = GifPlayerWidget(self.__main_window.get_config()["payment"]["accepted_gif"], True)
                 commons.remove_and_set_new_shown_widget(self.__stacked_widgets, accepted_gif)
                 accepted_gif.start()
-                self.__payed_timer  = QTimer()
+                # Starting timer to show accepted payment gif for 3 seconds
+                # TODO Check if it necessary
+                self.__payed_timer  = QTimer(self)
                 self.__payed_timer.setSingleShot(True)
-                self.__payed_timer.setInterval(7000)
+                self.__payed_timer.setInterval(500)    # FIXME ORIGINAL -> self.__payed_timer.setInterval(3000)
                 self.__payed_timer.timeout.connect(self.__on_payed_timer_cb)
                 self.__payed_timer.start()
 
-            return 
-
-            content = vmc_message.get_content()
-            self.__logger.log(f"VMC message: {vmc_message.payload_to_string()}")
 
     def __on_payed_timer_cb(self):
-        print ("Payed!!!!!")
+        self.__test_timer.stop()
         self.PaymentDone.emit(True)
 
     
@@ -121,9 +126,9 @@ class PaymentWindow (QWidget):
         if self.__test_timer_status == 0:
             self.__on_vmc_message("scanned")
             self.__test_timer_status += 1
+            self.__test_timer.start()
         elif self.__test_timer_status == 1:
             self.__on_vmc_message("payed")
-            self.__test_timer.stop()
 
 
 # When the payment is successful and the dispense process start, you receive a $WA*1*.... and if it is finished, you

@@ -66,3 +66,13 @@ DispensingWindow {
 
 SelectionWindow {
 }
+
+QWidget#dispensing_product_card, QWidget#product_ready_card{
+    background-color:white;
+    padding-right:40px;
+    padding-left:40px;
+    padding-top:10px;
+    padding-bottom:10px;
+    margin:20px;
+    border-radius: 5px;
+}

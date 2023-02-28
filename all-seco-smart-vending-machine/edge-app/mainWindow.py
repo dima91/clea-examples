@@ -160,7 +160,8 @@ class MainWindow (QMainWindow) :
         elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_done / PaymentDone
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__dispensing_window)
         
-        #TODO elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
+        elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
 
         # FIXME Not needed!
         #TODO FIXME elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
@@ -215,6 +216,7 @@ class MainWindow (QMainWindow) :
         # PaymentWindow signals
         self.__payment_window.PaymentDone.connect(self.__on_payment_done)
         # DispensingWindow signals
+        self.__dispensing_window.Dispensed.connect(self.__on_product_dispensed)
 
 
     def __astarte_connection_status_changes (self, new_status) :
@@ -264,6 +266,13 @@ class MainWindow (QMainWindow) :
     def __on_payment_done(self, is_done):
         self.__logger.debug(f"Is payment done? {is_done}")
         if not is_done:
-            self.__logger.critical("NFC payment end with error!")
+            self.__logger.critical("NFC payment ends with error!")
 
         self.__change_status(Status.DISPENSING)
+
+    def __on_product_dispensed(self, is_done):
+        self.__logger.debug(f"Is {self.products_details[self.__current_session.chosen_product_id]} product dispensed? {is_done}")
+        if not is_done:
+            self.__logger.critical(f"Product {self.products_details[self.__current_session.chosen_product_id]} not correctly dispensed!")
+
+        self.__change_status(Status.STANDBY)

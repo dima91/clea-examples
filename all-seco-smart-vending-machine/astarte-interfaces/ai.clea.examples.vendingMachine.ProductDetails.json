@@ -36,6 +36,10 @@
         {
             "endpoint": "/%{prodID}/needsSugar",
             "type":"boolean"
+        },
+        {
+            "endpoint": "/%{prodID}/connectedDispenserID",
+            "type":"integer"
         }
     ]
 }

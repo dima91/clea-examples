@@ -3,9 +3,9 @@ from utils.vendtraceMessage import VmcMessageType, VendtraceMessage, PcMessageTy
 from components.widgets.videoWidget import VideoWidget
 from components.widgets.advertisingWidget import AdvertisingWidget
 from components.widgets.footerWidget import FooterWidget
-from components.widgets.gifPlayerWidget import GifPlayerWidget
+from components.widgets.dispensingWidget import DispensingWidget, DispensingStatus
 
-from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QStackedWidget
+from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout
 from PySide6.QtCore import Signal, QSize, QTimer
 
 
@@ -15,12 +15,8 @@ class DispensingWindow (QWidget):
     __logger            = None
     __is_active         = None
     __vmc_interface     = None
-    __stacked_widgets   = None
-    __dispensed_timer   = None
-
-    # FIXME TEST memebers
-    __test_timer        = None
-    __test_timer_status = None
+    __top_label         = None
+    __dispensing_widget = None
     ##########
     Dispensed     = Signal(bool)
 
@@ -38,13 +34,9 @@ class DispensingWindow (QWidget):
 
 
     def __init_ui(self, config, video_thread):
-        min_w                   = self.__main_window.screen_sizes_percentage(.6).width()
-        self.__stacked_widgets  = QStackedWidget()
-        self.__stacked_widgets.setMinimumWidth(min_w)
-        
         hbox    = QHBoxLayout()
         hbox.addLayout(self.__build_lbox_layout(config, video_thread))
-        hbox.addWidget(self.__stacked_widgets)
+        hbox.addWidget(self.__build_rbox_widget())
         
         return hbox
     
@@ -66,24 +58,40 @@ class DispensingWindow (QWidget):
         layout.addWidget(FooterWidget(config, QSize(100, 100), None))
 
         return layout
+    
+
+    def __build_rbox_widget(self):
+        min_w                       = self.__main_window.screen_sizes_percentage(.6).width()
+        root_layout                 = QVBoxLayout()
+        root_widget                 = QWidget()
+        self.__top_label            = QLabel("Wait...")
+        self.__dispensing_widget    = DispensingWidget()
+
+        self.__dispensing_widget.DispensingUpdate.connect(self.__on_dispensing_widget_update)
+        
+        root_layout.addWidget(self.__top_label)
+        root_layout.addWidget(self.__dispensing_widget)
+        
+        root_widget.setMinimumWidth(min_w)
+        root_widget.setLayout(root_layout)
+
+        return root_widget
 
 
     def __on_session_change(self, session):
         if session.current_status == commons.Status.DISPENSING:
             self.__is_active    = True
-            # TODO Request the payment to the VMC
-            payment_gif = GifPlayerWidget(self.__main_window.get_config()["payment"]["processing_gif"], True)
-            payment_gif.start()
-            self.__stacked_widgets.setCurrentIndex(self.__stacked_widgets.addWidget(payment_gif))
-
-            # FIXME TEST section
-            # self.__test_timer_status    = 0
-            # self.__test_timer           = QTimer()
-            # self.__test_timer.timeout.connect(self.__on_test_timer_cb)
-            # self.__test_timer.setInterval(2000)
-            # self.__test_timer.start()
+            # The VMC is dispensing automatically the product
+            # TODO Starting dispensing bar
+            self.__dispensing_widget.start_dispensing()
         else:
             self.__is_active    = False
+
+
+    def __on_dispensing_widget_update(self, status:DispensingStatus):
+        self.__logger.debug(f"New dispensing widget status: {status}")
+        if status == DispensingStatus.STOPPED and self.__is_active:
+            self.Dispensed.emit(True)
 
 
     def __on_vmc_message(self, vmc_message):
