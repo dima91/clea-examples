@@ -48,7 +48,8 @@ class VideoThread (QThread) :
                             # frame, detections, remaining time for detection (possibly None)
     NewImage        = Signal (object, Detection, int)   # Signal sent every time a new frame is processed
     NewPerson       = Signal ()                         # Signal sent when a person (possible customer) is detected
-    EscapedPerson   = Signal ()                         # Signal sent when a person go out from camera frame
+                            # frame, detection, customer_info -> about the last valid frame
+    EscapedPerson   = Signal (object, object, object)   # Signal sent when a person go out from camera frame
                             # frame, detection, customer_info
     NewCustomer     = Signal (object, object, object)   # Signal sent when a new customer is detected -> image frizzed
     ## Members
@@ -204,6 +205,8 @@ class VideoThread (QThread) :
 
 
     def run(self):
+        prev_frame              = None
+        curr_frame              = None
         start_time_detection    = None  
         self.__customer_found   = False
         self.__freezed_frame    = None
@@ -212,10 +215,10 @@ class VideoThread (QThread) :
 
         while not self.__customer_found:
             try :
-                status,frame    = self.__video_source.read()
-                final_frame     = cv.flip(cv.cvtColor(frame, cv.COLOR_BGR2RGB),1)
-                detections      = self.__perform_face_detection(final_frame)
-                curr_time       = commons.ms_timestamp()
+                status,curr_frame   = self.__video_source.read()
+                final_frame         = cv.flip(cv.cvtColor(curr_frame, cv.COLOR_BGR2RGB),1)
+                detections          = self.__perform_face_detection(final_frame)
+                curr_time           = commons.ms_timestamp()
 
                 if self.__current_session.current_status == commons.Status.STANDBY:
                     self.NewImage.emit(final_frame.copy(), detections, 0)
@@ -239,7 +242,12 @@ class VideoThread (QThread) :
 
                     if len(detections) == 0:
                         # TODO Add a timeout to prevent oscillations
-                        self.EscapedPerson.emit()
+                        prev_detections     = self.__perform_face_detection(prev_frame)
+                        face_idx            = self.__get_target_face_idx(prev_frame, prev_detections)
+                        target_detection    = prev_detections[face_idx]
+                        d                   = target_detection
+                        customer_info       = self.__infer_age_emotions (prev_frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :])
+                        self.EscapedPerson.emit(prev_frame, target_detection, customer_info)
 
                     elif curr_time-start_time_detection >= self.__new_customer_threshold :
                         # Freezing image and face
@@ -260,6 +268,8 @@ class VideoThread (QThread) :
                         pass
                 else:
                     self.__logger.error("Wrong status: VideoThread should be stopped!")
+
+                prev_frame  = final_frame.copy()
 
             except RuntimeError as re:
                 self.__logger.error (f"Catched this runtime error: {re}")
