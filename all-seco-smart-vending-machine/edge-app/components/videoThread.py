@@ -167,7 +167,7 @@ class VideoThread (QThread) :
             customer_info["gender"] = "F"
         elif np.argmax(age_gender_prediction["prob"]) == 1:
             customer_info["gender"] = "M"
-        customer_info["emotions"]   = commons.emotions[np.argmax(emotions_prediction)]
+        customer_info["emotion"]    = commons.emotions[np.argmax(emotions_prediction)]
         customer_info["age"]        = int(age_gender_prediction["age_conv3"][0,0,0,0]*100)
 
         return customer_info
