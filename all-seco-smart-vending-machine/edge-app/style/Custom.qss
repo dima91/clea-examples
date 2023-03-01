@@ -13,6 +13,11 @@ MainWindow {
     background-color:rgb(255,255,255)
 }
 
+/* Standby Window */
+QLabel#slideshow_image {
+    margin-top:20px;
+}
+
 /* Recognition Window */
 RecognitionWindow {
 }

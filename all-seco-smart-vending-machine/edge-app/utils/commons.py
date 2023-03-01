@@ -99,7 +99,7 @@ def remove_and_set_new_shown_widget (widgets_stack, new_widget):
 ## Images functions
 
         
-def resize_image (curr_pixmap, target_size) :
+def resize_image (curr_pixmap, target_size) -> QPixmap:
     return curr_pixmap.scaled(target_size, Qt.KeepAspectRatio)
 
 
@@ -128,7 +128,7 @@ def midpoint(a, b):
     return [((a[0]+b[0])/2), ((a[1]+b[1])/2)]
 
 
-def apply_border_radius(in_pix:QPixmap, radius, size) -> QPixmap:
+def apply_border_radius(in_pix:QPixmap, radius:int, size:QSize) -> QPixmap:
     out_pix = QPixmap(size)
     out_pix.fill(Qt.transparent)
 

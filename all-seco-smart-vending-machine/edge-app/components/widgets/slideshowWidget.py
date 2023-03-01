@@ -1,6 +1,8 @@
 
-import os, logging
+import os, logging, random
+
 from utils import commons
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QPixmap
@@ -33,12 +35,12 @@ class SlideshowWidget (QWidget) :
             if os.path.isfile(os.path.join(base_folder, path)):
                 full_path   = commons.get_abs_path (base_folder, path)
                 self.__logger.debug (f"Loading {full_path}")
-                tmp_pixmap  = commons.resize_image(QPixmap(full_path), target_size)
+                tmp_pixmap  = commons.apply_border_radius (commons.resize_image(QPixmap(full_path), target_size), 15, target_size)
                 self.__images.append(tmp_pixmap)
         self.__image_label  = QLabel()
+        self.__image_label.setObjectName("slideshow_image")
         self.__image_label.setPixmap(self.__images[self.__curr_image_idx])
 
-        # TODO Creating central layout
         h_layout    = QHBoxLayout()
         v_layout    = QVBoxLayout()
     
@@ -59,6 +61,8 @@ class SlideshowWidget (QWidget) :
 
     def __show_next_image (self) -> None:
         self.__curr_image_idx   = (self.__curr_image_idx+1) % len(self.__images)
+        if self.__curr_image_idx == 0:
+            random.shuffle(self.__images)
         self.__image_label.setPixmap (self.__images[self.__curr_image_idx])
 
 

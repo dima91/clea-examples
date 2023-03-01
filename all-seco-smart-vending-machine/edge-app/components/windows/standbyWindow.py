@@ -17,6 +17,7 @@ class StandbyWindow (QWidget) :
     ## Members
     ##########
     __signage_slideshow = None
+    __footer_widget     = None
     __icon_size         = QSize(140, 140)
     __images_size       = None
 
@@ -24,9 +25,10 @@ class StandbyWindow (QWidget) :
     def __init__(self, config, main_window, async_loop) -> None:
         super().__init__()
         
-        self.__images_size          = main_window.screen_sizes_percentage(.8)
+        self.__images_size          = main_window.screen_sizes_percentage(.85)
         self.__signage_slideshow    = SlideshowWidget (config['digital_signage']['base_folder'], self.__images_size,
                                                         int(config['digital_signage']['update_interval_ms']))
+        self.__footer_widget        = FooterWidget(config, self.__icon_size, "Come closer!")
 
         # Registering slot to get session changes
         main_window.SessionUpdate.connect(self.__on_session_change)
@@ -34,7 +36,7 @@ class StandbyWindow (QWidget) :
         vbox    = QVBoxLayout()
         vbox.addWidget(self.__signage_slideshow)
         vbox.addStretch(1)
-        vbox.addWidget(FooterWidget(config, self.__icon_size, "Come closer!"))
+        vbox.addWidget(self.__footer_widget)
 
         self.setLayout(vbox)
 
