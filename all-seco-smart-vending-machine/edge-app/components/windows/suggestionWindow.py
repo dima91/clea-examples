@@ -49,7 +49,7 @@ class SuggestionWindow (QWidget):
 
     def __on_session_change(self, current_session):
         if current_session.current_status == Status.SUGGESTION :
-            # TODO Update suggestions in suggestion_widget
+            self.__suggestion_widget.update_suggested_products(current_session)
             self.__timer.start()
         else :
             self.__timer.stop()

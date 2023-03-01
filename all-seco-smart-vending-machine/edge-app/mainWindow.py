@@ -136,7 +136,6 @@ class MainWindow (QMainWindow) :
             self.__current_session  = CustomerSession()
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
-            #TODO self.__suggestion_window.update_suggested_products(session) -> do this by SuggestionWindow during session update
             self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__suggestion_window)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SELECTION :                   # product_selected / ProductSelected
@@ -237,8 +236,11 @@ class MainWindow (QMainWindow) :
         # Querying to change status into RECOGNITION
         self.__change_status(Status.RECOGNITION)
 
-    def __on_escaped_person(self):
+    def __on_escaped_person(self, frame, detection, customer_info):
         # Querying to change status into STANDBY
+        self.__current_session.frame                    = frame
+        self.__current_session.face_detection_results   = detection
+        self.__current_session.inference_results        = customer_info
         self.__change_status(Status.STANDBY)
 
     def __on_new_customer(self, frame, detection, customer_info):
