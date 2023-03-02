@@ -286,7 +286,7 @@ class MainWindow (QMainWindow) :
     def __on_selected_product(self, prod_id, is_suggested, promo_discount):
         self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}")
         self.__current_session.update_chosen_product(prod_id, is_suggested, promo_discount)
-        self.__current_session.update_shown_advertisement(self.__suggester.suggest_advertisement(self.__current_session, {}))#FIXME
+        self.__current_session.update_shown_advertisement(self.__suggester.suggest_advertisement(self.__current_session, self.advertisements_details))
         self.__change_status(Status.SELECTION)
 
     def __on_selection_confirmed (self, is_confirmed):

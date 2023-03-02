@@ -138,7 +138,7 @@ class AstarteClient(QObject) :
 
     def get_advertisements_details(self, advertisement_id:str = None) -> dict:
         try:
-            res = self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.AdvertisementData/{advertisement_id if advertisement_id!=None else ''}")
+            return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.AdvertisementDetails/{advertisement_id if advertisement_id!=None else ''}")
         except Exception as e:
             print (f'\n\n[QUERY ERROR]\n{__name__} : {e}')
             return {'data':{}}

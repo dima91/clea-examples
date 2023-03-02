@@ -104,6 +104,3 @@ class SuggestionWindow (QWidget):
     
     def set_selected_products_tab(self, tab_idx):
         return self.__products_widget.set_selected_proucts_tab(tab_idx)
-    
-    def update_suggested_products(self, session):
-        self.__suggestion_widget.update_suggested_products(session)
