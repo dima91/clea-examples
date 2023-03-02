@@ -1,5 +1,5 @@
 {
-    "interface_name": "ai.clea.examples.vendingMachine.AdvertisementData",
+    "interface_name": "ai.clea.examples.vendingMachine.AdvertisementDetails",
     "version_major": 0,
     "version_minor": 1,
     "type": "properties",
@@ -39,11 +39,13 @@
         },
         {
             "endpoint": "/%{advID}/startScheduleTime",
-            "type": "integer"
+            "type": "string",
+            "doc":"EXAMPLE: 08:00"
         },
         {
             "endpoint": "/%{advID}/endScheduleTime",
-            "type": "integer"
+            "type": "string",
+            "doc":"EXAMPLE: 10:30"
         },
         {
             "endpoint": "/%{advID}/targetedAdv",
@@ -67,7 +69,8 @@
         },
         {
             "endpoint": "/%{advID}/currentStatus",
-            "type": "string"
+            "type": "string",
+            "doc":"Possible status: ended, paused, active"
         }
     ]
 }

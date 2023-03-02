@@ -1,7 +1,7 @@
 {
     "interface_name": "ai.clea.examples.vendingMachine.PromoDetails",
-    "version_major": 0,
-    "version_minor": 1,
+    "version_major": 1,
+    "version_minor": 0,
     "type": "properties",
     "ownership": "server",
     "mappings": [
@@ -27,11 +27,13 @@
         },
         {
             "endpoint": "/%{promoID}/startScheduleTime",
-            "type": "integer"
+            "type": "string",
+            "doc":"EXAMPLE: 08:00"
         },
         {
             "endpoint": "/%{promoID}/endScheduleTime",
-            "type": "integer"
+            "type": "string",
+            "doc":"EXAMPLE: 10:30"
         },
         {
             "endpoint": "/%{promoID}/startDate",
@@ -59,7 +61,8 @@
         },
         {
             "endpoint": "/%{promoID}/currentStatus",
-            "type": "string"
+            "type": "string",
+            "doc":"Possible status: ended, paused, active"
         }
     ]
 }
