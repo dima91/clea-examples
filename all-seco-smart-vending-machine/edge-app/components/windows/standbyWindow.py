@@ -25,7 +25,7 @@ class StandbyWindow (QWidget) :
     def __init__(self, config, main_window, async_loop) -> None:
         super().__init__()
         
-        self.__images_size          = main_window.screen_sizes_percentage(.85)
+        self.__images_size          = main_window.screen_sizes_percentage(.83)
         self.__signage_slideshow    = SlideshowWidget (config['digital_signage']['base_folder'], self.__images_size,
                                                         int(config['digital_signage']['update_interval_ms']))
         self.__footer_widget        = FooterWidget(config, self.__icon_size, "Come closer!")

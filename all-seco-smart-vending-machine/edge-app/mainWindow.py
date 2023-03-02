@@ -9,6 +9,7 @@ from components.vmcInterfaceThread import VmcInterface
 from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
 from components.widgets.gifPlayerWidget import GifPlayerWidget
+from utils.suggestionsStrategies import SuggestionsStrategies
 from components.windows.standbyWindow import StandbyWindow
 from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
@@ -29,9 +30,11 @@ class MainWindow (QMainWindow) :
     ##########
     SessionUpdate   = Signal(CustomerSession)       # This signal notifies
 
-    introspection       = None
-    device_setup        = None
-    products_details    = None
+    introspection           = None
+    device_setup            = None
+    products_details        = None
+    advertisements_details  = None
+    promos_details          = None
     ##########
     __screen_sizes      = None
     __logger            = None
@@ -44,9 +47,8 @@ class MainWindow (QMainWindow) :
     __vmc_interface     = None
     
     ## Widgets
-    __video_thread          = None
-    __video_widget          = None
-    __products_widget       = None
+    __video_thread  = None
+    __suggester     = None
 
     ## Windows
     __standby_window        = None
@@ -55,6 +57,8 @@ class MainWindow (QMainWindow) :
     __selection_window      = None
 
     __video_logger      = None
+
+    __TRANSACTION_ID_LENGHT = 15
 
 
     def __init__(self, config, app_loop) -> None:
@@ -77,8 +81,11 @@ class MainWindow (QMainWindow) :
         self.setWindowTitle ("All SECO Smart Vending Machine")
         self.setCentralWidget (self.__widgets_stack)
 
-        # Creating VideoThread and VideoWidget
+        # Creating VideoThread
         self.__video_thread = VideoThread(self, config)
+
+        # Creating suggester
+        self.__suggester    = SuggestionsStrategies(config)
 
         # Creating base window
         loader  = GifPlayerWidget(config["loader"]["loader_path"], False)
@@ -125,15 +132,15 @@ class MainWindow (QMainWindow) :
 
 
         if old_status == Status.INITIALIZING and self.__current_status == Status.STANDBY:                       # astarte_initialized
-            self.__current_session  = CustomerSession()
-            self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__standby_window))
+            self.__close_current_session_and_start_new_one()
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
 
         elif old_status == Status.STANDBY and self.__current_status == Status.RECOGNITION:                      # new_person / NewPerson
             self.__current_session.start_time   = commons.ms_timestamp()
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__recognition_window))
             
         elif old_status == Status.RECOGNITION and self.__current_status == Status.STANDBY:                      # escaped_person / EscapedPerson
-            self.__current_session  = CustomerSession()
+            self.__close_current_session_and_start_new_one()
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
             self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
@@ -146,29 +153,25 @@ class MainWindow (QMainWindow) :
             self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
         elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY :                      # escaped_customer / EscapedCustomer
-            self.__current_session  = CustomerSession()
-            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
+            self.__close_current_session_and_start_new_one()
+            commons.remove_shown_widget(self.__widgets_stack)
         
         elif old_status == Status.SELECTION and self.__current_status == Status.RECOGNITION :                    # product_rejected / ProductRejected
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__recognition_window)
         elif old_status == Status.SELECTION and self.__current_status == Status.SUGGESTION :                    # product_rejected / ProductRejected
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__suggestion_window)
         elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT :                       # selection_confirmed / SelectionConfirmed
+            # Generating transaction id
+            self.__current_session.update_transaction_id(commons.generate_random_id(self.__TRANSACTION_ID_LENGHT))
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__payment_window)
         
         elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_done / PaymentDone
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__dispensing_window)
         
         elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
-            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
+            self.__close_current_session_and_start_new_one()
+            commons.remove_shown_widget(self.__widgets_stack)
 
-        # FIXME Not needed!
-        #TODO FIXME elif old_status == Status.SELECTION and self.__current_status == Status.PAYMENT_REQUESTED :             # selection_confirmed / SelectionConfirmed
-        #TODO FIXME elif old_status == Status.PAYMENT_REQUESTED and self.__current_status == Status.PAYMENT_ACCEPTED :      # payment_accepted / PaymentAccepted
-        #TODO FIXMEelif old_status == Status.PAYMENT_ACCEPTED and self.__current_status == Status.PAYMENT_PROCESSING :     # TODO
-        #TODO FIXME elif old_status == Status.PAYMENT_PROCESSING and self.__current_status == Status.DISPENSING :           # payment_done / PaymentDone
-        #TODO FIXME elif old_status == Status.DISPENSING and self.__current_status == Status.DISPENSED :                    # product_dispensed / ProductDispensed
-        #TODO FIXME elif old_status == Status.DISPENSED and self.__current_status == Status.STANDBY :                       # reset / Reset
         else :
             # Incompatible status! Notifying it and reverting 
             oss = commons.status_to_string(old_status)
@@ -221,9 +224,11 @@ class MainWindow (QMainWindow) :
     def __astarte_connection_status_changes (self, new_status) :
         if new_status == True :
             # Retrieving products list and all their information
-            self.introspection      = self.__astarte_client.get_introspection()["data"]
-            self.device_setup       = self.__astarte_client.get_device_setup()["data"]
-            self.products_details   = self.__astarte_client.get_products_details()["data"]
+            self.introspection          = self.__astarte_client.get_introspection()["data"]
+            self.device_setup           = self.__astarte_client.get_device_setup()["data"]
+            self.products_details       = self.__astarte_client.get_products_details()["data"]
+            self.advertisements_details = self.__astarte_client.get_advertisements_details()["data"]
+            self.promos_details         = self.__astarte_client.get_promos_details()["data"]
 
             self.__create_windows()
             self.__vmc_interface.start()
@@ -231,6 +236,36 @@ class MainWindow (QMainWindow) :
         else :
             print ("[FAILURE] Astarte disconnected!")
 
+
+    def __close_current_session_and_start_new_one(self):
+        if self.__current_session != None:
+            # Closing current session
+            self.__current_session.close_session()
+            self.__send_session_data()
+        # Creating a new session
+        self.__current_session  = CustomerSession()
+
+
+    def __send_session_data(self):
+        # Sending to Astarte interesting session information
+        s   = self.__current_session
+        # Sending customer detection
+        self.__astarte_client.send_customer_detection(s.end_time-s.start_time, s.inference_results["age"],
+                                                      s.inference_results["emotion"], s.shown_advertisement_id)
+        # TODO Updating eventually sold product
+        # Sending eventually performed transaction
+        if s.chosen_product_id != None:
+            p_id        = s.chosen_product_id
+            p_details   = self.products_details[p_id]
+            price       = p_details["currentPrice"] - (p_details["currentPrice"]*s.promo_discount)
+            self.__astarte_client.send_transaction(s.chosen_product_id, "NFC", s.transaction_id, p_details["currentCost"],
+                                                   price, s.promo_discount!=0, s.is_chosen_product_suggested)
+        pass
+
+
+    ###################
+    ## WINDOWS SLOTS ##
+    ###################
     
     def __on_new_person(self):
         # Querying to change status into RECOGNITION
@@ -238,24 +273,20 @@ class MainWindow (QMainWindow) :
 
     def __on_escaped_person(self, frame, detection, customer_info):
         # Querying to change status into STANDBY
-        self.__current_session.frame                    = frame
-        self.__current_session.face_detection_results   = detection
-        self.__current_session.inference_results        = customer_info
+        self.__current_session.new_detection(frame, detection, customer_info)
         self.__change_status(Status.STANDBY)
 
     def __on_new_customer(self, frame, detection, customer_info):
-        self.__current_session.frame                    = frame
-        self.__current_session.face_detection_results   = detection
-        self.__current_session.inference_results        = customer_info
+        self.__current_session.new_detection(frame, detection, customer_info)
         self.__change_status(Status.SUGGESTION)
         
     def __on_escaped_customer(self):
         self.__change_status(Status.STANDBY)
 
-    def __on_selected_product(self, prod_id, is_suggested):
+    def __on_selected_product(self, prod_id, is_suggested, promo_discount):
         self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}")
-        self.__current_session.chosen_product_id            = prod_id
-        self.__current_session.is_suggested_chosen_product  = is_suggested
+        self.__current_session.update_chosen_product(prod_id, is_suggested, promo_discount)
+        self.__current_session.update_shown_advertisement(self.__suggester.suggest_advertisement(self.__current_session, {}))#FIXME
         self.__change_status(Status.SELECTION)
 
     def __on_selection_confirmed (self, is_confirmed):

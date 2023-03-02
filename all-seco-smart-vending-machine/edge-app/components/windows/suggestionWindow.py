@@ -20,7 +20,7 @@ class SuggestionWindow (QWidget):
     __products_widget   = None
     ##########
     EscapedCustomer = Signal()
-    SelectedProduct = Signal(str, bool)     # product_id, is_suggested
+    SelectedProduct = Signal(str, bool, float)     # product_id, is_suggested, promo_discount
 
 
     ##########
@@ -81,7 +81,7 @@ class SuggestionWindow (QWidget):
 
     def __build_rbox_layout(self):
         layout                  = QVBoxLayout()
-        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["shownProducts"],
+        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["device"]["shownProducts"],
                                                  self.__main_window.products_details)
         self.__products_widget.SelectedProduct.connect(self.__on_product_selected)
         layout.addWidget(self.__products_widget)
@@ -91,12 +91,12 @@ class SuggestionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}")
-        self.SelectedProduct.emit (id, False)
+        self.SelectedProduct.emit (id, False, 0)
 
 
-    def __on_suggested_product_select(self, id):
+    def __on_suggested_product_select(self, id, promo_discount):
         self.__logger.debug (f"Selected SUGGESTED product with id {id}")
-        self.SelectedProduct.emit (id, True)
+        self.SelectedProduct.emit (id, True, promo_discount)
 
 
     def get_selected_products_tab(self):

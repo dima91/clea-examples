@@ -7,11 +7,18 @@ from PySide6.QtCore import QObject, Signal
 class AstarteClient(QObject) :
 
     ## Public members
-    NewConnectionStatus = Signal (bool)
-    IncomingData        = Signal (any)
+    NewConnectionStatus     = Signal(bool)
+    AdvertisementDataUpdate = Signal(dict)
+    DeviceSetupUpdate       = Signal(dict)
+    ProductDetailsUpdate    = Signal(dict)
+    PromoDetailsUpdate      = Signal(dict)
+    RefillEvent             = Signal(dict)
 
 
     ## Private members
+    __CUSTOMER_DETECTION_INTERFACE  = "ai.clea.examples.vendingMachine.CustomerDetection"
+    __TRANSACTION_INTERFACE         = "ai.clea.examples.vendingMachine.Transaction"
+
     __device            = None
     __loop              = None
     __logger            = None
@@ -68,25 +75,39 @@ class AstarteClient(QObject) :
         self.NewConnectionStatus.emit(True)
 
 
-    def __astarte_disconnecton_cb (self, dvc, boh) :
+    def __astarte_disconnecton_cb (self, dvc, code) :
         self.__logger.warning ("Device disconnected")
         self.NewConnectionStatus.emit(False)
 
     
-    def __astarte_data_cb (self, data) :
+    def __astarte_data_cb (self, device, ifname, ifpath, data) :
         self.__logger.info ("Received server data")
+        print(device)
+        print(ifname)
+        print(ifpath)
+        print(data)
+        print(json.loads(data))
         # TODO Emit signal
 
     
-    def __astarte_aggregated_data_cb (self, data) :
+    def __astarte_aggregated_data_cb (self, device, ifname, ifpath, data) :
         self.__logger.info ("Received aggregated server data")
         # TODO Emit signal
 
 
     def __build_appengine_url(self):
         return f"{self.__api_base_url}/appengine/v1/{self.__realm}/devices/{self.__device_id}"
+    
     def __build_headers(self):
-        return {"Content-Type":"application/json; charset=utf-8", "Authorization":f"Bearer {self.__appengine_token}"}
+        return {"Content-Type":"application/json;charset=utf-8", "Authorization":f"Bearer {self.__appengine_token}", "Accept":"application/json"}
+    
+    def __perform_get_request(self, suffix_path):
+        url     = f"{self.__build_appengine_url()}{suffix_path if suffix_path!='' else ''}"
+        response    = requests.get(url, headers=self.__build_headers())
+        if response.status_code == 200:
+            return json.loads(response.content)
+        else:
+            raise Exception(f"Cannot get data at {suffix_path}: {response.reason} ({response.status_code})")
 
 
     def connect_device(self):
@@ -102,45 +123,61 @@ class AstarteClient(QObject) :
     
 
     def get_introspection(self) -> dict:
-        result      = {}
-        url         = f"{self.__build_appengine_url()}"
-        response    = requests.get(url, headers=self.__build_headers())
-
-        if response.status_code == 200:
-            result  = json.loads(response.content)
-        else:
-            raise Exception(f"Cannot get device introspection: {response.reason} ({response.status_code})")
-
-        return result
+        return self.__perform_get_request("")
 
 
     
 
     def get_device_setup(self) -> dict:
-        result      = {}
-        url         = f"{self.__build_appengine_url()}/ai.clea.examples.vendingMachine.DeviceSetup"
-        response    = requests.get(url, headers=self.__build_headers())
-
-        # FIXME
-        # if response.status_code == 200:
-        #     result  = json.loads(response.content)
-        # else:
-        #     raise Exception(f"Cannot get device setup: {response.reason} ({response.status_code})")
-        #
-        # return result
-        return json.load(open(self.__config["device_setup_test_file"])) #FIXME Remove me! Only for test
+        return self.__perform_get_request("/interfaces/ai.clea.examples.vendingMachine.DeviceSetup")
     
 
-    def get_products_details(self, product_id=None) -> dict:
-        result      = {}
-        url         = f"{self.__build_appengine_url()}/ai.clea.examples.vendingMachine.ProductDetails/{product_id if product_id!=None else ''}"
-        response    = requests.get(url, headers=self.__build_headers())
+    def get_products_details(self, product_id:str = None) -> dict:
+        return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.ProductDetails/{product_id if product_id!=None else ''}")
 
-        # FIXME
-        # if response.status_code == 200:
-        #     result  = json.loads(response.content)
-        # else:
-        #     raise Exception(f"Cannot get product details: {response.reason} ({response.status_code})")
-        #
-        # return result
-        return json.load(open(self.__config["products_test_file"])) #FIXME Remove me! Only for test
+
+    def get_advertisements_details(self, advertisement_id:str = None) -> dict:
+        try:
+            res = self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.AdvertisementData/{advertisement_id if advertisement_id!=None else ''}")
+        except Exception as e:
+            print (f'\n\n[QUERY ERROR]\n{__name__} : {e}')
+            return {'data':{}}
+    
+
+    def get_promos_details(self, promo_id:str = None) -> dict:
+        try:
+            return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.PromoDetails/{promo_id if promo_id!=None else ''}")
+        except Exception as e:
+            print (f'\n\n[QUERY ERROR]\n{__name__} : {e}')
+            return {'data':{}}
+
+
+    def send_device_location(self, latitude:float, longitude:float) -> None:
+        # TODO
+        pass
+
+
+    def send_device_status(self, power_consumption:float, chamber_temperature:float, engine_vibration:float) -> None:
+        # TODO
+        pass
+        
+
+    def send_customer_detection(self, duration:int, age:int, emotion:str, shown_advertisement_id:str) -> None:
+        a_data  = {"duration":duration, "age":age, "emotion":emotion}
+        if shown_advertisement_id != None:
+            a_data["shownAdvertisementID"]  = shown_advertisement_id
+
+        self.__device.send_aggregate(self.__CUSTOMER_DETECTION_INTERFACE, '/detection', a_data)
+
+
+    def send_sold_product_details(self, product_id:str) -> None:
+        # TODO
+        pass
+
+
+    def send_transaction(self, product_id:str, payment_mode:str, transaction_id:str, selling_cost:float,
+                         selling_price:float, with_promo:bool, is_suggested:bool) -> None:
+        a_data  = {"productID":product_id, "paymentMode":payment_mode, "tansactionID":transaction_id, "sellingCost":selling_cost,
+                   "sellingPrice":selling_price, "withPromo":with_promo, "isSuggested":is_suggested}
+        
+        self.__device.send_aggregate(self.__TRANSACTION_INTERFACE, "/transaction", a_data)

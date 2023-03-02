@@ -122,7 +122,6 @@ class PaymentWindow (QWidget):
 
     
     def __on_test_timer_cb(self) :
-        print ("im into")
         if self.__test_timer_status == 0:
             self.__on_vmc_message("scanned")
             self.__test_timer_status += 1

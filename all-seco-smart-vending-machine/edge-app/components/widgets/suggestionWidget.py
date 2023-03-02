@@ -11,10 +11,11 @@ class SuggestionWidget (QLabel):
 
     __current_state         = None
     __logger                = None
+    __main_window           = None
     __suggestion_text       = None
     __suggestion_content    = None
     ##########
-    SelectedProduct         = Signal(str)
+    SelectedProduct         = Signal(str, float)        # product_id, promod_discounr
 
 
     def __init__(self, main_window, show_loader) -> None:
@@ -40,11 +41,15 @@ class SuggestionWidget (QLabel):
 
 
     def __on_selected_product(self, e):
-        self.SelectedProduct.emit(e)
+        # Map selected product with those that have a promo -> retrieve promo_discount
+        #FIXME
+        promo_discount  = 0
+        self.SelectedProduct.emit(e, promo_discount)
 
 
     def update_suggested_products(self, session):
         # TODO Basing on current customer_info, let's select tree products consider also promos (ask them to main window)
+        # TODO Map promo products to cloned product with different id and price
         #FIXME TEST
         products    = ProductsWidget(self.__main_window, False, False, ["yvvaJi0LNm", "yvvaJi0LNm", "yvvaJi0LNm"], self.__main_window.products_details)
         products.SelectedProduct.connect(self.__on_selected_product)

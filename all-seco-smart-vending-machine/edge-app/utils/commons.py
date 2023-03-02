@@ -1,5 +1,5 @@
 
-import os, datetime, logging
+import os, datetime, logging, random, string
 import numpy as np
 from enum import Enum
 
@@ -28,17 +28,53 @@ class CustomerSession():
     current_status  = None
 
     start_time                  = None
+    end_time                    = None
     frame                       = None
     face_detection_results      = None
     inference_results           = None
     current_product_tab_id      = None
     shown_advertisement_id      = None
     chosen_product_id           = None
-    is_suggested_chosen_product = None
+    promo_discount              = None
+    transaction_id              = None
+    is_chosen_product_suggested = None
 
     def __init__(self) -> None:
         self.current_status         = Status.STANDBY
         self.current_product_tab_id = 0
+
+    def set_status(self, new_status:Status) -> None:
+        self.current_status = new_status
+
+    def start_session(self) -> None:
+        start_time  = ms_timestamp()
+
+    def close_session(self) -> int:
+        self.end_time   = ms_timestamp()
+        return self.end_time-self.start_time
+    
+    def new_detection(self, frame:object, detection_results:dict, inference_results:dict) -> None:
+        self.frame                  = frame
+        self.face_detection_results = detection_results
+        self.inference_results      = inference_results
+
+    def update_shown_advertisement(self, advertisement_id:str) -> None:
+        self.shown_advertisement_id = advertisement_id
+
+    def update_chosen_product(self, chosen_product_id:str, is_suggested:bool, promo_discount:float) -> None:
+        self.chosen_product_id              = chosen_product_id
+        self.is_chosen_product_suggested    = is_suggested
+        self.promo_discount                 = promo_discount
+
+    def update_transaction_id(self, transaction_id:str) -> None:
+        self.transaction_id = transaction_id
+
+    def to_dict(self) -> dict:
+        return {"previous_status":self.previous_status, "current_status":self.current_status, "start_time":self.start_time,
+                "end_time":self.end_time, "frame":self.frame, "face_detection_results":self.face_detection_results,
+                "inference_results":self.inference_results, "current_product_tab_id":self.current_product_tab_id,
+                "shown_advertisement_id":self.shown_advertisement_id, "chosen_product_id":self.chosen_product_id,
+                "is_chosen_product_suggested":self.is_chosen_product_suggested}
 
 
 class ProductsCardSize(Enum):
@@ -93,6 +129,12 @@ def remove_shown_widget (widgets_stack) :
 def remove_and_set_new_shown_widget (widgets_stack, new_widget):
     remove_shown_widget(widgets_stack)
     widgets_stack.setCurrentIndex(widgets_stack.addWidget(new_widget))
+
+
+def generate_random_id(length):
+    source  = string.ascii_letters+string.digits
+    result  = ''.join(random.choice(source) for i in range(length))
+    return result
 
 
 ###################

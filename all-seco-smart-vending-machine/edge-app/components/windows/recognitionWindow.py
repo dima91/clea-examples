@@ -17,7 +17,7 @@ class RecognitionWindow (QWidget):
     __logger            = None
     __products_widget   = None
     ##########
-    SelectedProduct     = Signal(str, bool)
+    SelectedProduct     = Signal(str, bool, float)     # product_id, is_suggested, promo_discount
 
 
     def __init__(self, config, main_window, video_thread) -> None:
@@ -53,7 +53,7 @@ class RecognitionWindow (QWidget):
 
     def __build_rbox_layout(self) -> QVBoxLayout:
         layout                  = QVBoxLayout()
-        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["shownProducts"],
+        self.__products_widget  = ProductsWidget(self.__main_window, True, True, self.__main_window.device_setup["device"]["shownProducts"],
                                                  self.__main_window.products_details)
         self.__products_widget.SelectedProduct.connect(self.__on_product_selected)
         layout.addWidget(self.__products_widget)
@@ -63,7 +63,7 @@ class RecognitionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}")
-        self.SelectedProduct.emit(id, False)
+        self.SelectedProduct.emit(id, False, 0)
 
 
     def get_selected_products_tab(self):

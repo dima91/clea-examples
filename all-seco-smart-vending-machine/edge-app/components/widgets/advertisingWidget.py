@@ -2,7 +2,7 @@
 from utils import commons
 from utils.commons import Status
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
 
 class AdvertisingWidget (QWidget) :
 
@@ -17,21 +17,23 @@ class AdvertisingWidget (QWidget) :
 
         self.__main__window = main_window
         self.__logger       = commons.create_logger(__name__)
+        self.__adv_label    = QLabel()
+
+        vbox    =   QVBoxLayout()
+        vbox.addStretch(1)
+        vbox.addLayout(commons.h_center_widget(self.__adv_label))
+        vbox.addStretch(1)
+        self.setLayout(vbox)
 
         self.__main__window.SessionUpdate.connect(self.on_session_change)
 
 
     def on_session_change(self, session):
         if session.current_status == Status.SELECTION:
-            #### TODO Choosing the right promo to be shown and updating the __adv_label_image
-
+            print(session.to_dict())
             if session.shown_advertisement_id == None:
-                self.__logger.debug("Choosing the right advertisement!")
-                # TODO Collecting active advertisements
-                #advs    = self.__main__window.get_advertisements()
-                # TODO Selecting those that can be used
-                # TODO Randomly choosing an item
-                session.shown_advertisement_id  = 15
+                self.__logger.error("SELECTION staus with None adv_id!")
             else:
-                # TODO If the adv is already selected, display it
+                # TODO Displaying advertisement
+                self.__adv_label.setText(session.shown_advertisement_id)
                 pass
