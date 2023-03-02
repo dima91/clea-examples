@@ -1,0 +1,37 @@
+{
+    "data":{
+        "syOMCHyGNL":{
+            "creationTime":"2023-01-29T17:30:00Z",
+            "ID":"syOMCHyGNL",
+            "name":"Breakfast Club",
+            "products":["IY7pnokSgy","AVTUlW_tdw"],
+            "discount":10,
+            "startScheduleTime":"08:00",
+            "endScheduleTime":"10:30",
+            "startDate":"2023-02-01T00:00:00Z",
+            "endDate":"2023-03-31T23:59:59Z",
+            "minAudienceAge":14,
+            "maxAudienceAge":55,
+            "targetEmotions":["Happy", "Anger"],
+            "imagePath":"media/promos/breakfast_club.png",
+            "currentStatus":"active"
+        },
+
+        "4C2AfU3mDv":{
+            "creationTime":"2023-02-18T10:45:00Z",
+            "ID":"4C2AfU3mDv",
+            "name":"Special Brunch",
+            "products":["yvvaJi0LNm","9SwSOVa_yD", "h6oat_cgRm"],
+            "discount":15,
+            "startScheduleTime":"11:00",
+            "endScheduleTime":"15:45",
+            "startDate":"2023-03-01T00:00:00Z",
+            "endDate":"2023-05-31T23:59:59Z",
+            "minAudienceAge":24,
+            "maxAudienceAge":42,
+            "targetEmotions":["Neutral"],
+            "imagePath":" media/promos/special_brunch.png",
+            "currentStatus":"active"
+        }
+    }
+}
