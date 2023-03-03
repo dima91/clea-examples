@@ -260,6 +260,13 @@ class VideoThread (QThread) :
                         d                       = self.__target_detection
                         freezed_face            = self.__freezed_frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :]
                         self.__customer_info    = self.__infer_age_emotions (freezed_face)
+                        # Putting inference info on the image
+                        self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Emotion: {self.__customer_info['emotion']}",
+                                                             (5,40), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
+                        self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Gender: {self.__customer_info['gender']}",
+                                                             (5,70), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
+                        self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Age: {self.__customer_info['age']}",
+                                                             (5,100), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
                         # Go to SUGGESTION status
                         self.NewImage.emit(self.__freezed_frame, [self.__target_detection], None)
                         self.NewCustomer.emit(self.__freezed_frame, self.__target_detection, self.__customer_info)
