@@ -87,7 +87,7 @@ class SuggestionsStrategies(QObject) :
             random.shuffle(f_promos)
             result  = f_promos[0]
         else:
-            self.__logger.debug("No promos available!")
+            self.__logger.debug("No promo available!")
 
         return result
     
@@ -119,6 +119,6 @@ class SuggestionsStrategies(QObject) :
             random.shuffle(f_advs)
             result  = f_advs[0]
         else:
-            self.__logger.debug("No promos available!")
+            self.__logger.debug("No adv available!")
 
         return result
