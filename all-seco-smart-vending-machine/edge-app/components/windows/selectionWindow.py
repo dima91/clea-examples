@@ -47,14 +47,10 @@ class SelectionWindow(QWidget):
         layout  = QVBoxLayout()
 
         # Video widget
-        vw_layout   = QHBoxLayout ()
-        vw_layout.addStretch(1)
-        vw_layout.addWidget(VideoWidget(self.__main_window, video_thread))
-        vw_layout.addStretch(1)
-        layout.addLayout(vw_layout)
-
+        layout.addLayout(commons.h_center_widget(VideoWidget(self.__main_window, video_thread)))
         # Advertising widget
         advertising_widget  = AdvertisingWidget(self.__main_window)
+        layout.addStretch(1)
         layout.addWidget(advertising_widget)
         layout.addStretch(1)
         layout.addWidget(FooterWidget(config, QSize(100, 100), None))

@@ -18,7 +18,7 @@ class ProductsTable (QWidget) :
     SelectedProduct = Signal(str)
 
 
-    def __init__ (self, main_window, prods_id, products_details, products_size) -> None:
+    def __init__ (self, main_window, prods_id, products_details, products_size, promo_descriptor=None, promo_poduct_id=None) -> None:
         super().__init__()
 
         self.__logger           = commons.create_logger(__name__)
@@ -45,17 +45,23 @@ class ProductsTable (QWidget) :
 
         # Filling first row layout
         for i in range (0, min(self.__COLS_COUNT, len(products))):
-            p   = products[i]
+            p           = products[i]
+            apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size)
+            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,
+                                         apply_promo, promo_descriptor)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r0_layout.addWidget(card_box)
 
         # Filling second row
         for i in range (0, min(self.__COLS_COUNT, len(products)-self.__COLS_COUNT)):
-            p   = products[i+self.__COLS_COUNT]
+            p           = products[i+self.__COLS_COUNT]
+            apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            r1_layout.addWidget(ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size))
+            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,
+                                         apply_promo, promo_descriptor)
+            card_box.SelectedItem.connect(self.__on_selected_card)
+            r1_layout.addWidget(card_box)
 
 
         # Ignoring remaining products!

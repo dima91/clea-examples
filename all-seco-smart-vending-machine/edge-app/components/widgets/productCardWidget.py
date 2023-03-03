@@ -16,7 +16,8 @@ class ProductCardBox (QWidget):
     SelectedItem    = Signal(str)
 
 
-    def __init__(self, id, name, current_price, image_path, ingredients, target_image_size, product_size) -> None:
+    def __init__(self, id, name, current_price, image_path, ingredients, target_image_size, product_size,
+                 apply_promo:bool, promo_descriptor:dict) -> None:
         super().__init__()
         
         self.__id           = id
@@ -28,8 +29,10 @@ class ProductCardBox (QWidget):
         pixmap              = QPixmap()
         pixmap_label        = QLabel()
         name_label          = QLabel(name)
-        ingredients_label   = QLabel(str(ingredients))
+        ingredients_label   = QLabel(self.__array_string_to_string(ingredients) if ingredients!=None else ingredients)
         price_label         = QLabel(str(current_price)+" €")
+        if apply_promo :
+            price_label.setStyleSheet("QLabel{color:red;}")
         
         # Checking if image_path is an URL or a file
         if validators.url(image_path) and os.path.isfile(image_path) :
@@ -46,10 +49,13 @@ class ProductCardBox (QWidget):
 
         pixmap_label.setObjectName("ProductDescItem")
         inner_layout.addLayout(commons.h_center_widget(pixmap_label))
+        inner_layout.addStretch(1)
         name_label.setObjectName("ProductDescItem")
+        name_label.setStyleSheet("QLabel{font-size:20px;}")
         inner_layout.addLayout(commons.h_center_widget(name_label))
-        ingredients_label.setObjectName("ProductDescItem")
-        inner_layout.addLayout(commons.h_center_widget(ingredients_label))
+        if ingredients != None:
+            ingredients_label.setObjectName("ProductDescItem")
+            inner_layout.addLayout(commons.h_center_widget(ingredients_label))
         price_label.setObjectName("ProductDescItem")
         inner_layout.addLayout(commons.h_center_widget(price_label))
 
@@ -70,6 +76,14 @@ class ProductCardBox (QWidget):
         self.setGraphicsEffect(self.shadow)
 
         self.adjustSize()
+
+
+    def __array_string_to_string(self, string_array:str):
+        result  = ""
+        for s in string_array:
+            result += f"{s.capitalize()}, "
+
+        return result[:len(result)-2]
 
 
     def mousePressEvent(self, ev):

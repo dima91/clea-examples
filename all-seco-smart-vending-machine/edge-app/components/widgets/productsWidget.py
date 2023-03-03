@@ -27,7 +27,8 @@ class ProductsWidget (QWidget):
     SelectedProduct     = Signal(str)
 
 
-    def __init__(self, main_window, show_title, separate_in_sections, shown_products, products_details) -> None:
+    def __init__(self, main_window, show_title, separate_in_sections, shown_products, products_details,
+                 promo_descriptor=None, promo_poduct_id=None) -> None:
         QWidget.__init__(self)
 
         self.__logger           = commons.create_logger(__name__)
@@ -73,11 +74,13 @@ class ProductsWidget (QWidget):
                 # Filtering products by target section
                 prods_id    = filter (lambda e: products_details[e]["menuSection"] == s, products_details)
                 # Building and configuring ProductsTable
-                prod_table  = ProductsTable(self.__main_window, prods_id, products_details, commons.ProductsCardSize.LARGE)
+                prod_table  = ProductsTable(self.__main_window, prods_id, products_details, commons.ProductsCardSize.LARGE,
+                                            promo_descriptor, promo_poduct_id)
                 prod_table.SelectedProduct.connect(self.__on_selected_product)
                 self.__tables_stack.addWidget(prod_table)
         else :
-            prod_table  = ProductsTable(self.__main_window, shown_products, products_details, commons.ProductsCardSize.SMALL)
+            prod_table  = ProductsTable(self.__main_window, shown_products, products_details, commons.ProductsCardSize.SMALL,
+                                        promo_descriptor, promo_poduct_id)
             prod_table.SelectedProduct.connect(self.__on_selected_product)
             self.__tables_stack.addWidget(prod_table)
         

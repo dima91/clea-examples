@@ -7,6 +7,8 @@ from components.widgets.productsWidget import ProductsWidget
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QStackedWidget
 from PySide6.QtCore import Signal, QTimer, QRect
 
+import random
+
 
 class SuggestionWidget (QLabel):
 
@@ -16,8 +18,11 @@ class SuggestionWidget (QLabel):
     __suggester                 = None
     __suggestion_text           = None
     __suggestion_content        = None
+
+    __promo_descriptor          = None
+    __promo_product_id          = None
     ##########
-    SelectedProduct             = Signal(str, float)        # product_id, promod_discounr
+    SelectedProduct             = Signal(str, float)        # product_id, promo_discount
 
 
     def __init__(self, main_window, show_loader) -> None:
@@ -53,14 +58,29 @@ class SuggestionWidget (QLabel):
     def update_suggested_products(self, session):
         # Collecting suggestions
         suggestions = self.__suggester.suggest_products(session, self.__main_window.products_details)
-        # TODO Retrieving possible promo
-        promo       = self.__suggester.suggest_promo(session, self.__main_window.promos_details)
-        if promo!=None:
-            # TODO Merging suggested promo with suggested products
-            # TODO Mapping promo product to cloned product with different id and price
-            pass
+        print (f"Suggestions are: {suggestions}")
+        # Retrieving possible promo
+        promo_id                = self.__suggester.suggest_promo(session, self.__main_window.promos_details)
+        self.__promo_descriptor = None
+        self.__promo_product_id = None
+        if promo_id!=None:
+            self.__promo_descriptor = self.__main_window.promos_details[promo_id]
+            # Chosing the promotional product
+            promo_prods             = self.__main_window.promos_details[promo_id]["products"].copy()
+            random.shuffle(promo_prods)
+            self.__promo_product_id = promo_prods[0]
+            self.__logger.debug(f"Chosen promo: {self.__promo_product_id} -> {self.__promo_descriptor['name']}")
+            if not self.__promo_product_id in suggestions:
+                self.__logger.debug(f"Changing last element of {suggestions}")
+                suggestions[len(suggestions)-1] = self.__promo_product_id
+            else:
+                self.__logger.debug(f"Not needed change of {suggestions}")
+            # Moving promotional item to the end
+            suggestions.append(suggestions.pop(suggestions.index(self.__promo_product_id)))
         
-        products    = ProductsWidget(self.__main_window, False, False, suggestions, self.__main_window.products_details)
+        self.__logger.debug(f"Final shown products {suggestions}")
+        products    = ProductsWidget(self.__main_window, False, False, suggestions, self.__main_window.products_details,
+                                     self.__promo_descriptor, self.__promo_product_id)
         products.SelectedProduct.connect(self.__on_selected_product)
         commons.remove_and_set_new_shown_widget(self.__suggestion_content, products)
 

@@ -4,7 +4,7 @@ import numpy as np
 from enum import Enum
 
 from PySide6.QtCore import Qt, QRect, QSize
-from PySide6.QtWidgets import QHBoxLayout
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout
 from PySide6.QtGui import QPixmap, QImage, QPainter, QPainterPath
 
 
@@ -189,11 +189,23 @@ def apply_border_radius(in_pix:QPixmap, radius:int, size:QSize) -> QPixmap:
 ###################
 ## Layout functions
 
-def h_center_widget (w) -> QHBoxLayout:
-        h_layout    = QHBoxLayout()
+def h_center_widget(w) -> QHBoxLayout:
+    h_layout    = QHBoxLayout()
+    h_layout.addStretch(1)
+    h_layout.addWidget(w)
+    h_layout.addStretch(1)
+    return h_layout
 
-        h_layout.addStretch(1)
-        h_layout.addWidget(w)
-        h_layout.addStretch(1)
+def v_center_widget(w) -> QVBoxLayout:
+    v_layout    = QVBoxLayout()
+    v_layout.addStretch(1)
+    v_layout.addWidget(w)
+    v_layout.addStretch(1)
+    return v_layout
 
-        return h_layout
+def hv_center_widget(w) -> QVBoxLayout:
+    h_layout    = h_center_widget(w)
+    v_layout    = QVBoxLayout()
+    v_layout.addStretch(1)
+    v_layout.addLayout(h_layout)
+    v_layout.addStretch(1)
