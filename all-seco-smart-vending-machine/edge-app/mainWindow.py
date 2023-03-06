@@ -304,6 +304,11 @@ class MainWindow (QMainWindow) :
     def __on_selected_product(self, prod_id, is_suggested, related_promo_id):
         self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}\t\tWith promo: {related_promo_id}")
 
+        if self.__current_session.inference_results==None:
+            self.__logger.info("Customer chose a product before timeout!")
+            (frame, detection, customer_info)   = self.__video_thread.get_last_inference_info()
+            self.__current_session.new_detection(frame, detection, customer_info)
+
         print (f"Promo is none? {related_promo_id==None}")
         self.__current_session.update_chosen_product(prod_id, is_suggested, related_promo_id,
                                                      0 if related_promo_id=="" else self.promos_details[related_promo_id]["discount"])

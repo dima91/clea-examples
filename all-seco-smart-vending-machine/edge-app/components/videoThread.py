@@ -4,7 +4,7 @@ import cv2 as cv, numpy as np, pandas, logging, math
 from utils import commons
 from openvino.inference_engine import IECore
 
-from PySide6.QtCore import Signal, QThread, QPoint
+from PySide6.QtCore import Signal, QThread, QPoint, QMutex
 from PySide6.QtWidgets import QWidget
 
 
@@ -61,7 +61,9 @@ class VideoThread (QThread) :
     __current_session           = None
     __new_person_threshold      = None
     __new_customer_threshold    = None
+    __gpu_mutex                 = None
 
+    __prev_frame                = None
     __freezed_frame             = None
     __target_detection          = None
     __customer_info             = None
@@ -75,6 +77,7 @@ class VideoThread (QThread) :
         self.__new_customer_threshold   = int (config["ai"]["new_customer_threshold_ms"])
 
         self.__logger                   = commons.create_logger(__name__)
+        self.__gpu_mutex                = QMutex()
         
         self.__logger.debug(f"Loading networks..")
         self.__logger.debug(f'All networks loaded in {self.__load_ai_networks(config["ai"])} seconds')
@@ -97,6 +100,20 @@ class VideoThread (QThread) :
         }
         
         return commons.ms_timestamp() - start_t
+    
+
+    def perform_inference(self, frame) -> dict:
+        self.__gpu_mutex.lock()
+        prev_detections     = self.__perform_face_detection(frame)
+        # Retrieving the target detection from all the detections
+        face_idx            = self.__get_target_face_idx(frame, prev_detections)
+        target_detection    = prev_detections[face_idx]
+        # Inferring emotion and age values on freezed face
+        d                   = target_detection
+        customer_info       = self.__infer_age_emotions (frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :])
+        self.__gpu_mutex.unlock()
+
+        return (target_detection, customer_info)
 
 
     def __on_session_change(self, current_session):
@@ -106,6 +123,17 @@ class VideoThread (QThread) :
             self.start()
         else:
             self.stop()
+
+        if curr_status==commons.Status.SELECTION and self.__current_session.previous_status==commons.Status.RECOGNITION:
+            # Putting inference info on the image
+            self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Emotion: {self.__customer_info['emotion']}",
+                                                    (5,40), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
+            self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Gender: {self.__customer_info['gender']}",
+                                                    (5,70), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
+            self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Age: {self.__customer_info['age']}",
+                                                    (5,100), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
+            # Go to SUGGESTION status
+            self.NewImage.emit(self.__freezed_frame, [self.__target_detection], None)
 
 
     def __perform_face_detection(self, curr_frame):
@@ -205,9 +233,9 @@ class VideoThread (QThread) :
 
 
     def run(self):
-        prev_frame              = None
         curr_frame              = None
         start_time_detection    = None  
+        self.__prev_frame       = None
         self.__customer_found   = False
         self.__freezed_frame    = None
         self.__target_detection = None
@@ -217,7 +245,9 @@ class VideoThread (QThread) :
             try :
                 status,curr_frame   = self.__video_source.read()
                 final_frame         = cv.flip(cv.cvtColor(curr_frame, cv.COLOR_BGR2RGB),1)
+                self.__gpu_mutex.lock()
                 detections          = self.__perform_face_detection(final_frame)
+                self.__gpu_mutex.unlock()
                 curr_time           = commons.ms_timestamp()
 
                 if self.__current_session.current_status == commons.Status.STANDBY:
@@ -242,24 +272,17 @@ class VideoThread (QThread) :
 
                     if len(detections) == 0:
                         # TODO Add a timeout to prevent oscillations
-                        prev_detections     = self.__perform_face_detection(prev_frame)
-                        face_idx            = self.__get_target_face_idx(prev_frame, prev_detections)
-                        target_detection    = prev_detections[face_idx]
-                        d                   = target_detection
-                        customer_info       = self.__infer_age_emotions (prev_frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :])
-                        self.EscapedPerson.emit(prev_frame, target_detection, customer_info)
+
+                        # Computing AI models on the previous valid frame (in which there is at least one detection)
+                        (detection, customer_info)  = self.perform_inference(self.__prev_frame)
+                        self.EscapedPerson.emit(self.__prev_frame, detection, customer_info)
 
                     elif curr_time-start_time_detection >= self.__new_customer_threshold :
                         # Freezing image and face
-                        self.__customer_found   = True
-                        self.__freezed_frame    = final_frame.copy()
-                        # Retrieving the target detection from all the detections
-                        freezed_face_idx        = self.__get_target_face_idx(self.__freezed_frame, detections)
-                        self.__target_detection = detections[freezed_face_idx]
-                        # Inferring emotion and age values on freezed face
-                        d                       = self.__target_detection
-                        freezed_face            = self.__freezed_frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :]
-                        self.__customer_info    = self.__infer_age_emotions (freezed_face)
+                        self.__customer_found                           = True
+                        self.__freezed_frame                            = final_frame.copy()
+                        (self.__target_detection, self.__customer_info) = self.perform_inference(final_frame)
+                        
                         # Putting inference info on the image
                         self.__freezed_frame    = cv.putText(self.__freezed_frame, f"Emotion: {self.__customer_info['emotion']}",
                                                              (5,40), cv.FONT_HERSHEY_SIMPLEX, 1, (153,0,0), 2)
@@ -276,7 +299,7 @@ class VideoThread (QThread) :
                 else:
                     self.__logger.error("Wrong status: VideoThread should be stopped!")
 
-                prev_frame  = final_frame.copy()
+                self.__prev_frame   = final_frame.copy()
 
             except RuntimeError as re:
                 self.__logger.error (f"Catched this runtime error: {re}")
@@ -291,7 +314,8 @@ class VideoThread (QThread) :
         if not self.isRunning():
             super().start()
         else:
-            self.__logger.warning("Thread already running!")
+            #self.__logger.warning("Thread already running!")
+            pass
 
 
     def activate(self):
@@ -315,6 +339,10 @@ class VideoThread (QThread) :
 
 
     def get_last_inference_info(self):
+        if self.__freezed_frame==None:
+            self.__freezed_frame                            = self.__prev_frame.copy()
+            (self.__target_detection, self.__customer_info) = self.perform_inference(self.__freezed_frame)
+
         return (self.__freezed_frame, self.__target_detection, self.__customer_info)
     
 
