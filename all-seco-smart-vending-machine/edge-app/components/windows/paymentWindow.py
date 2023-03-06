@@ -30,8 +30,7 @@ class PaymentWindow (QWidget):
     __processing_gif_duration_ms    = None
     __accepted_gif_duration_ms      = None
 
-    # FIXME TEST memebers
-    __test_timer        = None
+    __emulated_payment_timer        = None
     ##########
     PaymentDone     = Signal(bool)
 
@@ -87,20 +86,18 @@ class PaymentWindow (QWidget):
             self.__is_active        = True
             self.__payment_status   = 0
 
-            self.__logger.debug(f"cdID: {session.connected_dispenser_id}")
-
             if session.connected_dispenser_id == None:
                 # Simulating product dispensing
                 self.__logger.debug(f"Simulating payment process")
                 self.__show_requested_gif()
-                self.__test_timer   = QTimer(self)
-                self.__test_timer.setSingleShot(True)
-                self.__test_timer.setInterval(self.__requsted_gif_duration_ms)
-                self.__test_timer.timeout.connect(self.__on_test_timer_cb)
-                self.__test_timer.start()
+                self.__emulated_payment_timer   = QTimer(self)
+                self.__emulated_payment_timer.setSingleShot(True)
+                self.__emulated_payment_timer.setInterval(self.__requsted_gif_duration_ms)
+                self.__emulated_payment_timer.timeout.connect(self.__on_emulated_payment_timer_cb)
+                self.__emulated_payment_timer.start()
             else :
                 # Asking payment to VMC
-                self.__logger.debug(f"Asking payment to VMC using dispenser {session.connected_dispenser_id}!!!!")
+                self.__logger.debug(f"Asking payment to VMC using dispenser {session.connected_dispenser_id}!!!!\n\n\n")
                 self.__vmc_interface.send_message(f"Wahl*{session.connected_dispenser_id}*")
                 self.__show_requested_gif()
         else:
@@ -115,13 +112,15 @@ class PaymentWindow (QWidget):
         internal_msg    = vmc_message.get_message()
         
         if self.__is_active:
-            if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="1": # internal_msg['status']=="<prod_id"
+            if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="2": # internal_msg['status']=="<prod_id"
+                self.__show_processing_gif()
+            elif internal_msg['message_tpe']==VmcMessageType.KREDIT and internal_msg['total']=='100': # TODO Don't hardocde the required value!
                 self.__show_accepted_gif()
                 self.__start_payed_timer()
 
 
     def __on_payed_timer_cb(self):
-        self.__test_timer.stop()
+        self.__emulated_payment_timer.stop()
         self.__clean_widgets_stack()
         self.PaymentDone.emit(True)
 
@@ -129,17 +128,21 @@ class PaymentWindow (QWidget):
     def __show_requested_gif(self):
         payment_gif = GifPlayerWidget(self.__main_window.get_config()["payment"]["requested_gif"], True)
         payment_gif.start()
-        self.__stacked_widgets.setCurrentIndex(self.__stacked_widgets.addWidget(payment_gif))
+        commons.remove_and_set_new_shown_widget(self.__stacked_widgets, payment_gif)
+
     def __show_processing_gif(self):
         processing_gif  = GifPlayerWidget(self.__main_window.get_config()["payment"]["processing_gif"], True)
         processing_gif.start()
         commons.remove_and_set_new_shown_widget(self.__stacked_widgets, processing_gif)
+
     def __show_accepted_gif(self):
         accepted_gif    = GifPlayerWidget(self.__main_window.get_config()["payment"]["accepted_gif"], True)
         accepted_gif.start()
         commons.remove_and_set_new_shown_widget(self.__stacked_widgets, accepted_gif)
+        
     def __clean_widgets_stack(self):
         commons.remove_shown_widget(self.__stacked_widgets)
+    
     def __start_payed_timer(self):
         # Starting timer to show accepted payment GIF
         self.__payed_timer  = QTimer(self)
@@ -149,11 +152,11 @@ class PaymentWindow (QWidget):
         self.__payed_timer.start()
 
     
-    def __on_test_timer_cb(self) :
+    def __on_emulated_payment_timer_cb(self) :
         if self.__payment_status == 0:
             self.__show_processing_gif()
             self.__payment_status += 1
-            self.__test_timer.start()
+            self.__emulated_payment_timer.start()
         elif self.__payment_status == 1:
             self.__payment_status += 1
             self.__show_accepted_gif()
