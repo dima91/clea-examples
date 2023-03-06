@@ -50,8 +50,8 @@ class ProductsTable (QWidget) :
             p           = products[i]
             apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,\
-                                         (promo_descriptor if apply_promo else None), products_card_size)
+            card_box    = ProductCardBox(self.__main_window, p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"],\
+                                         products_image_size, products_size, (promo_descriptor if apply_promo else None), products_card_size)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r0_layout.addWidget(card_box)
 
@@ -60,8 +60,8 @@ class ProductsTable (QWidget) :
             p           = products[i+self.__COLS_COUNT]
             apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,\
-                                         (promo_descriptor if apply_promo else None), products_card_size)
+            card_box    = ProductCardBox(self.__main_window, p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"],\
+                                         products_image_size, products_size, (promo_descriptor if apply_promo else None), products_card_size)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r1_layout.addWidget(card_box)
 

@@ -11,17 +11,19 @@ import requests, validators, os
 class ProductCardBox(QWidget):
 
     __id                = None
+    __main_window       = None
     __logger            = None
     __promo_descriptor  = None
     ##########
     SelectedItem    = Signal(str)
 
 
-    def __init__(self, id, name, current_price, image_path, ingredients, target_image_size, product_size,
+    def __init__(self, main_window, id, name, current_price, image_path, ingredients, target_image_size, product_size,
                  promo_descriptor:dict, card_size:QSize) -> None:
         super().__init__()
         
         self.__id               = id
+        self.__main_window      = main_window
         self.__logger           = commons.create_logger(__name__)
         self.__promo_descriptor = promo_descriptor
         self.setObjectName("ProductCardBox")
@@ -96,8 +98,13 @@ class ProductCardBox(QWidget):
 
 
     def mousePressEvent(self, ev):
-        self.__card_pressed_handler(ev)
+        # Checking product availability
+        product_info    = self.__main_window.get_local_db().get_product_info(self.__id)
+        if product_info["remainingItems"]>0:
+            self.__card_pressed_handler(ev)
+        
         return super().mousePressEvent(ev)
+        
 
 
     def __card_pressed_handler(self, evt):
