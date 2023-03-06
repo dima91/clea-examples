@@ -10,6 +10,7 @@ from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
 from components.widgets.gifPlayerWidget import GifPlayerWidget
 from utils.suggestionsStrategies import SuggestionsStrategies
+from utils.local_db import LocalDB
 from components.windows.standbyWindow import StandbyWindow
 from components.windows.recognitionWindow import RecognitionWindow
 from components.windows.suggestionWindow import SuggestionWindow
@@ -45,6 +46,7 @@ class MainWindow (QMainWindow) :
     __astarte_client    = None
     __config            = None
     __vmc_interface     = None
+    __local_db          = None
     
     ## Widgets
     __video_thread  = None
@@ -107,6 +109,10 @@ class MainWindow (QMainWindow) :
     
     def get_config(self):
         return self.__config
+    
+
+    def get_local_db(self):
+        return self.__local_db
     
     
     def get_current_session(self) -> CustomerSession :
@@ -230,6 +236,12 @@ class MainWindow (QMainWindow) :
             self.advertisements_details = self.__astarte_client.get_advertisements_details()["data"]
             self.promos_details         = self.__astarte_client.get_promos_details()["data"]
 
+            # Creating local_db
+            self.__local_db = LocalDB(self.__config, self.__astarte_client)
+
+            # Registering slots
+            self.__astarte_client.RefillEvent.connect(self.__on_refill_event)
+
             self.__create_windows()
             self.__vmc_interface.start()
             self.__change_status (Status.STANDBY)
@@ -259,11 +271,14 @@ class MainWindow (QMainWindow) :
             price       = p_details["currentPrice"] - (p_details["currentPrice"]*s.promo_discount/100)
             print (f"currentPrice: {p_details['currentPrice']}")
             print (f"promo_discount: {s.promo_discount}")
+            print (f"Final price: {price}")
+
+            # Updating selling counters and values
+            self.__local_db.update_sold_product(s.chosen_product_id, p_details['currentCost'], price)
             
             # Sending performed transaction
             self.__astarte_client.send_transaction(s.chosen_product_id, "NFC", s.transaction_id, p_details["currentCost"],
                                                    price, s.promo_discount!=0, s.is_chosen_product_suggested)
-        pass
 
 
     ###################
@@ -315,3 +330,11 @@ class MainWindow (QMainWindow) :
             self.__logger.critical(f"Product {self.products_details[self.__current_session.chosen_product_id]} not correctly dispensed!")
 
         self.__change_status(Status.STANDBY)
+
+
+    ##########################
+    ## ASTARTE CLIENT SLOTS ##
+    ##########################
+    
+    def __on_refill_event(self, path, payload):
+        self.__local_db.refill_event()

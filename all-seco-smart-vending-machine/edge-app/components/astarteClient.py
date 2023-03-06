@@ -8,16 +8,24 @@ class AstarteClient(QObject) :
 
     ## Public members
     NewConnectionStatus     = Signal(bool)
-    AdvertisementDataUpdate = Signal(dict)
-    DeviceSetupUpdate       = Signal(dict)
-    ProductDetailsUpdate    = Signal(dict)
-    PromoDetailsUpdate      = Signal(dict)
-    RefillEvent             = Signal(dict)
+    AdvertisementDataUpdate = Signal(str, dict)
+    DeviceSetupUpdate       = Signal(str, dict)
+    ProductDetailsUpdate    = Signal(str, dict)
+    PromoDetailsUpdate      = Signal(str, dict)
+    RefillEvent             = Signal(str, dict)
 
 
     ## Private members
-    __CUSTOMER_DETECTION_INTERFACE  = "ai.clea.examples.vendingMachine.CustomerDetection"
-    __TRANSACTION_INTERFACE         = "ai.clea.examples.vendingMachine.Transaction"
+            # Client owned
+    __CUSTOMER_DETECTION_INTERFACE      = "ai.clea.examples.vendingMachine.CustomerDetection"
+    __TRANSACTION_INTERFACE             = "ai.clea.examples.vendingMachine.Transaction"
+    __SALE_PRODUCT_DETAILS_INTERFACE    = "ai.clea.examples.vendingMachine.SaleProductDetails"
+            # Server owned
+    __REFILL_EVENT_INTERFACE            = "ai.clea.examples.vendingMachine.RefillEvent"
+    __PROMO_DETAILS_INTERFACE           = "ai.clea.examples.vendingMachine.PromoDetails"
+    __ADVERTISEMENT_DETAILS_INTERFACE   = "ai.clea.examples.vendingMachine.AdvertisementDetails"
+    __PRODUCT_DETAILS_INTERFACE         = "ai.clea.examples.vendingMachine.ProductDetails"
+    __DEVICE_SETUP_INTERFACE            = "ai.clea.examples.vendingMachine.DeviceSetup"
 
     __device            = None
     __loop              = None
@@ -80,14 +88,11 @@ class AstarteClient(QObject) :
         self.NewConnectionStatus.emit(False)
 
     
-    def __astarte_data_cb (self, device, ifname, ifpath, data) :
+    def __astarte_data_cb (self, astarte_device, interface, path, data) :
         self.__logger.info ("Received server data")
-        print(device)
-        print(ifname)
-        print(ifpath)
-        print(data)
-        print(json.loads(data))
-        # TODO Emit signal
+
+        if interface == self.__REFILL_EVENT_INTERFACE:
+            self.RefillEvent.emit(path, data)
 
     
     def __astarte_aggregated_data_cb (self, device, ifname, ifpath, data) :
@@ -129,16 +134,16 @@ class AstarteClient(QObject) :
     
 
     def get_device_setup(self) -> dict:
-        return self.__perform_get_request("/interfaces/ai.clea.examples.vendingMachine.DeviceSetup")
+        return self.__perform_get_request(f"/interfaces/{self.__DEVICE_SETUP_INTERFACE}")
     
 
     def get_products_details(self, product_id:str = None) -> dict:
-        return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.ProductDetails/{product_id if product_id!=None else ''}")
+        return self.__perform_get_request(f"/interfaces/{self.__PRODUCT_DETAILS_INTERFACE}/{product_id if product_id!=None else ''}")
 
 
     def get_advertisements_details(self, advertisement_id:str = None) -> dict:
         try:
-            return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.AdvertisementDetails/{advertisement_id if advertisement_id!=None else ''}")
+            return self.__perform_get_request(f"/interfaces/{self.__ADVERTISEMENT_DETAILS_INTERFACE}/{advertisement_id if advertisement_id!=None else ''}")
         except Exception as e:
             print (f'\n\n[QUERY ERROR]\n{__name__} : {e}')
             return {'data':{}}
@@ -146,10 +151,14 @@ class AstarteClient(QObject) :
 
     def get_promos_details(self, promo_id:str = None) -> dict:
         try:
-            return self.__perform_get_request(f"/interfaces/ai.clea.examples.vendingMachine.PromoDetails/{promo_id if promo_id!=None else ''}")
+            return self.__perform_get_request(f"/interfaces/{self.__PROMO_DETAILS_INTERFACE}/{promo_id if promo_id!=None else ''}")
         except Exception as e:
             print (f'\n\n[QUERY ERROR]\n{__name__} : {e}')
             return {'data':{}}
+        
+
+    def get_sale_product_details(self, product_id:str=None) -> dict:
+        return self.__perform_get_request(f"/interfaces/{self.__SALE_PRODUCT_DETAILS_INTERFACE}/{product_id if product_id!=None else ''}")
 
 
     def send_device_location(self, latitude:float, longitude:float) -> None:
@@ -170,9 +179,8 @@ class AstarteClient(QObject) :
         self.__device.send_aggregate(self.__CUSTOMER_DETECTION_INTERFACE, '/detection', a_data)
 
 
-    def send_sold_product_details(self, product_id:str) -> None:
-        # TODO
-        pass
+    def send_sold_product_detail(self, product_id:str, property_name, property_value) -> None:
+        self.__device.send(self.__SALE_PRODUCT_DETAILS_INTERFACE, f"/{product_id}/{property_name}", property_value)
 
 
     def send_transaction(self, product_id:str, payment_mode:str, transaction_id:str, selling_cost:float,

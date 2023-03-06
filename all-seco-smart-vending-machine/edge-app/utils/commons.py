@@ -1,5 +1,5 @@
 
-import os, datetime, logging, random, string
+import os, datetime, logging, random, string, json
 import numpy as np
 from enum import Enum
 
@@ -121,6 +121,10 @@ def create_logger (name):
 
 def get_abs_path (base_folder, file_name) :
     return os.path.abspath(os.path.join(base_folder, file_name))
+
+
+def dict_to_pretty_print(d) -> str:
+    return json.dumps(d, indent=3)
 
 
 def remove_shown_widget (widgets_stack) :
