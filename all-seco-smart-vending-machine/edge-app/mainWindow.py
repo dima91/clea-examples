@@ -309,9 +309,16 @@ class MainWindow (QMainWindow) :
             (frame, detection, customer_info)   = self.__video_thread.get_last_inference_info()
             self.__current_session.new_detection(frame, detection, customer_info)
 
-        print (f"Promo is none? {related_promo_id==None}")
+        dispenser_id    = None
+        try :
+            dispenser_id    = self.products_details[prod_id]["connectedDispenserID"]
+            print (f"\n\n\n\nproduct wit hdispenser {dispenser_id}")
+        except Exception:
+            pass
+
         self.__current_session.update_chosen_product(prod_id, is_suggested, related_promo_id,
-                                                     0 if related_promo_id=="" else self.promos_details[related_promo_id]["discount"])
+                                                     0 if related_promo_id=="" else self.promos_details[related_promo_id]["discount"],
+                                                     dispenser_id)
         self.__current_session.update_shown_advertisement(self.__suggester.suggest_advertisement(self.__current_session, self.advertisements_details))
         self.__change_status(Status.SELECTION)
 

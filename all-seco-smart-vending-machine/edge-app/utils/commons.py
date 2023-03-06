@@ -39,6 +39,7 @@ class CustomerSession():
     promo_discount              = None
     transaction_id              = None
     is_chosen_product_suggested = None
+    connected_dispenser_id      = None
 
     def __init__(self) -> None:
         self.current_status         = Status.STANDBY
@@ -62,11 +63,12 @@ class CustomerSession():
     def update_shown_advertisement(self, advertisement_id:str) -> None:
         self.shown_advertisement_id = advertisement_id
 
-    def update_chosen_product(self, chosen_product_id:str, is_suggested:bool, promo_id:str, promo_discount:float) -> None:
+    def update_chosen_product(self, chosen_product_id:str, is_suggested:bool, promo_id:str, promo_discount:float, connected_dispenser_id:int) -> None:
         self.chosen_product_id              = chosen_product_id
         self.is_chosen_product_suggested    = is_suggested
         self.promo_discount                 = promo_discount
         self.promo_id                       = promo_id
+        self.connected_dispenser_id         = connected_dispenser_id
 
     def update_transaction_id(self, transaction_id:str) -> None:
         self.transaction_id = transaction_id

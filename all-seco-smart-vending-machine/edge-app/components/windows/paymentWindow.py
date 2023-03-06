@@ -1,6 +1,7 @@
 
 from utils import commons
 from utils.vendtraceMessage import VmcMessageType, VendtraceMessage, PcMessageType
+from components.vmcInterfaceThread import VmcInterface
 from components.widgets.videoWidget import VideoWidget
 from components.widgets.advertisingWidget import AdvertisingWidget
 from components.widgets.footerWidget import FooterWidget
@@ -8,6 +9,11 @@ from components.widgets.gifPlayerWidget import GifPlayerWidget
 
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QStackedWidget
 from PySide6.QtCore import Signal, QSize, QTimer
+
+# VMC messages
+# PC    <-> VMC
+# $Wahl  -> 
+#        <-  $WA
 
 
 class PaymentWindow (QWidget):
@@ -17,22 +23,29 @@ class PaymentWindow (QWidget):
     __is_active         = None
     __vmc_interface     = None
     __stacked_widgets   = None
+    __payment_status    = None      # 0:requested, 1:processing, 2:accepted
     __payed_timer       = None
+
+    __requsted_gif_duration_ms      = None
+    __processing_gif_duration_ms    = None
+    __accepted_gif_duration_ms      = None
 
     # FIXME TEST memebers
     __test_timer        = None
-    __test_timer_status = None
     ##########
     PaymentDone     = Signal(bool)
 
 
-    def __init__(self, config, main_window, video_thread, vmc_interface) -> None:
+    def __init__(self, config, main_window, video_thread, vmc_interface:VmcInterface) -> None:
         super().__init__()
 
         self.__main_window      = main_window
         self.__logger           = commons.create_logger(__name__)
         self.__is_active        = False
         self.__vmc_interface    = vmc_interface
+        self.__requsted_gif_duration_ms     = int(config['payment']["requsted_gif_duration_ms"])
+        self.__processing_gif_duration_ms   = int(config['payment']["processing_gif_duration_ms"])
+        self.__accepted_gif_duration_ms     = int(config['payment']["accepted_gif_duration_ms"])
         self.__main_window.SessionUpdate.connect(self.__on_session_change)
         self.__vmc_interface.NewMessage.connect(self.__on_vmc_message)
         self.setLayout(self.__init_ui(config, video_thread))
@@ -69,65 +82,82 @@ class PaymentWindow (QWidget):
         return layout
 
 
-    def __on_session_change(self, session):
+    def __on_session_change(self, session:commons.CustomerSession):
         if session.current_status == commons.Status.PAYMENT:
-            self.__is_active    = True
-            # TODO Request the payment to the VMC
-            payment_gif = GifPlayerWidget(self.__main_window.get_config()["payment"]["requested_gif"], True)
-            payment_gif.start()
-            self.__stacked_widgets.setCurrentIndex(self.__stacked_widgets.addWidget(payment_gif))
+            self.__is_active        = True
+            self.__payment_status   = 0
 
-            # FIXME TEST section
-            self.__test_timer_status    = 0
-            self.__test_timer           = QTimer(self)
-            self.__test_timer.setSingleShot(True)
-            self.__test_timer.setInterval(500) #FIXME ORIGINAL -> self.__test_timer.setInterval(2000)
-            self.__test_timer.timeout.connect(self.__on_test_timer_cb)
-            self.__test_timer.start()
+            self.__logger.debug(f"cdID: {session.connected_dispenser_id}")
+
+            if session.connected_dispenser_id == None:
+                # Simulating product dispensing
+                self.__logger.debug(f"Simulating payment process")
+                self.__show_requested_gif()
+                self.__test_timer   = QTimer(self)
+                self.__test_timer.setSingleShot(True)
+                self.__test_timer.setInterval(self.__requsted_gif_duration_ms)
+                self.__test_timer.timeout.connect(self.__on_test_timer_cb)
+                self.__test_timer.start()
+            else :
+                # Asking payment to VMC
+                self.__logger.debug(f"Asking payment to VMC using dispenser {session.connected_dispenser_id}!!!!")
+                self.__vmc_interface.send_message(f"Wahl*{session.connected_dispenser_id}*")
+                self.__show_requested_gif()
         else:
             self.__is_active    = False
             if self.__payed_timer:
                 self.__payed_timer.stop()
 
 
-    def __on_vmc_message(self, vmc_message):
-
+    def __on_vmc_message(self, vmc_message:VendtraceMessage) -> None:
+        
+        self.__logger.debug(f"Received this VMC message: {vmc_message.payload_to_string()}")
+        internal_msg    = vmc_message.get_message()
+        
         if self.__is_active:
-            ''' TODO Restore me!
-            content = vmc_message.get_content()
-            self.__logger.log(f"VMC message: {vmc_message.payload_to_string()}")
-            '''
-
-            #FIXME TEST section
-            if vmc_message == "scanned":
-                processing_gif  = GifPlayerWidget(self.__main_window.get_config()["payment"]["processing_gif"], True)
-                commons.remove_and_set_new_shown_widget(self.__stacked_widgets, processing_gif)
-                processing_gif.start()
-            elif vmc_message == "payed":
-                accepted_gif    = GifPlayerWidget(self.__main_window.get_config()["payment"]["accepted_gif"], True)
-                commons.remove_and_set_new_shown_widget(self.__stacked_widgets, accepted_gif)
-                accepted_gif.start()
-                # Starting timer to show accepted payment gif for 3 seconds
-                # TODO Check if it necessary
-                self.__payed_timer  = QTimer(self)
-                self.__payed_timer.setSingleShot(True)
-                self.__payed_timer.setInterval(500)    # FIXME ORIGINAL -> self.__payed_timer.setInterval(3000)
-                self.__payed_timer.timeout.connect(self.__on_payed_timer_cb)
-                self.__payed_timer.start()
+            if internal_msg['message_type']==VmcMessageType.WAHL and internal_msg['message_type']=="2":
+                self.__show_accepted_gif()
+                self.__start_payed_timer()
 
 
     def __on_payed_timer_cb(self):
         self.__test_timer.stop()
+        self.__clean_widgets_stack()
         self.PaymentDone.emit(True)
+
+
+    def __show_requested_gif(self):
+        payment_gif = GifPlayerWidget(self.__main_window.get_config()["payment"]["requested_gif"], True)
+        payment_gif.start()
+        self.__stacked_widgets.setCurrentIndex(self.__stacked_widgets.addWidget(payment_gif))
+    def __show_processing_gif(self):
+        processing_gif  = GifPlayerWidget(self.__main_window.get_config()["payment"]["processing_gif"], True)
+        processing_gif.start()
+        commons.remove_and_set_new_shown_widget(self.__stacked_widgets, processing_gif)
+    def __show_accepted_gif(self):
+        accepted_gif    = GifPlayerWidget(self.__main_window.get_config()["payment"]["accepted_gif"], True)
+        accepted_gif.start()
+        commons.remove_and_set_new_shown_widget(self.__stacked_widgets, accepted_gif)
+    def __clean_widgets_stack(self):
+        commons.remove_shown_widget(self.__stacked_widgets)
+    def __start_payed_timer(self):
+        # Starting timer to show accepted payment GIF
+        self.__payed_timer  = QTimer(self)
+        self.__payed_timer.setSingleShot(True)
+        self.__payed_timer.setInterval(self.__accepted_gif_duration_ms)
+        self.__payed_timer.timeout.connect(self.__on_payed_timer_cb)
+        self.__payed_timer.start()
 
     
     def __on_test_timer_cb(self) :
-        if self.__test_timer_status == 0:
-            self.__on_vmc_message("scanned")
-            self.__test_timer_status += 1
+        if self.__payment_status == 0:
+            self.__show_processing_gif()
+            self.__payment_status += 1
             self.__test_timer.start()
-        elif self.__test_timer_status == 1:
-            self.__on_vmc_message("payed")
+        elif self.__payment_status == 1:
+            self.__payment_status += 1
+            self.__show_accepted_gif()
+            self.__start_payed_timer()
 
 
 # When the payment is successful and the dispense process start, you receive a $WA*1*.... and if it is finished, you
