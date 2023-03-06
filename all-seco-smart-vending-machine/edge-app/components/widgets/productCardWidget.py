@@ -32,6 +32,7 @@ class ProductCardBox(QWidget):
         pixmap_label        = QLabel()
         name_label          = QLabel(name)
         ingredients_label   = QLabel(self.__array_string_to_string(ingredients) if ingredients!=None else ingredients)
+        promo_label         = QLabel("" if promo_descriptor==None else "A special discount for you!")
         price_label         = QLabel(str(current_price)+" €")
         if promo_descriptor!=None :
             price_label.setStyleSheet("QLabel{color:red;}")
@@ -58,12 +59,15 @@ class ProductCardBox(QWidget):
         if ingredients != None:
             ingredients_label.setObjectName("ProductDescItem")
             inner_layout.addLayout(commons.h_center_widget(ingredients_label))
+        promo_label.setObjectName("ProductDescItem")
+        promo_label.setStyleSheet("QLabel{font-size:12px; color:green}")
+        inner_layout.addLayout(commons.h_center_widget(promo_label))
         price_label.setObjectName("ProductDescItem")
         inner_layout.addLayout(commons.h_center_widget(price_label))
 
         root_label      = QLabel()
         root_obj_name   = "product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm"
-        root_stylesheet = f"QLabel#{root_obj_name}"+ "{border:2px solid green}" if promo_descriptor!=None else ""
+        root_stylesheet = f"QLabel#{root_obj_name}"+ "{border:3px solid green}" if promo_descriptor!=None else ""
         root_label.setObjectName(root_obj_name)
         root_label.setLayout(inner_layout)
         root_label.setStyleSheet (root_stylesheet)
