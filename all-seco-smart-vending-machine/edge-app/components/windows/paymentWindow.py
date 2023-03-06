@@ -115,7 +115,7 @@ class PaymentWindow (QWidget):
         internal_msg    = vmc_message.get_message()
         
         if self.__is_active:
-            if internal_msg['message_type']==VmcMessageType.WAHL and internal_msg['message_type']=="2":
+            if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="1": # internal_msg['status']=="<prod_id"
                 self.__show_accepted_gif()
                 self.__start_payed_timer()
 
