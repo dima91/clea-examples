@@ -43,14 +43,14 @@ class TesterThread (QThread) :
         self.___vmc.NewMessage.connect(self.__message_callback)
 
         self.__messages.append("")
-        self.__messages.append("VER*0*14*")
+        #self.__messages.append("VER*0*14*")
         self.__messages.append("")
         self.__messages.append("")
         self.__messages.append("")
-        self.__messages.append("Kredit*100*")
+        #self.__messages.append("Kredit*100*")
         # Sending chosen item [1 || 2 || 3 || 10 || 17 || 22] -> Wahl
         self.__messages.append("")
-        self.__messages.append("Wahl*2*")
+        self.__messages.append("Wahl*9*")
         self.__messages.append("")
 
 
