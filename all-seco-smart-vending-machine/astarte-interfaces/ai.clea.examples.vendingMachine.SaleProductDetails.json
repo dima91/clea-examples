@@ -1,7 +1,7 @@
 {
     "interface_name": "ai.clea.examples.vendingMachine.SaleProductDetails",
-    "version_major": 0,
-    "version_minor": 1,
+    "version_major": 1,
+    "version_minor": 0,
     "type": "properties",
     "ownership": "device",
     "mappings": [
@@ -14,7 +14,7 @@
             "type": "double"
         },
         {
-            "endpoint": "/%{prodID}/totalProductProfit",
+            "endpoint": "/%{prodID}/totalProductPrice",
             "type": "double"
         },
         {
