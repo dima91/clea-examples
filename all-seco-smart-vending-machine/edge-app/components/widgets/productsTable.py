@@ -37,6 +37,8 @@ class ProductsTable (QWidget) :
         # products_image_size = QSize(int(prod_conf['image_width']), int(prod_conf['image_height']))
         products_image_size = QSize(int(prod_conf['image_width']), int(prod_conf['image_height'])) if products_size == commons.ProductsCardSize.LARGE \
                                 else QSize(int(prod_conf['image_width'])/2, int(prod_conf['image_height'])/2)
+        products_card_size  = QSize(int(prod_conf["min_card_width_lg"]), int(prod_conf["min_card_height_lg"])) if products_size == commons.ProductsCardSize.LARGE \
+                                    else QSize(int(prod_conf["min_card_width_lg"])/2, int(prod_conf["min_card_height_lg"])/2)
 
         # Defining widgets layouts
         v_layout    = QVBoxLayout()
@@ -48,8 +50,8 @@ class ProductsTable (QWidget) :
             p           = products[i]
             apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,
-                                         apply_promo, promo_descriptor)
+            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,\
+                                         (promo_descriptor if apply_promo else None), products_card_size)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r0_layout.addWidget(card_box)
 
@@ -58,8 +60,8 @@ class ProductsTable (QWidget) :
             p           = products[i+self.__COLS_COUNT]
             apply_promo = (promo_descriptor!=None) and (promo_poduct_id==p["ID"])
             # Create productCardWidget
-            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,
-                                         apply_promo, promo_descriptor)
+            card_box    = ProductCardBox(p["ID"], p["name"], p["currentPrice"], p["imagePath"], p["ingredients"], products_image_size, products_size,\
+                                         (promo_descriptor if apply_promo else None), products_card_size)
             card_box.SelectedItem.connect(self.__on_selected_card)
             r1_layout.addWidget(card_box)
 

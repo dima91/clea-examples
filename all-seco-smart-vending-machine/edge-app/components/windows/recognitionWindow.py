@@ -17,7 +17,7 @@ class RecognitionWindow (QWidget):
     __logger            = None
     __products_widget   = None
     ##########
-    SelectedProduct     = Signal(str, bool, float)     # product_id, is_suggested, promo_discount
+    SelectedProduct     = Signal(str, bool, str)     # product_id, is_suggested, related_promo_id
 
 
     def __init__(self, config, main_window, video_thread) -> None:
@@ -63,7 +63,7 @@ class RecognitionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}")
-        self.SelectedProduct.emit(id, False, 0)
+        self.SelectedProduct.emit(id, False, None)
 
 
     def get_selected_products_tab(self):

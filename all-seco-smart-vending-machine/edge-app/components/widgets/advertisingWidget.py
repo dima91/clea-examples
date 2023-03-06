@@ -36,7 +36,7 @@ class AdvertisingWidget (QWidget) :
             else:
                 #  Displaying advertisement
                 curr_adv    = self.__main__window.advertisements_details[session.shown_advertisement_id]
-                self.__logger.debug(f"Displaying {curr_adv}")
+                #self.__logger.debug(f"Displaying {curr_adv}")
                 self.__adv_label.setText(curr_adv["name"])
                 pixmap   = QPixmap()
                 pixmap.load(curr_adv["imagePath"])

@@ -40,8 +40,6 @@ class SelectionWindow(QWidget):
         if session.current_status == commons.Status.SELECTION:
             self.__update_shown_product(session)
 
-            
-
 
     def __build_lbox_layout(self, config, video_thread):
         layout  = QVBoxLayout()

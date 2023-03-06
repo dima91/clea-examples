@@ -20,7 +20,7 @@ class SuggestionWindow (QWidget):
     __products_widget   = None
     ##########
     EscapedCustomer = Signal()
-    SelectedProduct = Signal(str, bool, float)     # product_id, is_suggested, promo_discount
+    SelectedProduct = Signal(str, bool, str)     # product_id, is_suggested, related_promo_id
 
 
     ##########
@@ -91,12 +91,12 @@ class SuggestionWindow (QWidget):
 
     def __on_product_selected(self, id) :
         self.__logger.debug (f"Selected product with id {id}")
-        self.SelectedProduct.emit (id, False, 0)
+        self.SelectedProduct.emit (id, False, None)
 
 
-    def __on_suggested_product_select(self, id, promo_discount):
+    def __on_suggested_product_select(self, id, related_promo_id):
         self.__logger.debug (f"Selected SUGGESTED product with id {id}")
-        self.SelectedProduct.emit (id, True, promo_discount)
+        self.SelectedProduct.emit (id, True, related_promo_id)
 
 
     def get_selected_products_tab(self):

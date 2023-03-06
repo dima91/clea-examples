@@ -2,26 +2,28 @@
 from utils import commons
 
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PySide6.QtCore import QRect, Signal
+from PySide6.QtCore import QRect, Signal, QSize
 from PySide6.QtGui import QPixmap, QColor
 
 import requests, validators, os
 
 
-class ProductCardBox (QWidget):
+class ProductCardBox(QWidget):
 
-    __id            = None
-    __logger        = None
+    __id                = None
+    __logger            = None
+    __promo_descriptor  = None
     ##########
     SelectedItem    = Signal(str)
 
 
     def __init__(self, id, name, current_price, image_path, ingredients, target_image_size, product_size,
-                 apply_promo:bool, promo_descriptor:dict) -> None:
+                 promo_descriptor:dict, card_size:QSize) -> None:
         super().__init__()
         
-        self.__id           = id
-        self.__logger       = commons.create_logger(__name__)
+        self.__id               = id
+        self.__logger           = commons.create_logger(__name__)
+        self.__promo_descriptor = promo_descriptor
         self.setObjectName("ProductCardBox")
 
         inner_layout        = QVBoxLayout()
@@ -31,7 +33,7 @@ class ProductCardBox (QWidget):
         name_label          = QLabel(name)
         ingredients_label   = QLabel(self.__array_string_to_string(ingredients) if ingredients!=None else ingredients)
         price_label         = QLabel(str(current_price)+" €")
-        if apply_promo :
+        if promo_descriptor!=None :
             price_label.setStyleSheet("QLabel{color:red;}")
         
         # Checking if image_path is an URL or a file
@@ -59,10 +61,12 @@ class ProductCardBox (QWidget):
         price_label.setObjectName("ProductDescItem")
         inner_layout.addLayout(commons.h_center_widget(price_label))
 
-        root_label  = QLabel()
-        root_label.setObjectName("product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm")
+        root_label      = QLabel()
+        root_obj_name   = "product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm"
+        root_stylesheet = f"QLabel#{root_obj_name}"+ "{border:2px solid green}" if promo_descriptor!=None else ""
+        root_label.setObjectName(root_obj_name)
         root_label.setLayout(inner_layout)
-        #root_label.setStyleSheet ("QLabel{padding-left:30px; padding-right:30px;}")
+        root_label.setStyleSheet (root_stylesheet)
         root_label.adjustSize()
         root_layout = QBoxLayout(QBoxLayout.BottomToTop)
         root_layout.addWidget(root_label)
@@ -75,6 +79,7 @@ class ProductCardBox (QWidget):
         self.shadow.setOffset(5, 5)
         self.setGraphicsEffect(self.shadow)
 
+        self.setMinimumSize(card_size)
         self.adjustSize()
 
 

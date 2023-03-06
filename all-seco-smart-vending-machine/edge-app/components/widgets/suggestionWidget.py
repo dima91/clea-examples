@@ -22,7 +22,7 @@ class SuggestionWidget (QLabel):
     __promo_descriptor          = None
     __promo_product_id          = None
     ##########
-    SelectedProduct             = Signal(str, float)        # product_id, promo_discount
+    SelectedProduct             = Signal(str, str)        # product_id, related_promo_id
 
 
     def __init__(self, main_window, show_loader) -> None:
@@ -48,11 +48,15 @@ class SuggestionWidget (QLabel):
         self.setLayout(layout)
 
 
-    def __on_selected_product(self, e):
-        # TODO Map selected product with those that have a promo -> retrieve promo_discount
-        #FIXME
-        promo_discount  = 0
-        self.SelectedProduct.emit(e, promo_discount)
+    def __on_selected_product(self, p):
+        # Maping selected product with those that have a promo -> retrieving promo_discount
+        related_promo_id    = None
+
+        if self.__promo_product_id==p:
+            print(f"Customer selected product ({p}) with promo -> {self.__promo_descriptor}")
+            related_promo_id    = self.__promo_descriptor['ID']
+            
+        self.SelectedProduct.emit(p, related_promo_id)
 
 
     def update_suggested_products(self, session):

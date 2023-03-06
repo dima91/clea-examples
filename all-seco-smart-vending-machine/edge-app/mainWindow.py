@@ -3,8 +3,8 @@ import asyncio, logging
 from utils import commons
 from utils.commons import Status, CustomerSession
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtCore import Signal, QSize, QTimer
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
+from PySide6.QtCore import Signal, QSize
+from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from components.vmcInterfaceThread import VmcInterface
 from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
@@ -246,18 +246,21 @@ class MainWindow (QMainWindow) :
         self.__current_session  = CustomerSession()
 
 
+    # Sending to Astarte interesting session information
     def __send_session_data(self):
-        # Sending to Astarte interesting session information
         s   = self.__current_session
         # Sending customer detection
         self.__astarte_client.send_customer_detection(s.end_time-s.start_time, s.inference_results["age"],
                                                       s.inference_results["emotion"], s.shown_advertisement_id)
-        # TODO Updating eventually sold product
-        # Sending eventually performed transaction
+        # Updating eventually sold product
         if s.chosen_product_id != None:
             p_id        = s.chosen_product_id
             p_details   = self.products_details[p_id]
-            price       = p_details["currentPrice"] - (p_details["currentPrice"]*s.promo_discount)
+            price       = p_details["currentPrice"] - (p_details["currentPrice"]*s.promo_discount/100)
+            print (f"currentPrice: {p_details['currentPrice']}")
+            print (f"promo_discount: {s.promo_discount}")
+            
+            # Sending performed transaction
             self.__astarte_client.send_transaction(s.chosen_product_id, "NFC", s.transaction_id, p_details["currentCost"],
                                                    price, s.promo_discount!=0, s.is_chosen_product_suggested)
         pass
@@ -283,9 +286,12 @@ class MainWindow (QMainWindow) :
     def __on_escaped_customer(self):
         self.__change_status(Status.STANDBY)
 
-    def __on_selected_product(self, prod_id, is_suggested, promo_discount):
-        self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}")
-        self.__current_session.update_chosen_product(prod_id, is_suggested, promo_discount)
+    def __on_selected_product(self, prod_id, is_suggested, related_promo_id):
+        self.__logger.debug(f"Chosen product: {prod_id}\t\tIs suggested: {is_suggested}\t\tWith promo: {related_promo_id}")
+
+        print (f"Promo is none? {related_promo_id==None}")
+        self.__current_session.update_chosen_product(prod_id, is_suggested, related_promo_id,
+                                                     0 if related_promo_id=="" else self.promos_details[related_promo_id]["discount"])
         self.__current_session.update_shown_advertisement(self.__suggester.suggest_advertisement(self.__current_session, self.advertisements_details))
         self.__change_status(Status.SELECTION)
 

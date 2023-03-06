@@ -35,6 +35,7 @@ class CustomerSession():
     current_product_tab_id      = None
     shown_advertisement_id      = None
     chosen_product_id           = None
+    promo_id                    = None
     promo_discount              = None
     transaction_id              = None
     is_chosen_product_suggested = None
@@ -61,10 +62,11 @@ class CustomerSession():
     def update_shown_advertisement(self, advertisement_id:str) -> None:
         self.shown_advertisement_id = advertisement_id
 
-    def update_chosen_product(self, chosen_product_id:str, is_suggested:bool, promo_discount:float) -> None:
+    def update_chosen_product(self, chosen_product_id:str, is_suggested:bool, promo_id:str, promo_discount:float) -> None:
         self.chosen_product_id              = chosen_product_id
         self.is_chosen_product_suggested    = is_suggested
         self.promo_discount                 = promo_discount
+        self.promo_id                       = promo_id
 
     def update_transaction_id(self, transaction_id:str) -> None:
         self.transaction_id = transaction_id
@@ -74,6 +76,7 @@ class CustomerSession():
                 "end_time":self.end_time, "frame":self.frame, "face_detection_results":self.face_detection_results,
                 "inference_results":self.inference_results, "current_product_tab_id":self.current_product_tab_id,
                 "shown_advertisement_id":self.shown_advertisement_id, "chosen_product_id":self.chosen_product_id,
+                "promo_id":self.promo_id, "promo_discount":self.promo_discount, "transaction_id":self.transaction_id,
                 "is_chosen_product_suggested":self.is_chosen_product_suggested}
 
 

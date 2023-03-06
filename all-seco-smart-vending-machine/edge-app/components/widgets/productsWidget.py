@@ -3,7 +3,7 @@ from utils import commons
 from components.widgets.productsTable import ProductsTable
 
 from PySide6.QtWidgets import (QWidget, QBoxLayout, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QStackedWidget, QPushButton)
-from PySide6.QtCore import QRect, Signal
+from PySide6.QtCore import Signal, QSize
 from PySide6.QtGui import QColor
 
 
@@ -23,6 +23,7 @@ class ProductsWidget (QWidget):
     __sections          = None
     __current_section   = None
     __show_sections     = None
+    __config            = None
     ##########
     SelectedProduct     = Signal(str)
 
@@ -33,6 +34,7 @@ class ProductsWidget (QWidget):
 
         self.__logger           = commons.create_logger(__name__)
         self.__main_window      = main_window
+        self.__config           = self.__main_window.get_config()
         self.__show_sections    = separate_in_sections
         self.__main_window.SessionUpdate.connect(self.__on_session_change)
         # Collecting sections
@@ -105,9 +107,6 @@ class ProductsWidget (QWidget):
     def __on_selected_product(self, id) :
         self.SelectedProduct.emit(id)
 
-
-    def __filter_cb(self, item, target_section, product_details):
-        return 
 
     def get_selected_proucts_tab(self):
         return self.__selected_tab_idx
