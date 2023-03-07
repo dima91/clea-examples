@@ -97,7 +97,7 @@ class PaymentWindow (QWidget):
                 self.__emulated_payment_timer.start()
             else :
                 # Asking payment to VMC
-                self.__logger.debug(f"Asking payment to VMC using dispenser {session.connected_dispenser_id}!!!!\n\n\n")
+                self.__logger.debug(f"Asking payment to VMC for product {session.connected_dispenser_id}!!!!\n\n\n")
                 self.__vmc_interface.send_message(f"Wahl*{session.connected_dispenser_id}*")
                 self.__show_requested_gif()
         else:
@@ -120,7 +120,6 @@ class PaymentWindow (QWidget):
 
 
     def __on_payed_timer_cb(self):
-        self.__emulated_payment_timer.stop()
         self.__clean_widgets_stack()
         self.PaymentDone.emit(True)
 

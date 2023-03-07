@@ -1,8 +1,10 @@
 
 [PC]                            [VMC]
-Wahl*9*             =>                              # asking for product 9
-                    <=      Wahl*2*9*100**          # choice complete
+Wahl*9*             =>                              # Asking for product 9
+                    <=      Wahl*2*9*100**          # Choice complete
                     <=      Kredit*100*0*0*100*     # Credit correctly loaded from card
-                    <=      WA*1*9**2*              # new issue of goods
+                    <=      WA*1*9**2*              # New issue of goods
 ... VMC starts dispensing
-                    <=      WA*0*9**2*              # issue completed
+                    <=      WA*0*9**2*              # Issue completed
+                    <=      Kredit*0*0*0*0*         # Credit finished
+                    <=      Wahl*0*0*               # Process finished
