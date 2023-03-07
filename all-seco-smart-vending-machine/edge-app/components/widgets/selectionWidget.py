@@ -12,6 +12,8 @@ class SelectionWidget(QWidget):
 
     __main_window       = None
     __logger            = None
+    __min_image_width   = None
+    __min_image_height  = None
     ##########
     SelectionConfirmed  = Signal(bool)
 
@@ -19,8 +21,10 @@ class SelectionWidget(QWidget):
     def __init__(self, main_window, session) -> None:
         super().__init__()
 
-        self.__main_window  = main_window
-        self.__logger       = commons.create_logger(__name__)
+        self.__main_window      = main_window
+        self.__logger           = commons.create_logger(__name__)
+        self.__min_image_width  = int(main_window.get_config()["selection"]["min_image_width"])
+        self.__min_image_height = int(main_window.get_config()["selection"]["min_image_height"])
         self.__init_ui(session)
 
 
@@ -28,39 +32,57 @@ class SelectionWidget(QWidget):
         if session.current_status == Status.SELECTION:
             product = self.__main_window.products_details[session.chosen_product_id]
             self.__logger.debug(f"Updating with product:\n{product}")
-            
-            root_layout = QVBoxLayout()
-            self.setLayout(root_layout)
 
             text_layout = QHBoxLayout()
             text_label  = QLabel("Your selection:")
             text_label.setObjectName("SelectionLabel")
             text_layout.addWidget(text_label)
-            text_layout.addStretch(1)
+            #text_layout.addStretch(1)
 
             image_label = QLabel()
             pixmap      = QPixmap()
             pixmap.load(product["imagePath"])
-            image_label.setPixmap(commons.resize_image(pixmap, QSize(500, 500)))
+            image_label.setPixmap(commons.resize_image(pixmap, QSize(self.__min_image_width, self.__min_image_height)))
 
-            back_button     = QPushButton("Back")
+            back_button     = QPushButton("BACK")
+            back_button.setObjectName("ConfirmationButton")
             back_button.clicked.connect(lambda evt: self.SelectionConfirmed.emit(False))
-            confirm_button  = QPushButton("Confirm")
+            confirm_button  = QPushButton("CONFIRM")
+            confirm_button.setObjectName("ConfirmationButton")
             confirm_button.clicked.connect(lambda evt: self.SelectionConfirmed.emit(True))
             buttons_layout  = QHBoxLayout()
-            buttons_layout.addStretch(2)
+            buttons_layout.addStretch(4)
             buttons_layout.addWidget(back_button)
-            buttons_layout.addStretch(1)
-            buttons_layout.addWidget(confirm_button)
             buttons_layout.addStretch(2)
+            buttons_layout.addWidget(confirm_button)
+            buttons_layout.addStretch(4)
+            
+            buttons_widget   = QWidget()
+            buttons_widget.setObjectName("ButtonsWidget")
+            buttons_widget.setLayout(buttons_layout)
+
+            root_layout = QVBoxLayout()
 
             root_layout.addLayout(text_layout)
-            root_layout.addLayout(commons.h_center_widget(image_label))
-            root_layout.addLayout(commons.h_center_widget(QLabel(product["name"])))
-            root_layout.addLayout(commons.h_center_widget(QLabel(str(product["currentPrice"]))))
-            if product["needsSugar"]:
-                root_layout.addLayout(commons.h_center_widget(SugarWidget()))
             root_layout.addStretch(1)
-            root_layout.addLayout(buttons_layout)
+            
+            root_layout.addLayout(commons.h_center_widget(image_label))
+            
+            product_name    = QLabel(product["name"])
+            product_name.setObjectName("Selection_ProductName")
+            root_layout.addStretch(2)
+            root_layout.addLayout(commons.h_center_widget(product_name))
+
+            product_price   = QLabel(f'{str(product["currentPrice"])} €')
+            product_price.setObjectName("Selection_ProductCost")
+            root_layout.addStretch(1)
+            root_layout.addLayout(commons.h_center_widget(product_price))
+
+            if product["needsSugar"]:
+                root_layout.addStretch(1)
+                root_layout.addLayout(commons.h_center_widget(SugarWidget()))
+            root_layout.addStretch(4)
+            root_layout.addWidget(buttons_widget)
+            root_layout.addStretch(1)
 
             self.setLayout(root_layout)

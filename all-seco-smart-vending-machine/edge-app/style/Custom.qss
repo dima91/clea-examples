@@ -77,12 +77,30 @@ QWidget#ProductDescItem{
 }
 
 
+SelectionWindow {
+}
+QPushButton#ConfirmationButton{
+    width:7em;
+    height:2em;
+    background-color:blue;
+    color:white;
+    font-size:34px;
+    border-radius: 25px;
+}
+QLabel#Selection_ProductName{
+    font-size:38px;
+}
+QLabel#Selection_ProductCost{
+    font-size:26px;
+}
+QWidget#ButtonsWidget{
+    margin-bottom:500px;
+}
+
+
 DispensingWindow {
 }
 
-
-SelectionWindow {
-}
 
 QWidget#dispensing_product_card, QWidget#product_ready_card{
     background-color:white;
