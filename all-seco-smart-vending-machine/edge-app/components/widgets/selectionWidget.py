@@ -34,6 +34,7 @@ class SelectionWidget(QWidget):
 
             text_layout = QHBoxLayout()
             text_label  = QLabel("Your selection:")
+            text_label.setObjectName("SelectionLabel")
             text_layout.addWidget(text_label)
             text_layout.addStretch(1)
 

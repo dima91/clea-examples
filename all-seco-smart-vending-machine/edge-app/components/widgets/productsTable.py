@@ -2,12 +2,12 @@
 from utils import commons
 from components.widgets.productCardWidget import ProductCardBox
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGraphicsDropShadowEffect
 from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QColor
 
 
-class ProductsTable (QWidget) :
+class ProductsTable (QLabel) :
 
     __ROWS_COUNT    = 2
     __COLS_COUNT    = 4
@@ -77,44 +77,8 @@ class ProductsTable (QWidget) :
 
 
         self.adjustSize()
-
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setColor(QColor(10,10,10))
-        shadow.setBlurRadius(10)
-        shadow.setOffset(5, 5)
-        self.setGraphicsEffect(shadow)
-
         self.setLayout(v_layout)
-        self.setStyleSheet("QWidget#ProductsTable {"
-                                    "border:10px solid red;"
-                                "}")
 
 
     def __on_selected_card(self, id):
         self.SelectedProduct.emit(id)
-
-'''
-        # Wrapping layout in a root layout
-        root_label  = QLabel()
-        root_label.setObjectName("productsTable_rootLabel")
-        root_label.setLayout(v_layout)
-        #root_label.setMinimumWidth(250)
-        root_label.adjustSize()
-        root_layout = QVBoxLayout()
-        root_layout.addWidget(root_label)
-
-        self.setStyleSheet("QWidget#productsTable_rootLabel {"
-                                "border:1px solid red;"
-
-                            "}")
-
-        # Adding shadow
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setColor(QColor(10,10,10))
-        shadow.setBlurRadius(10)
-        shadow.setOffset(5, 5)
-        self.setGraphicsEffect(shadow)
-
-        self.setLayout(root_layout)
-        self.adjustSize()
-'''

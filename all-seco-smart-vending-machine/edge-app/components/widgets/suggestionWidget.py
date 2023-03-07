@@ -34,7 +34,6 @@ class SuggestionWidget (QLabel):
         self.__suggester            = None if show_loader==True else SuggestionsStrategies(main_window.get_config())
         self.__suggestion_text      = QLabel("I suggest you..." if show_loader == True else "Based on your current emotion,\nI suggest you...")
         self.__suggestion_text.setObjectName("SuggestionText")
-        self.__suggestion_text.setStyleSheet("QLabel {margin-left:10px}")
         if show_loader == True :
             self.__suggestion_content   = GifPlayerWidget(main_window.get_config()["loader"]["loader_path"], True)
             self.__suggestion_content.start()

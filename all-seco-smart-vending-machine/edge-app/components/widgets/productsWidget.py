@@ -56,10 +56,15 @@ class ProductsWidget (QWidget):
         if separate_in_sections:
             # Creating "left" and "right" buttons and section label
             left_button             = QPushButton("<")
+            left_button.setObjectName("SectionSelector")
             left_button.clicked.connect(self.__handle_l_button_pressed)
+            
             right_button            = QPushButton(">")
+            right_button.setObjectName("SectionSelector")
             right_button.clicked.connect(self.__handle_r_button_pressed)
+            
             self.__current_section  = QLabel("")
+            self.__current_section.setObjectName("ProductsSection")
 
             switch_buttons_layout   = QHBoxLayout()
             switch_buttons_layout.addWidget(left_button)
