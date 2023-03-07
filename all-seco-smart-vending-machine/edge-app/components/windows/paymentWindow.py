@@ -108,13 +108,13 @@ class PaymentWindow (QWidget):
 
     def __on_vmc_message(self, vmc_message:VendtraceMessage) -> None:
         
-        self.__logger.debug(f"Received this VMC message: {vmc_message.payload_to_string()}")
+        self.__logger.debug(f"VMC: {vmc_message.payload_to_string()}")
         internal_msg    = vmc_message.get_message()
         
         if self.__is_active:
             if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="2": # internal_msg['status']=="<prod_id"
                 self.__show_processing_gif()
-            elif internal_msg['message_tpe']==VmcMessageType.KREDIT and internal_msg['total']=='100': # TODO Don't hardocde the required value!
+            elif internal_msg['message_type']==VmcMessageType.KREDIT and internal_msg['total']=='100': # TODO Don't hardocde the required value!
                 self.__show_accepted_gif()
                 self.__start_payed_timer()
 
