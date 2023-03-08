@@ -146,11 +146,11 @@ class PaymentWindow (QWidget):
                 self.__start_payed_timer()
             elif internal_msg["message_type"]==VmcMessageType.WA and int(internal_msg['status'])>=2:                    # error status
                 self.__free_window_resources()
-                self.__main_window.get_current_status.set_error_string(f"Cannot dispense product:  {vmc_message.payload_to_string()}")
+                self.__main_window.get_current_status().set_error_string(f"Cannot dispense product:  {vmc_message.payload_to_string()}")
                 self.PaymentDone.emit(False)
             elif internal_msg["message_type"]==VmcMessageType.WAHL and internal_msg['status']=="0" and internal_msg['choice']=="0":     # error status
                 self.__free_window_resources()
-                self.__main_window.get_current_status.set_error_string(f"Timeout from VMC:  {vmc_message.payload_to_string()}")
+                self.__main_window.get_current_status().set_error_string(f"Timeout from VMC:  {vmc_message.payload_to_string()}")
                 self.PaymentDone.emit(False)
 
 
