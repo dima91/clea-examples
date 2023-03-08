@@ -20,6 +20,7 @@ class AstarteClient(QObject) :
     __CUSTOMER_DETECTION_INTERFACE      = "ai.clea.examples.vendingMachine.CustomerDetection"
     __TRANSACTION_INTERFACE             = "ai.clea.examples.vendingMachine.Transaction"
     __SALE_PRODUCT_DETAILS_INTERFACE    = "ai.clea.examples.vendingMachine.SaleProductDetails"
+    __DEVICE_STATUS_INTERFACE           = "ai.clea.examples.vendingMachine.DeviceStatus"
             # Server owned
     __REFILL_EVENT_INTERFACE            = "ai.clea.examples.vendingMachine.RefillEvent"
     __PROMO_DETAILS_INTERFACE           = "ai.clea.examples.vendingMachine.PromoDetails"
@@ -93,6 +94,8 @@ class AstarteClient(QObject) :
 
         if interface == self.__REFILL_EVENT_INTERFACE:
             self.RefillEvent.emit(path, data)
+        else:
+            raise Exception(f"Received unexpected data from interface {interface}/{path}")
 
     
     def __astarte_aggregated_data_cb (self, device, ifname, ifpath, data) :
@@ -167,8 +170,8 @@ class AstarteClient(QObject) :
 
 
     def send_device_status(self, power_consumption:float, chamber_temperature:float, engine_vibration:float) -> None:
-        # TODO
-        pass
+        a_data  = {"powerConsumption":power_consumption, "chamberTemperature":chamber_temperature, "engineVibration":engine_vibration}
+        self.__device.send_aggregate(self.__DEVICE_STATUS_INTERFACE, "/status", a_data)
         
 
     def send_customer_detection(self, duration:int, age:int, emotion:str, shown_advertisement_id:str) -> None:

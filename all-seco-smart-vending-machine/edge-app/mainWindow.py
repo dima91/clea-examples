@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from components.vmcInterfaceThread import VmcInterface
 from components.astarteClient import AstarteClient
 from components.videoThread import VideoThread
+from components.deviceStatisticsGenerator import DeviceStatisticsGenerator
 from components.widgets.gifPlayerWidget import GifPlayerWidget
 from utils.suggestionsStrategies import SuggestionsStrategies
 from utils.local_db import LocalDB
@@ -48,10 +49,10 @@ class MainWindow (QMainWindow) :
     __config            = None
     __vmc_interface     = None
     __local_db          = None
-    
-    ## Widgets
-    __video_thread  = None
-    __suggester     = None
+        
+    __video_thread      = None
+    __suggester         = None
+    __stats_generator   = None
 
     ## Windows
     __standby_window        = None
@@ -86,10 +87,13 @@ class MainWindow (QMainWindow) :
         self.setCentralWidget (self.__widgets_stack)
 
         # Creating VideoThread
-        self.__video_thread = VideoThread(self, config)
+        self.__video_thread     = VideoThread(self, config)
 
         # Creating suggester
-        self.__suggester    = SuggestionsStrategies(config)
+        self.__suggester        = SuggestionsStrategies(config)
+
+        # Creating statistics generator
+        self.__stats_generator  = DeviceStatisticsGenerator(self, self.__astarte_client)
 
         # Creating base window
         loader  = GifPlayerWidget(config["loader"]["loader_path"], False)
