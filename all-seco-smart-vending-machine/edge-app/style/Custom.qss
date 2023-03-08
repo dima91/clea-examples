@@ -7,16 +7,16 @@ QLabel#FooterText {
     color:black;
     font-size: 56px;
 }
-
-
 MainWindow {
     background-color:rgb(255,255,255)
 }
+
 
 /* Standby Window */
 QLabel#slideshow_image {
     margin-top:20px;
 }
+
 
 /* Recognition Window */
 RecognitionWindow {
@@ -42,6 +42,7 @@ QPushButton#SectionSelector{
     width:80px;
     height:80px;
 }
+
 
 /* Suggestion window */
 QLabel#SuggestionText{
@@ -128,7 +129,29 @@ QLabel#PaymentDescription {
 
 
 /* Dispensing window */
-DispensingWindow {
+QWidget#DispensingCard {
+    margin-top:200px;
+}
+QLabel#DispensingLabel {
+    font-size:28px;
+    margin-top:50px;
+}
+QLabel#DispensingDescription {
+    font-size:36px;
+}
+QLabel#DispensingStatusStr{
+    font-size:16px;
+}
+/*QProgressBar#DispensingProgressBar {
+    border: solid grey;
+    border-radius: 15px;
+}
+QProgressBar#DispensingProgressBar::chunk {
+    border-radius :15px;
+}*/
+QWidget#dispensing_product_card {
+}
+QWidget#product_ready_card {
 }
 QWidget#dispensing_product_card, QWidget#product_ready_card{
     background-color:white;
@@ -138,4 +161,7 @@ QWidget#dispensing_product_card, QWidget#product_ready_card{
     padding-bottom:10px;
     margin:20px;
     border-radius: 5px;
+}
+QLabel#ProductReadyLabel {
+    font-size:36px;
 }

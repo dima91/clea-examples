@@ -36,7 +36,7 @@ class DispensingWindow (QWidget):
     def __init_ui(self, config, video_thread):
         hbox    = QHBoxLayout()
         hbox.addLayout(self.__build_lbox_layout(config, video_thread))
-        hbox.addWidget(self.__build_rbox_widget())
+        hbox.addWidget(self.__build_rbox_widget(config))
         
         return hbox
     
@@ -60,12 +60,16 @@ class DispensingWindow (QWidget):
         return layout
     
 
-    def __build_rbox_widget(self):
+    def __build_rbox_widget(self, config):
         min_w                       = self.__main_window.screen_sizes_percentage(.6).width()
         root_layout                 = QVBoxLayout()
         root_widget                 = QWidget()
         self.__top_label            = QLabel("Wait...")
-        self.__dispensing_widget    = DispensingWidget()
+        cards_width                 = self.__main_window.screen_sizes_percentage(float(config["dispensing"]["card_width_percentage"])).width()
+        cards_height                = self.__main_window.screen_sizes_percentage(float(config["dispensing"]["card_height_percentage"])).height()
+        self.__dispensing_widget    = DispensingWidget(QSize(cards_width, cards_height), config["dispensing"]["dispensed_img_path"])
+
+        self.__top_label.setObjectName("DispensingLabel")
 
         self.__dispensing_widget.DispensingUpdate.connect(self.__on_dispensing_widget_update)
         
