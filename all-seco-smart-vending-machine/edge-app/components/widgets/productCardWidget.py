@@ -35,9 +35,7 @@ class ProductCardBox(QWidget):
         name_label          = QLabel(name)
         ingredients_label   = QLabel(self.__array_string_to_string(ingredients) if ingredients!=None else ingredients)
         promo_label         = QLabel("" if promo_descriptor==None else "A special discount for you!")
-        price_label         = QLabel(str(current_price)+" €")
-        if promo_descriptor!=None :
-            price_label.setStyleSheet("QLabel{color:red;}")
+        price_layout        = self._get_price_layout(current_price)
         
         # Checking if image_path is an URL or a file
         if validators.url(image_path) and os.path.isfile(image_path) :
@@ -64,8 +62,8 @@ class ProductCardBox(QWidget):
         promo_label.setObjectName("ProductDescItem")
         promo_label.setStyleSheet("QLabel{font-size:12px; color:green}")
         inner_layout.addLayout(commons.h_center_widget(promo_label))
-        price_label.setObjectName("ProductDescItem")
-        inner_layout.addLayout(commons.h_center_widget(price_label))
+        #price_layout.setObjectName("ProductDescItem")
+        inner_layout.addLayout(price_layout)
 
         root_label      = QLabel()
         root_obj_name   = "product_card_root_label_lg" if product_size == commons.ProductsCardSize.LARGE else "product_card_root_label_sm"
@@ -87,6 +85,37 @@ class ProductCardBox(QWidget):
 
         self.setMinimumSize(card_size)
         self.adjustSize()
+
+
+    def _get_price_layout(self, price) -> QHBoxLayout:
+        layout              = QHBoxLayout()
+        wrong_price_label   = None
+        price_label         = QLabel(str(price)+" €")
+        price_label.setObjectName("ProductDescItem")
+
+        if self.__promo_descriptor!=None :
+            wrong_price_label   = QLabel(str(price)+" €")
+            wrong_price_label.setObjectName("ProductDescItem")
+            price_label         = QLabel(str(self.__apply_discount(price))+" €")
+            price_label.setObjectName("ProductDescItem")
+
+            wrong_price_label.setStyleSheet("QLabel{color:red;}")
+            f   = wrong_price_label.font()
+            f.setStrikeOut(True)
+            wrong_price_label.setFont(f)
+        
+        layout.addStretch(3)
+        if wrong_price_label!=None:
+            layout.addWidget(wrong_price_label)
+            layout.addStretch(1)
+        layout.addWidget(price_label)
+        layout.addStretch(3)
+
+        return layout
+    
+
+    def __apply_discount(self, price) -> int:
+        return price - (price*self.__promo_descriptor["discount"]/100)
 
 
     def __array_string_to_string(self, string_array:str):

@@ -1,6 +1,7 @@
 
 from utils import commons
 from utils.commons import Status
+from utils.commons import CustomerSession
 from components.widgets.sugarWidget import SugarWidget
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
@@ -28,7 +29,7 @@ class SelectionWidget(QWidget):
         self.__init_ui(session)
 
 
-    def __init_ui(self, session):
+    def __init_ui(self, session:CustomerSession):
         if session.current_status == Status.SELECTION:
             product = self.__main_window.products_details[session.chosen_product_id]
             self.__logger.debug(f"Updating with product:\n{product}")
@@ -67,13 +68,16 @@ class SelectionWidget(QWidget):
             root_layout.addStretch(1)
             
             root_layout.addLayout(commons.h_center_widget(image_label))
-            
+
             product_name    = QLabel(product["name"])
             product_name.setObjectName("Selection_ProductName")
             root_layout.addStretch(2)
             root_layout.addLayout(commons.h_center_widget(product_name))
 
-            product_price   = QLabel(f'{str(product["currentPrice"])} €')
+            real_price  = product["currentPrice"]
+            if session.promo_discount!=0:
+                real_price      =real_price - (real_price*session.promo_discount/100)
+            product_price   = QLabel(f'{str(real_price)} €')
             product_price.setObjectName("Selection_ProductCost")
             root_layout.addStretch(1)
             root_layout.addLayout(commons.h_center_widget(product_price))
