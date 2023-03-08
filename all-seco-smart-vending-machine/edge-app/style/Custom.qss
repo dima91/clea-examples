@@ -43,7 +43,7 @@ QPushButton#SectionSelector{
     height:80px;
 }
 
-
+/* Suggestion window */
 QLabel#SuggestionText{
     margin-left:1em;
     margin-top:1em;
@@ -77,15 +77,37 @@ QWidget#ProductDescItem{
 }
 
 
+/* Selection window */
 SelectionWindow {
 }
-QPushButton#ConfirmationButton{
-    width:7em;
-    height:2em;
+QPushButton#ConfirmationButton, QPushButton#MinusPlusButton{
+    border-radius: 10px;
     background-color:blue;
     color:white;
+}
+QPushButton#ConfirmationButton{
     font-size:34px;
-    border-radius: 25px;
+    min-width:7em;
+    min-height:2em;
+}
+QLabel#SugarLabel{
+    font-size:30px;
+    margin-right:5px;
+}
+QPushButton#MinusPlusButton{
+    font-size:24px;
+    width:2em;
+    height:2em;
+    margin-left:3px;
+    margin-right:3px;
+}
+QLabel#SugarIndicator{
+    min-width:2em;
+    min-height:6em;
+    border-radius:5px;
+    margin-left:2px;
+    margin-right:2px;
+    background-color:blue;
 }
 QLabel#Selection_ProductName{
     font-size:38px;
