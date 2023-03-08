@@ -10,7 +10,7 @@ import cv2 as cv
 
 class VideoWidget (QLabel):
 
-    __BORDER_RADIUS     = 20
+    __BORDER_RADIUS     = None
 
     __logger            = None
     __resolution        = None
@@ -26,6 +26,7 @@ class VideoWidget (QLabel):
 
         self.__logger           = commons.create_logger(__name__)
         self.__video_thread     = video_thread
+        self.__BORDER_RADIUS    = int(main_window.get_config()["app"]["video_border_radius"])
         self.__resolution       = QSize(float(config["app"]["video_resolution_width"]), float(config["app"]["video_resolution_height"]))
         self.__current_session  = main_window.get_current_session()
         video_thread.NewImage.connect (self.__on_new_image)

@@ -11,15 +11,17 @@ class AdvertisingWidget (QWidget) :
     __main__window      = None
     __logger            = None
     __adv_label         = None
+    __BORDER_RADIUS     = None
     ##########
 
 
     def __init__(self, main_window) -> None:
         super().__init__()
 
-        self.__main__window = main_window
-        self.__logger       = commons.create_logger(__name__)
-        self.__adv_label    = QLabel()
+        self.__main__window     = main_window
+        self.__logger           = commons.create_logger(__name__)
+        self.__adv_label        = QLabel()
+        self.__BORDER_RADIUS    = int(main_window.get_config()["app"]["video_border_radius"])
 
         vbox    =   QVBoxLayout()
         vbox.addStretch(1)
@@ -43,4 +45,4 @@ class AdvertisingWidget (QWidget) :
                 pixmap      = commons.apply_border_radius(pixmap, 5, pixmap.size())
                 app_config  = self.__main__window.get_config()["app"]
                 size        = QSize(int(app_config["video_resolution_width"]), int(app_config["video_resolution_height"]))
-                self.__adv_label.setPixmap(commons.resize_image(pixmap, size))
+                self.__adv_label.setPixmap(commons.apply_border_radius(commons.resize_image(pixmap, size), self.__BORDER_RADIUS, size))
