@@ -87,6 +87,7 @@ class PaymentWindow (QWidget):
 
         # Advertising widget
         advertising_widget  = AdvertisingWidget(self.__main_window)
+        layout.addStretch(1)
         layout.addWidget(advertising_widget)
         layout.addStretch(1)
         layout.addWidget(FooterWidget(config, QSize(100, 100), None))
