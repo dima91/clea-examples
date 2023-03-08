@@ -120,10 +120,16 @@ QWidget#ButtonsWidget{
 }
 
 
-DispensingWindow {
+/* Payment window */
+QLabel#PaymentDescription {
+    font-size:36px;
+    margin-top=800px;
 }
 
 
+/* Dispensing window */
+DispensingWindow {
+}
 QWidget#dispensing_product_card, QWidget#product_ready_card{
     background-color:white;
     padding-right:40px;

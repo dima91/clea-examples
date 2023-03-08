@@ -18,13 +18,14 @@ from PySide6.QtCore import Signal, QSize, QTimer
 
 class PaymentWindow (QWidget):
 
-    __main_window       = None
-    __logger            = None
-    __is_active         = None
-    __vmc_interface     = None
-    __stacked_widgets   = None
-    __payment_status    = None      # 0:requested, 1:processing, 2:accepted
-    __payed_timer       = None
+    __main_window           = None
+    __logger                = None
+    __is_active             = None
+    __vmc_interface         = None
+    __stacked_widgets       = None
+    __payment_status        = None      # 0:requested, 1:processing, 2:accepted
+    __payment_description   = None
+    __payed_timer           = None
 
     __requsted_gif_duration_ms      = None
     __processing_gif_duration_ms    = None
@@ -38,28 +39,40 @@ class PaymentWindow (QWidget):
     def __init__(self, config, main_window, video_thread, vmc_interface:VmcInterface) -> None:
         super().__init__()
 
-        self.__main_window      = main_window
-        self.__logger           = commons.create_logger(__name__)
-        self.__is_active        = False
-        self.__vmc_interface    = vmc_interface
+        self.__main_window          = main_window
+        self.__logger               = commons.create_logger(__name__)
+        self.__is_active            = False
+        self.__vmc_interface        = vmc_interface
+        self.__payment_description  = QLabel("")
         self.__requsted_gif_duration_ms     = int(config['payment']["requsted_gif_duration_ms"])
         self.__processing_gif_duration_ms   = int(config['payment']["processing_gif_duration_ms"])
         self.__accepted_gif_duration_ms     = int(config['payment']["accepted_gif_duration_ms"])
         self.__main_window.SessionUpdate.connect(self.__on_session_change)
         self.__vmc_interface.NewMessage.connect(self.__on_vmc_message)
+        self.__payment_description.setObjectName("PaymentDescription")
+
         self.setLayout(self.__init_ui(config, video_thread))
 
 
     def __init_ui(self, config, video_thread):
+        r_layout    = QVBoxLayout()
+        l_layout    = self.__build_lbox_layout(config, video_thread)
+        root_layout = QHBoxLayout()
+
         min_w                   = self.__main_window.screen_sizes_percentage(.6).width()
         self.__stacked_widgets  = QStackedWidget()
         self.__stacked_widgets.setMinimumWidth(min_w)
+
+        r_layout.addStretch(1)
+        r_layout.addWidget(self.__payment_description)
+        r_layout.addStretch(4)
+        r_layout.addWidget(self.__stacked_widgets)
+        r_layout.addStretch(4)
+
+        root_layout.addLayout(l_layout)
+        root_layout.addLayout(r_layout)
         
-        hbox    = QHBoxLayout()
-        hbox.addLayout(self.__build_lbox_layout(config, video_thread))
-        hbox.addWidget(self.__stacked_widgets)
-        
-        return hbox
+        return root_layout
 
 
     def __build_lbox_layout(self, config, video_thread):
@@ -106,6 +119,20 @@ class PaymentWindow (QWidget):
                 self.__payed_timer.stop()
 
 
+    def __payment_status_to_description(self) -> str:
+        text    = ""
+        if self.__payment_status==0:
+            text    = "Please place the card on the reader to start."
+        elif self.__payment_status==1:
+            text    = "Processing payment..."
+        elif self.__payment_status==2:
+            text    = "Authorization granded!"
+        else:
+            raise Exception(f"Unknown payment status {self.__payment_status}")
+        
+        return text
+
+
     def __on_vmc_message(self, vmc_message:VendtraceMessage) -> None:
         
         self.__logger.debug(f"VMC: {vmc_message.payload_to_string()}")
@@ -125,16 +152,19 @@ class PaymentWindow (QWidget):
 
 
     def __show_requested_gif(self):
+        self.__payment_description.setText(self.__payment_status_to_description())
         payment_gif = GifPlayerWidget(self.__main_window.get_config()["payment"]["requested_gif"], True)
         payment_gif.start()
         commons.remove_and_set_new_shown_widget(self.__stacked_widgets, payment_gif)
 
     def __show_processing_gif(self):
+        self.__payment_description.setText(self.__payment_status_to_description())
         processing_gif  = GifPlayerWidget(self.__main_window.get_config()["payment"]["processing_gif"], True)
         processing_gif.start()
         commons.remove_and_set_new_shown_widget(self.__stacked_widgets, processing_gif)
 
     def __show_accepted_gif(self):
+        self.__payment_description.setText(self.__payment_status_to_description())
         accepted_gif    = GifPlayerWidget(self.__main_window.get_config()["payment"]["accepted_gif"], True)
         accepted_gif.start()
         commons.remove_and_set_new_shown_widget(self.__stacked_widgets, accepted_gif)
@@ -153,8 +183,8 @@ class PaymentWindow (QWidget):
     
     def __on_emulated_payment_timer_cb(self) :
         if self.__payment_status == 0:
-            self.__show_processing_gif()
             self.__payment_status += 1
+            self.__show_processing_gif()
             self.__emulated_payment_timer.start()
         elif self.__payment_status == 1:
             self.__payment_status += 1
