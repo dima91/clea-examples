@@ -139,15 +139,27 @@ class PaymentWindow (QWidget):
         internal_msg    = vmc_message.get_message()
         
         if self.__is_active:
-            if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="2": # internal_msg['status']=="<prod_id"
+            if internal_msg['message_type']==VmcMessageType.WA and internal_msg['status']=="0": # internal_msg['status']=="<prod_id"
                 self.__show_processing_gif()
-            elif internal_msg['message_type']==VmcMessageType.KREDIT and internal_msg['total']=='100': # TODO Don't hardocde the required value!
+            elif internal_msg['message_type']==VmcMessageType.KREDIT and internal_msg['total']=='100':                  # TODO Don't hardocde the required value!
                 self.__show_accepted_gif()
                 self.__start_payed_timer()
+            elif internal_msg["message_type"]==VmcMessageType.WA and int(internal_msg['status'])>=2:                    # error status
+                self.__free_window_resources()
+                self.__main_window.get_current_status.set_error_string(f"Cannot dispense product:  {vmc_message.payload_to_string()}")
+                self.PaymentDone.emit(False)
+            elif internal_msg["message_type"]==VmcMessageType.WAHL and internal_msg['status']=="0" and internal_msg['choice']=="0":     # error status
+                self.__free_window_resources()
+                self.__main_window.get_current_status.set_error_string(f"Timeout from VMC:  {vmc_message.payload_to_string()}")
+                self.PaymentDone.emit(False)
+
+
+    def __free_window_resources(self):
+        self.__clean_widgets_stack()
 
 
     def __on_payed_timer_cb(self):
-        self.__clean_widgets_stack()
+        self.__free_window_resources()
         self.PaymentDone.emit(True)
 
 
