@@ -17,6 +17,7 @@ from components.windows.suggestionWindow import SuggestionWindow
 from components.windows.selectionWindow import SelectionWindow
 from components.windows.paymentWindow import PaymentWindow
 from components.windows.dispensingWindow import DispensingWindow
+from components.windows.errorWindow import ErrorWindow
 
 from components.windows.videoLoggerWindow import VideoLoggerWindow
 
@@ -57,6 +58,7 @@ class MainWindow (QMainWindow) :
     __recognition_window    = None
     __suggestion_window     = None
     __selection_window      = None
+    __error_window          = None
 
     __video_logger      = None
 
@@ -138,7 +140,7 @@ class MainWindow (QMainWindow) :
 
 
         if old_status == Status.INITIALIZING and self.__current_status == Status.STANDBY:                       # astarte_initialized
-            self.__close_current_session_and_start_new_one()
+            self.__close_current_session_and_start_new_one(True)
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__standby_window)
 
         elif old_status == Status.STANDBY and self.__current_status == Status.RECOGNITION:                      # new_person / NewPerson
@@ -146,7 +148,7 @@ class MainWindow (QMainWindow) :
             self.__widgets_stack.setCurrentIndex(self.__widgets_stack.addWidget(self.__recognition_window))
             
         elif old_status == Status.RECOGNITION and self.__current_status == Status.STANDBY:                      # escaped_person / EscapedPerson
-            self.__close_current_session_and_start_new_one()
+            self.__close_current_session_and_start_new_one(True)
             commons.remove_shown_widget(self.__widgets_stack)
         elif old_status == Status.RECOGNITION and self.__current_status == Status.SUGGESTION:                   # new_customer / NewCustomer
             self.__current_session.current_product_tab_id   = self.__recognition_window.get_selected_products_tab()
@@ -159,7 +161,7 @@ class MainWindow (QMainWindow) :
             self.__current_session.current_product_tab_id   = self.__suggestion_window.get_selected_products_tab()
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__selection_window)
         elif old_status == Status.SUGGESTION and self.__current_status == Status.STANDBY :                      # escaped_customer / EscapedCustomer
-            self.__close_current_session_and_start_new_one()
+            self.__close_current_session_and_start_new_one(True)
             commons.remove_shown_widget(self.__widgets_stack)
         
         elif old_status == Status.SELECTION and self.__current_status == Status.RECOGNITION :                    # product_rejected / ProductRejected
@@ -173,9 +175,15 @@ class MainWindow (QMainWindow) :
         
         elif old_status == Status.PAYMENT and self.__current_status == Status.DISPENSING :                      # payment_done / PaymentDone
             commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__dispensing_window)
+        elif old_status == Status.PAYMENT and self.__current_status == Status.ERROR :                           # payment_done / PaymentDone -> with error
+            commons.remove_and_set_new_shown_widget(self.__widgets_stack, self.__error_window)
         
         elif old_status == Status.DISPENSING and self.__current_status == Status.STANDBY :                      # product_dispensed / ProductDispensed
-            self.__close_current_session_and_start_new_one()
+            self.__close_current_session_and_start_new_one(True)
+            commons.remove_shown_widget(self.__widgets_stack)
+
+        elif old_status == Status.ERROR and self.__current_status == Status.STANDBY:
+            self.__close_current_session_and_start_new_one(False)
             commons.remove_shown_widget(self.__widgets_stack)
 
         else :
@@ -202,6 +210,7 @@ class MainWindow (QMainWindow) :
         self.__selection_window     = SelectionWindow(self.__config, self, self.__video_thread)
         self.__payment_window       = PaymentWindow(self.__config, self, self.__video_thread, self.__vmc_interface)
         self.__dispensing_window    = DispensingWindow(self.__config, self, self.__video_thread, self.__vmc_interface)
+        self.__error_window         = ErrorWindow(self.__config, self)
 
         if self.__config["app"].getboolean("show_video_logger") == True:
             self.__video_logger     = VideoLoggerWindow(self.__video_thread, QSize(float(self.__config["app"]["video_resolution_width"]),
@@ -225,6 +234,8 @@ class MainWindow (QMainWindow) :
         self.__payment_window.PaymentDone.connect(self.__on_payment_done)
         # DispensingWindow signals
         self.__dispensing_window.Dispensed.connect(self.__on_product_dispensed)
+        # ErrorWindow signals
+        self.__error_window.ErrorShown.connect(self.__on_error_shown)
 
 
     def __astarte_connection_status_changes (self, new_status) :
@@ -249,8 +260,8 @@ class MainWindow (QMainWindow) :
             print ("[FAILURE] Astarte disconnected!")
 
 
-    def __close_current_session_and_start_new_one(self):
-        if self.__current_session != None:
+    def __close_current_session_and_start_new_one(self, send_session_to_astarte):
+        if self.__current_session != None and send_session_to_astarte:
             # Closing current session
             self.__current_session.close_session()
             self.__send_session_data()
@@ -333,14 +344,18 @@ class MainWindow (QMainWindow) :
         self.__logger.debug(f"Is payment done? {is_done}")
         if not is_done:
             self.__logger.critical("NFC payment ends with error!")
-
-        self.__change_status(Status.DISPENSING)
+            self.__change_status(Status.ERROR)
+        else:
+            self.__change_status(Status.DISPENSING)
 
     def __on_product_dispensed(self, is_done):
         self.__logger.debug(f"Is {self.products_details[self.__current_session.chosen_product_id]} product dispensed? {is_done}")
         if not is_done:
             self.__logger.critical(f"Product {self.products_details[self.__current_session.chosen_product_id]} not correctly dispensed!")
 
+        self.__change_status(Status.STANDBY)
+
+    def __on_error_shown(self):
         self.__change_status(Status.STANDBY)
 
 

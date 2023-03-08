@@ -16,6 +16,7 @@ class Status(Enum):
     SELECTION           = 3
     PAYMENT             = 4
     DISPENSING          = 5
+    ERROR               = 6
 
 
 '''
@@ -40,6 +41,7 @@ class CustomerSession():
     transaction_id              = None
     is_chosen_product_suggested = None
     connected_dispenser_id      = None
+    error_string                = None
 
     def __init__(self) -> None:
         self.current_status         = Status.STANDBY
@@ -72,6 +74,9 @@ class CustomerSession():
 
     def update_transaction_id(self, transaction_id:str) -> None:
         self.transaction_id = transaction_id
+
+    def set_error_string(self, err_str) -> None:
+        self.error_string   = err_str
 
     def to_dict(self) -> dict:
         return {"previous_status":self.previous_status, "current_status":self.current_status, "start_time":self.start_time,
