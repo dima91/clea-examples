@@ -277,8 +277,11 @@ class MainWindow (QMainWindow) :
     def __send_session_data(self):
         s   = self.__current_session
         # Sending customer detection
-        self.__astarte_client.send_customer_detection(s.end_time-s.start_time, s.inference_results["age"],
-                                                      s.inference_results["emotion"], s.shown_advertisement_id)
+        
+        # Eventually sending customer detection
+        if s.inference_results!=None:
+            self.__astarte_client.send_customer_detection(s.end_time-s.start_time, s.inference_results["age"],
+                                                          s.inference_results["emotion"], s.shown_advertisement_id)
         # Updating eventually sold product
         if s.chosen_product_id != None:
             p_id        = s.chosen_product_id

@@ -1,5 +1,5 @@
 
-import cv2 as cv, numpy as np, pandas, logging, math
+import cv2 as cv, numpy as np, pandas, logging, math, traceback
 
 from utils import commons
 from openvino.inference_engine import IECore
@@ -61,6 +61,7 @@ class VideoThread (QThread) :
     __current_session           = None
     __new_person_threshold      = None
     __new_customer_threshold    = None
+    __escaped_person_threshold  = None
     __gpu_mutex                 = None
 
     __prev_frame                = None
@@ -75,6 +76,7 @@ class VideoThread (QThread) :
         self.__min_conf                 = float(config["ai"]["face_deection_minimum_confidence"])
         self.__new_person_threshold     = int (config["ai"]["new_person_threshold_ms"])
         self.__new_customer_threshold   = int (config["ai"]["new_customer_threshold_ms"])
+        self.__escaped_person_threshold = int (config["ai"]["escaped_person_threshold_ms"])
 
         self.__logger                   = commons.create_logger(__name__)
         self.__gpu_mutex                = QMutex()
@@ -104,13 +106,16 @@ class VideoThread (QThread) :
 
     def perform_inference(self, frame) -> dict:
         self.__gpu_mutex.lock()
+        target_detection    = None
+        customer_info       = None
         prev_detections     = self.__perform_face_detection(frame)
         # Retrieving the target detection from all the detections
         face_idx            = self.__get_target_face_idx(frame, prev_detections)
-        target_detection    = prev_detections[face_idx]
-        # Inferring emotion and age values on freezed face
-        d                   = target_detection
-        customer_info       = self.__infer_age_emotions (frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :])
+        if face_idx!=None:
+            target_detection    = prev_detections[face_idx]
+            # Inferring emotion and age values on freezed face
+            d                   = target_detection
+            customer_info       = self.__infer_age_emotions (frame[d.min.y():d.max.y(), d.min.x():d.max.x(), :])
         self.__gpu_mutex.unlock()
 
         return (target_detection, customer_info)
@@ -233,13 +238,14 @@ class VideoThread (QThread) :
 
 
     def run(self):
-        curr_frame              = None
-        start_time_detection    = None  
-        self.__prev_frame       = None
-        self.__customer_found   = False
-        self.__freezed_frame    = None
-        self.__target_detection = None
-        self.__customer_info    = None
+        curr_frame                  = None
+        start_time_detection        = None
+        start_time_no_detections    = None  
+        self.__prev_frame           = None
+        self.__customer_found       = False
+        self.__freezed_frame        = None
+        self.__target_detection     = None
+        self.__customer_info        = None
 
         while not self.__customer_found:
             try :
@@ -255,12 +261,14 @@ class VideoThread (QThread) :
 
                     if len(detections)>0:
                         if start_time_detection == None:
-                            start_time_detection    = commons.ms_timestamp()
+                            start_time_detection        = commons.ms_timestamp()
+                            start_time_no_detections    = None
                         elif curr_time-start_time_detection >= self.__new_person_threshold :
                             self.NewPerson.emit()
                             pass
                     else:
-                        start_time_detection    = None
+                        start_time_detection        = None
+                        start_time_no_detections    = None  # FIXME commons.ms_timestamp()
 
                 elif self.__current_session.current_status == commons.Status.RECOGNITION:
                     # Still retrieving camera frames and providing them to subscribers
@@ -271,11 +279,18 @@ class VideoThread (QThread) :
                         start_time_detection    = commons.ms_timestamp()
 
                     if len(detections) == 0:
-                        # TODO Add a timeout to prevent oscillations
-
-                        # Computing AI models on the previous valid frame (in which there is at least one detection)
-                        (detection, customer_info)  = self.perform_inference(self.__prev_frame)
-                        self.EscapedPerson.emit(self.__prev_frame, detection, customer_info)
+                        if start_time_no_detections == None:
+                            start_time_no_detections    = commons.ms_timestamp()
+                            start_time_detection        = None
+                        
+                        # Adding a timeout to prevent oscillations
+                        if curr_time-start_time_no_detections>self.__escaped_person_threshold:
+                            # Computing AI models on the previous valid frame (in which there is at least one detection)
+                            (detection, customer_info)  = self.perform_inference(self.__prev_frame)
+                            self.EscapedPerson.emit(self.__prev_frame, detection, customer_info)
+                        else:
+                            # Ingoring unrecognized person
+                            pass
 
                     elif curr_time-start_time_detection >= self.__new_customer_threshold :
                         # Freezing image and face
@@ -294,8 +309,7 @@ class VideoThread (QThread) :
                         self.NewImage.emit(self.__freezed_frame, [self.__target_detection], None)
                         self.NewCustomer.emit(self.__freezed_frame, self.__target_detection, self.__customer_info)
                     else:
-                        # Do nothing
-                        pass
+                        start_time_no_detections    = None
                 else:
                     self.__logger.error("Wrong status: VideoThread should be stopped!")
 
@@ -305,6 +319,7 @@ class VideoThread (QThread) :
                 self.__logger.error (f"Catched this runtime error: {re}")
             except TypeError as te:
                 self.__logger.error (f"Catched this type error: {te}")
+                traceback.print_exc()
             except Exception as e:
                 self.__logger.error (f"Catched this generic exception: {e}")
 
