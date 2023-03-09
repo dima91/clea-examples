@@ -1,0 +1,68 @@
+{
+    "interface_name": "ai.clea.examples.vendingMachine.PromoDetails",
+    "version_major": 1,
+    "version_minor": 0,
+    "type": "properties",
+    "ownership": "server",
+    "mappings": [
+        {
+            "endpoint": "/%{promoID}/creationTime",
+            "type" : "datetime"
+        },
+        {
+            "endpoint": "/%{promoID}/ID",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{promoID}/name",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{promoID}/products",
+            "type": "stringarray"
+        },
+        {
+            "endpoint": "/%{promoID}/discount",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{promoID}/startScheduleTime",
+            "type": "string",
+            "doc":"EXAMPLE: 08:00"
+        },
+        {
+            "endpoint": "/%{promoID}/endScheduleTime",
+            "type": "string",
+            "doc":"EXAMPLE: 10:30"
+        },
+        {
+            "endpoint": "/%{promoID}/startDate",
+            "type": "datetime"
+        },
+        {
+            "endpoint": "/%{promoID}/endDate",
+            "type": "datetime"
+        },
+        {
+            "endpoint": "/%{promoID}/minAudienceAge",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{promoID}/maxAudienceAge",
+            "type": "integer"
+        },
+        {
+            "endpoint": "/%{promoID}/targetEmotions",
+            "type": "stringarray"
+        },
+        {
+            "endpoint": "/%{promoID}/imagePath",
+            "type": "string"
+        },
+        {
+            "endpoint": "/%{promoID}/currentStatus",
+            "type": "string",
+            "doc":"Possible status: ended, paused, active"
+        }
+    ]
+}

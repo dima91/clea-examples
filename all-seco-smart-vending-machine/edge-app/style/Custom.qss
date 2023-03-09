@@ -1,0 +1,167 @@
+
+* {
+    font-family:"Noto Sans";
+}
+
+QLabel#FooterText {
+    color:black;
+    font-size: 56px;
+}
+MainWindow {
+    background-color:rgb(255,255,255)
+}
+
+
+/* Standby Window */
+QLabel#slideshow_image {
+    margin-top:20px;
+}
+
+
+/* Recognition Window */
+RecognitionWindow {
+}
+VideoWidget {
+}
+SuggestionWidget {
+}
+QLabel#SuggestionText, QLabel#ProductsLabel, QLabel#SelectionLabel {
+    color:black;
+    font-size: 30px;
+}
+QLabel#ProductsLabel, QLabel#SelectionLabel {
+    margin-top:2em;
+    margin-bottom:3em;
+}
+QLabel#ProductsSection{
+    font-size:24px;
+}
+QPushButton#SectionSelector{
+    font-size:24px;
+    background-color:white;
+    width:80px;
+    height:80px;
+}
+
+
+/* Suggestion window */
+QLabel#SuggestionText{
+    margin-left:1em;
+    margin-top:1em;
+}
+QLabel#product_card_root_label_sm {
+    background-color:white;
+    padding-right:15px;
+    padding-left:15px;
+    padding-top:5px;
+    padding-bottom:5px;
+    /* margin:10px; */
+    border-radius: 5px;
+}
+QLabel#product_card_root_label_lg {
+    background-color:white;
+    padding-right:40px;
+    padding-left:40px;
+    padding-top:10px;
+    padding-bottom:10px;
+    margin:20px;
+    border-radius: 5px;
+}
+QLabel#product_card_root_label:pressed{
+    border-radius: 5px;
+    border: 2px solid #eaeaea;
+    background-color: #888888;
+}
+QWidget#ProductDescItem{
+    margin-top:5px;
+    font-size:16px;
+}
+
+
+/* Selection window */
+SelectionWindow {
+}
+QPushButton#ConfirmationButton, QPushButton#MinusPlusButton{
+    border-radius: 10px;
+    background-color:blue;
+    color:white;
+}
+QPushButton#ConfirmationButton{
+    font-size:34px;
+    min-width:7em;
+    min-height:2em;
+}
+QLabel#SugarLabel{
+    font-size:30px;
+    margin-right:5px;
+}
+QPushButton#MinusPlusButton{
+    font-size:24px;
+    width:2em;
+    height:2em;
+    margin-left:3px;
+    margin-right:3px;
+}
+QLabel#SugarIndicator{
+    min-width:2em;
+    min-height:6em;
+    border-radius:5px;
+    margin-left:2px;
+    margin-right:2px;
+    background-color:blue;
+}
+QLabel#Selection_ProductName{
+    font-size:38px;
+}
+QLabel#Selection_ProductCost{
+    font-size:26px;
+}
+QWidget#ButtonsWidget{
+    margin-bottom:500px;
+}
+
+
+/* Payment window */
+QLabel#PaymentDescription {
+    font-size:36px;
+    margin-top=800px;
+}
+
+
+/* Dispensing window */
+QWidget#DispensingCard {
+    margin-top:200px;
+}
+QLabel#DispensingLabel {
+    font-size:28px;
+    margin-top:50px;
+}
+QLabel#DispensingDescription {
+    font-size:36px;
+}
+QLabel#DispensingStatusStr{
+    font-size:16px;
+}
+/*QProgressBar#DispensingProgressBar {
+    border: solid grey;
+    border-radius: 15px;
+}
+QProgressBar#DispensingProgressBar::chunk {
+    border-radius :15px;
+}*/
+QWidget#dispensing_product_card {
+}
+QWidget#product_ready_card {
+}
+QWidget#dispensing_product_card, QWidget#product_ready_card{
+    background-color:white;
+    padding-right:40px;
+    padding-left:40px;
+    padding-top:10px;
+    padding-bottom:10px;
+    margin:20px;
+    border-radius: 5px;
+}
+QLabel#ProductReadyLabel {
+    font-size:36px;
+}

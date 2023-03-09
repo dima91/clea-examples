@@ -1,0 +1,37 @@
+{
+    "data":{
+        "l98p3aAzU8":{
+            "creationTime":"2023-01-29T17:30:00Z",
+            "ID":"l98p3aAzU8",
+            "name":"Super Eyeliner",
+            "brand":"Cosmetic Store",
+            "category":"Beauty",
+            "description":"",
+            "startDate":"2023-02-01T00:00:00Z",
+            "endDate":"2023-03-31T23:59:59Z",
+            "startScheduleTime":"10:00",
+            "endScheduleTime":"18:00",
+            "targetedAdv":true,
+            "minAge":23,
+            "maxAge":44,
+            "emotions":["Happy"],
+            "imagePath":"media/advertisements/super_eyeliner.jpg",
+            "currentStatus":"active"
+        },
+        "I7TiL38pj3":{
+            "creationTime":"2023-02-18T10:45:00Z",
+            "ID":"I7TiL38pj3",
+            "name":"Jewerly Store",
+            "brand":"Jewerly Store",
+            "category":"Beauty",
+            "description":"",
+            "startDate":"2023-03-01T00:00:00Z",
+            "endDate":"2023-05-31T23:59:59Z",
+            "startScheduleTime":"8:00",
+            "endScheduleTime":"20:00",
+            "targetedAdv":false,
+            "imagePath":"media/advertisements/jewelry_store.jpg",
+            "currentStatus":"active"
+        }
+    }
+}
