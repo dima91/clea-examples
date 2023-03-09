@@ -7,6 +7,7 @@ from PySide6.QtCore import Signal, QSize
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from components.vmcInterfaceThread import VmcInterface
 from components.astarteClient import AstarteClient
+from components.images_repository import ImagesRepository
 from components.videoThread import VideoThread
 from components.deviceStatisticsGenerator import DeviceStatisticsGenerator
 from components.widgets.gifPlayerWidget import GifPlayerWidget
@@ -38,6 +39,7 @@ class MainWindow (QMainWindow) :
     products_details        = None
     advertisements_details  = None
     promos_details          = None
+    images_repository       = None
     ##########
     __screen_sizes      = None
     __logger            = None
@@ -94,6 +96,9 @@ class MainWindow (QMainWindow) :
 
         # Creating statistics generator
         self.__stats_generator  = DeviceStatisticsGenerator(self, self.__astarte_client)
+
+        # Creating images repository
+        self.images_repository  = ImagesRepository()
 
         # Creating base window
         loader  = GifPlayerWidget(config["loader"]["loader_path"], False)

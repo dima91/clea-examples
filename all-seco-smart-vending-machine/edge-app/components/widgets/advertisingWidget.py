@@ -40,8 +40,7 @@ class AdvertisingWidget (QWidget) :
                 curr_adv    = self.__main__window.advertisements_details[session.shown_advertisement_id]
                 #self.__logger.debug(f"Displaying {curr_adv}")
                 self.__adv_label.setText(curr_adv["name"])
-                pixmap   = QPixmap()
-                pixmap.load(curr_adv["imagePath"])
+                pixmap   = self.__main__window.images_repository.get_pixmap(curr_adv["imagePath"])
                 pixmap      = commons.apply_border_radius(pixmap, 5, pixmap.size())
                 app_config  = self.__main__window.get_config()["app"]
                 size        = QSize(int(app_config["video_resolution_width"]), int(app_config["video_resolution_height"]))

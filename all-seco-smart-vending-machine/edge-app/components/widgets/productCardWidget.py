@@ -30,23 +30,12 @@ class ProductCardBox(QWidget):
 
         inner_layout        = QVBoxLayout()
         
-        pixmap              = QPixmap()
+        pixmap              = self.__main_window.images_repository.get_pixmap(image_path)
         pixmap_label        = QLabel()
         name_label          = QLabel(name)
         ingredients_label   = QLabel(self.__array_string_to_string(ingredients) if ingredients!=None else ingredients)
         promo_label         = QLabel("" if promo_descriptor==None else "A special discount for you!")
         price_layout        = self._get_price_layout(current_price)
-        
-        # Checking if image_path is an URL or a file
-        if validators.url(image_path) and os.path.isfile(image_path) :
-            raise Exception(f"{image_path} is a file and a URL")
-        if not validators.url(image_path) and not os.path.isfile(image_path) :
-            raise Exception(f"{image_path} is neither a file neither a URL")
-        
-        if validators.url(image_path) :
-            pixmap.loadFromData(requests.get(image_path).content)
-        else :
-            pixmap.load(image_path)
 
         pixmap_label.setPixmap(commons.resize_image(pixmap, target_image_size))
 

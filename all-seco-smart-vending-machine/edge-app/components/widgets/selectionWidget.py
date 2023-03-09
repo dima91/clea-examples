@@ -41,8 +41,7 @@ class SelectionWidget(QWidget):
             #text_layout.addStretch(1)
 
             image_label = QLabel()
-            pixmap      = QPixmap()
-            pixmap.load(product["imagePath"])
+            pixmap      = self.__main_window.images_repository.get_pixmap(product["imagePath"])
             image_label.setPixmap(commons.resize_image(pixmap, QSize(self.__min_image_width, self.__min_image_height)))
 
             back_button     = QPushButton("BACK")
