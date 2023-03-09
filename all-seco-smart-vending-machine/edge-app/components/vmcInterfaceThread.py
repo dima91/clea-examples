@@ -113,7 +113,6 @@ class VmcInterface (QThread) :
                             self.send_message("OK")
                             # Building incoming message
                             msg = VendtraceMessage(payload, MessageDirection.VMC_TO_PC)
-                            # TODO Do something with the message
                             # Emitting NewMessage signal
                             self.NewMessage.emit(msg)
                         except Exception as e:

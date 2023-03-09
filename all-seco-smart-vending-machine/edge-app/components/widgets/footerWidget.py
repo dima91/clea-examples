@@ -7,10 +7,6 @@ from utils import commons
 class FooterWidget (QWidget) :
 
     ##########
-    ## Members
-    ##########
-    # TODO
-    ##########
 
 
     def __init__(self, config, icons_size, middle_text) -> None:

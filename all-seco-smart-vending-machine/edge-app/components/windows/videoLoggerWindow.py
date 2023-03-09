@@ -7,8 +7,6 @@ from PySide6.QtCore import Qt, QSize, QRect
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QStackedWidget, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
 
-# TODO Create and edit a custom qss file to border the images
-
 
 class VideoLoggerWindow (QWidget) :
 

@@ -87,7 +87,7 @@ class DispensingWindow (QWidget):
         if session.current_status == commons.Status.DISPENSING:
             self.__is_active    = True
             # The VMC is dispensing automatically the product
-            # TODO Starting dispensing bar
+            # Starting dispensing bar
             self.__dispensing_widget.start_dispensing()
         else:
             self.__is_active    = False
