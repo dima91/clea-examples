@@ -10,12 +10,6 @@ from PySide6.QtGui import QColor
 class ProductsWidget (QWidget):
 
 
-    # FIXME Implement me! -> Class for left and right buttons (?)
-    class __FakeButton(QLabel):
-        def __init__(self):
-            pass
-
-
     __logger            = None
     __main_window       = None
     __tables_stack      = None
