@@ -288,7 +288,7 @@ class MainWindow (QMainWindow) :
             self.__astarte_client.send_customer_detection(s.end_time-s.start_time, s.inference_results["age"],
                                                           s.inference_results["emotion"], s.shown_advertisement_id)
         # Updating eventually sold product
-        if s.chosen_product_id != None:
+        if s.chosen_product_id!=None and s.transaction_id!=None:
             p_id        = s.chosen_product_id
             p_details   = self.products_details[p_id]
             price       = p_details["currentPrice"] - (p_details["currentPrice"]*s.promo_discount/100)

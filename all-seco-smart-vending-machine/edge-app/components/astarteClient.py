@@ -179,10 +179,12 @@ class AstarteClient(QObject) :
         if shown_advertisement_id != None:
             a_data["shownAdvertisementID"]  = shown_advertisement_id
 
+        #self.__logger.debug(f"Sending detection:\n{a_data}")
         self.__device.send_aggregate(self.__CUSTOMER_DETECTION_INTERFACE, '/detection', a_data)
 
 
     def send_sold_product_detail(self, product_id:str, property_name, property_value) -> None:
+        #self.__logger.debug(f"Sending sold product details:\n{property_value}")
         self.__device.send(self.__SALE_PRODUCT_DETAILS_INTERFACE, f"/{product_id}/{property_name}", property_value)
 
 
@@ -191,4 +193,5 @@ class AstarteClient(QObject) :
         a_data  = {"productID":product_id, "paymentMode":payment_mode, "tansactionID":transaction_id, "sellingCost":selling_cost,
                    "sellingPrice":selling_price, "withPromo":with_promo, "isSuggested":is_suggested}
         
+        #self.__logger.debug(f"Sending transaction:\n{a_data}")
         self.__device.send_aggregate(self.__TRANSACTION_INTERFACE, "/transaction", a_data)
