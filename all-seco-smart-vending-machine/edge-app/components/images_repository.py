@@ -29,6 +29,15 @@ class ImagesRepository(QWidget):
         super().__init__()
 
 
+    def __retrieve_image(self, path) -> QPixmap:
+        pixmap  = QPixmap()
+        if validators.url(path) :
+            pixmap.loadFromData(requests.get(path).content)
+        else :
+            pixmap.load(path)
+        return pixmap
+
+
     def get_pixmap(self, path) -> QPixmap :
         
         # Checking if image_path is an URL or a file
@@ -39,14 +48,8 @@ class ImagesRepository(QWidget):
         
         # Checking if 'path' already exists
         result  = self.__images_descriptors.get(path)
-
-        if result==None:        
-            pixmap  = QPixmap()
-            if validators.url(path) :
-                pixmap.loadFromData(requests.get(path).content)
-            else :
-                pixmap.load(path)
-
+        if result==None:
+            pixmap                          = self.__retrieve_image(path)
             result                          = ImageDescriptor(path, pixmap)
             self.__images_descriptors[path] = result
         else:
