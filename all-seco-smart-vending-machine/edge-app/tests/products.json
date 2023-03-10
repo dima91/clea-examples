@@ -5,7 +5,7 @@
         "name"          : "Coca Cola",
         "currentPrice"  : 1.00,
         "currentCost"   : 0.45,
-        "imagePath"     : "media/products/coke.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/coke.png",
         "ingredients"   : [],
         "menuSection"   : "Drinks",
         "needsSugar"    : false
@@ -15,7 +15,7 @@
         "name"          : "Fanta",
         "currentPrice"  : 1.20,
         "currentCost"   : 0.55,
-        "imagePath"     : "media/products/fanta.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/fanta.png",
         "ingredients"   : [],
         "menuSection"   : "Drinks",
         "needsSugar"    : false
@@ -25,7 +25,7 @@
         "name"          : "Espresso",
         "currentPrice"  : 1.00,
         "currentCost"   : 0.30,
-        "imagePath"     : "media/products/coffee.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/coffee.png",
         "ingredients"   : ["Coffee"],
         "menuSection"   : "Coffee drinks",
         "needsSugar"    : true
@@ -35,7 +35,7 @@
         "name"          : "Americano",
         "currentPrice"  : 1.20,
         "currentCost"   : 0.55,
-        "imagePath"     : "media/products/americano.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/americano.png",
         "ingredients"   : ["Coffee"],
         "menuSection"   : "Coffee drinks",
         "needsSugar"    : true
@@ -45,7 +45,7 @@
         "name"          : "Cappuccino",
         "currentPrice"  : 1.50,
         "currentCost"   : 0.80,
-        "imagePath"     : "media/products/cappuccino.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/cappuccino.png",
         "ingredients"   : ["Milk", "Coffee"],
         "menuSection"   : "Coffee drinks",
         "needsSugar"    : true
@@ -55,7 +55,7 @@
         "name"          : "Lay's",
         "currentPrice"  : 1.50,
         "currentCost"   : 0.55,
-        "imagePath"     : "media/products/chips.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/chips.png",
         "ingredients"   : [],
         "menuSection"   : "Snacks",
         "needsSugar"    : false
@@ -65,7 +65,7 @@
         "name"          : "Cheeze-it",
         "currentPrice"  : 1.20,
         "currentCost"   : 0.55,
-        "imagePath"     : "media/products/cheez_it.png",
+        "imagePath"     : "https://clea.udoo.org/__media__/products/cheez_it.png",
         "ingredients"   : [],
         "menuSection"   : "Snacks",
         "needsSugar"    : false

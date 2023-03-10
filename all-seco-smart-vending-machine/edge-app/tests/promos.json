@@ -13,7 +13,7 @@
             "minAudienceAge":14,
             "maxAudienceAge":55,
             "targetEmotions":["Happy", "Anger"],
-            "imagePath":"media/promos/breakfast_club.png",
+            "imagePath":"https://clea.udoo.org/__media__/promos/breakfast_club.png",
             "currentStatus":"active"
         },
 
@@ -30,7 +30,7 @@
             "minAudienceAge":24,
             "maxAudienceAge":42,
             "targetEmotions":["Neutral", "Happy"],
-            "imagePath":" media/promos/special_brunch.png",
+            "imagePath":" https://clea.udoo.org/__media__/promos/special_brunch.png",
             "currentStatus":"active"
         }
     }

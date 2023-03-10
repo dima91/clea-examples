@@ -15,7 +15,7 @@
             "minAge":23,
             "maxAge":44,
             "emotions":["Happy"],
-            "imagePath":"media/advertisements/super_eyeliner.jpg",
+            "imagePath":"https://clea.udoo.org/__media__/advertisements/super_eyeliner.jpg",
             "currentStatus":"active"
         },
         "I7TiL38pj3":{
@@ -30,7 +30,7 @@
             "startScheduleTime":"8:00",
             "endScheduleTime":"20:00",
             "targetedAdv":false,
-            "imagePath":"media/advertisements/jewelry_store.jpg",
+            "imagePath":"https://clea.udoo.org/__media__/advertisements/jewelry_store.jpg",
             "currentStatus":"active"
         }
     }
