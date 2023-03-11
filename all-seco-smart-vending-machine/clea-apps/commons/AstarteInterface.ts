@@ -98,14 +98,17 @@ class AstarteInterface {
         return this.config.token
     }
 
-    build_request(method:Method, url:string){
-        return axios(url, {
+    build_request(method:Method, request_url:URL, query:any){
+        let request_params  = {
             method  : method,
             headers : {
                 "Authorization" : `Bearer ${this.astarteClient.getAuthorizationToken()}`,
                 "Content-type"  : "application/json:charset=UTF-8"
             }
-        })
+        }
+        if (query)
+            request_url.search  = new URLSearchParams(query).toString()
+        return axios(request_url.toString(), request_params)
     }
 
     build_path(interface_name:string) : string {
@@ -135,12 +138,9 @@ class AstarteInterface {
             timespan            += MS_IN_AN_HOUR
             let since           = moment (until.valueOf() - timespan)
             let query           = {"since":since.format("YYYY-MM-DDTHH:mm:ss"), "to":to.format('YYYY-MM-DDTHH:mm:ss')};
-            request_url.search  = new URLSearchParams(query).toString()
-
-            //console.debug (`New time range =>\t${query.since} - ${query.to}\nrequesturl: ${request_url.toString()}`)
             
             try {
-                let response    = await this.build_request("get", request_url.toString())
+                let response    = await this.build_request("get", request_url, query)
                 if (response.data.data!=undefined && isArray(response.data.data)) {
                     _.reverse(response.data.data).map((item:any, idx:number) => {
                         results.push(item)
@@ -157,12 +157,18 @@ class AstarteInterface {
     }
 
     private async get_datastream_items(path:string, since:moment.Moment, to:moment.Moment|undefined = undefined) {
-        // TODO
+        if (!to)
+            to  = moment()
+        
+        const request_url   = new URL(path, this.get_appengine_url())
+        let query           = {"since":since.format("YYYY-MM-DDTHH:mm:ss"), "to":to.format('YYYY-MM-DDTHH:mm:ss')}
+        
+        return this.build_request("get", request_url, query)
     }
 
     private async get_property(path:string) {
         const request_url   = new URL(path, this.get_appengine_url())
-        return this.build_request("get", request_url.toString())
+        return this.build_request("get", request_url, undefined)
     }
 
 
@@ -172,6 +178,12 @@ class AstarteInterface {
     async get_last_device_status(items_count:number, until:moment.Moment|undefined = undefined) {
         const path  = `${this.build_path(this.device_status_interface)}/status`
         return this.get_last_datastream_items(path, items_count, until)
+    }
+    
+    
+    async get_device_status_time_series(since:moment.Moment, to:moment.Moment) {
+        const path  = `${this.build_path(this.device_status_interface)}/status`
+        return this.get_datastream_items(path, since, to)
     }
     
     

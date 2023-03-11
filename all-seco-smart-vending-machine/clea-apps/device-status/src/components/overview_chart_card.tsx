@@ -30,7 +30,7 @@ const months                        = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`,
 
 
 
-export const ChartCard : React.FC<ChartCardProps> = ({astarte, chart_name, data_retriever_cb, data_filter_cb}:ChartCardProps) => {
+export const OverviewChartCard : React.FC<ChartCardProps> = ({astarte, chart_name, data_retriever_cb, data_filter_cb}:ChartCardProps) => {
     
     
     const MS_IN_24_HOURS                = 3600000
@@ -332,4 +332,4 @@ export const ChartCard : React.FC<ChartCardProps> = ({astarte, chart_name, data_
 };
 
 
-export default ChartCard;
+export default OverviewChartCard;

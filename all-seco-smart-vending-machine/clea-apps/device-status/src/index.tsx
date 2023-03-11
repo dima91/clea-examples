@@ -60,6 +60,8 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
         astarte_interface.get_device_setup()
         .then ((data:any) => {
             set_setup(data)
+            console.log ("device setup")
+            console.log (data)
         })
     }, [astarte_interface])
 

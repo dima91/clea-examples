@@ -1,11 +1,16 @@
 
 import React from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
+import AstarteInterface from "../../../commons/AstarteInterface";
+import _, { result } from 'lodash';
 
-import ChartCard from "./chart_card";
+import OverviewChartCard from "./overview_chart_card";
+import { derive_efficiency, downsample } from "../../../commons/utils";
 
 
 type StatusOverviewProps = {
+    astarte:AstarteInterface
+    device_setup:any
     temperature:number,
     consumption:number,
     vibration:number,
@@ -47,16 +52,9 @@ const build_card    = (text:string, value:string, unit:string) => {
 }
 
 
-const build_chart_card  = () => {
-    return (
-        <ChartCard></ChartCard>
-    )
-}
-
-
 const build_efficiency_details_card = (efficiency:number) => {
     let desc            = efficiency>=65 ? efficiency_descriptor["normal"] : efficiency_descriptor["warning"]
-    console.log (desc)
+    //console.log (desc)
 
     return (
         <Card className={`rounded shadow m-2 text-white ${desc.bg}`}>
@@ -76,7 +74,7 @@ const build_efficiency_details_card = (efficiency:number) => {
 }
 
 
-export const StatusOverview : React.FC<StatusOverviewProps>  = ({temperature, consumption, vibration, efficiency} : StatusOverviewProps) => {
+export const StatusOverview : React.FC<StatusOverviewProps>  = ({temperature, consumption, vibration, efficiency, device_setup, astarte} : StatusOverviewProps) => {
 
     return (
         <Container>
@@ -91,7 +89,17 @@ export const StatusOverview : React.FC<StatusOverviewProps>  = ({temperature, co
             </Row>
 
             <Row>
-                <Col sm={7}>{build_chart_card()}</Col>
+                <Col sm={7}>
+                    <OverviewChartCard astarte={astarte} chart_name={"Efficiency"}
+                               data_retriever_cb={(a:AstarteInterface, s:moment.Moment, t:moment.Moment) => {
+                                                    return a.get_device_status_time_series(s,t)}}
+                               data_filter_cb={(items:any) => {
+                                                let downsampled   = downsample(items, 30)
+                                                return _.map(downsampled, (it:any, idx:number) => {
+                                                                return [new Date(it.timestamp), derive_efficiency(it.chamberTemperature, it.powerConsumption,
+                                                                                                                    it.engineVibration, device_setup)]})}}
+                               ></OverviewChartCard>
+                </Col>
                 <Col sm={5}>{build_efficiency_details_card(efficiency)}</Col>
             </Row>
         </Container>
