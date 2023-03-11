@@ -1,0 +1,9 @@
+
+.primary-bg {
+    background-color: #11B0EF;
+}
+
+.warning-gradient-bg {
+    background: rgb(224,24,24);
+    background: linear-gradient(90deg, rgba(255,160,0,1) 0%, rgba(255,190,0,1) 100%);
+}
