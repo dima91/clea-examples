@@ -20,6 +20,16 @@
         "menuSection"   : "Drinks",
         "needsSugar"    : false
       },
+      "yu97fG2e4T"  : {
+        "ID"            : "yu97fG2e4T",
+        "name"          : "Red Bull",
+        "currentPrice"  : 1.40,
+        "currentCost"   : 0.60,
+        "imagePath"     : "https://clea.udoo.org/__media__/products/red_bull.png",
+        "ingredients"   : [],
+        "menuSection"   : "Drinks",
+        "needsSugar"    : false
+      },
       "AVTUlW_tdw"  : {
         "ID"            : "AVTUlW_tdw",
         "name"          : "Espresso",
