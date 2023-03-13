@@ -14,6 +14,7 @@ class VmcInterface (QThread) :
     __serial_port_mutex = None
     __still_run         = None
     __still_run_mux     = None
+    __send_message_sgnl = Signal(VendtraceMessage)
     ##########
     CR          = '\r'  # 0x0D
     LF          = '\n'  # 0x0A
@@ -37,8 +38,11 @@ class VmcInterface (QThread) :
         self.__still_run        = True
         self.__still_run_mux    = QMutex()
 
+        self.__send_message_sgnl.connect(self.__send_message_sgnl_cb)
 
-    def __send_message(self, msg):
+
+    def __send_message_sgnl_cb(self, msg):
+        print('im into callback')
         serialized_message      = msg.serialize()
         serialized_message_str  = msg.serialize().decode()
         serialized_message_len  = len(serialized_message)
@@ -61,17 +65,18 @@ class VmcInterface (QThread) :
 
     def send_message(self, msg) :
         message                 = VendtraceMessage(msg, MessageDirection.PC_TO_VMC)
+        self.__send_message_sgnl.emit(message)
 
         # Adding message to "output_messages" list
-        self.__out_messages_mux.lock()
-        self.__out_messages.append(message)
-        self.__out_messages_mux.unlock()
+        # self.__out_messages_mux.lock()
+        # self.__out_messages.append(message)
+        # self.__out_messages_mux.unlock()
 
-        # Checking for messages in "output_messages" list
-        self.__out_messages_mux.lock()
-        if len(self.__out_messages) > 0 :
-            self.__send_message(self.__out_messages.pop())
-        self.__out_messages_mux.unlock()
+        # # Checking for messages in "output_messages" list
+        # self.__out_messages_mux.lock()
+        # if len(self.__out_messages) > 0 :
+        #     self.__send_message(self.__out_messages.pop())
+        # self.__out_messages_mux.unlock()
 
 
     def run(self) -> None:
