@@ -74,7 +74,7 @@ class DispensingWidget(QWidget):
         
         dispensing_description  = QLabel("Dispensed" if self.__dispensed_quantity==self.__DISPENSING_MAX_QUANTITY else "Dispensing")
         dispensing_description.setObjectName("DispensingDescription")
-        dispensing_status_str   = QLabel("Fisnish" if self.__dispensed_quantity==self.__DISPENSING_MAX_QUANTITY else "I'm heating the milk...")
+        dispensing_status_str   = QLabel("Finish" if self.__dispensed_quantity==self.__DISPENSING_MAX_QUANTITY else "")
         dispensing_status_str.setObjectName("DispensingStatusStr")
         inner_layout.addWidget(dispensing_description)
         inner_layout.addWidget(self.__progress_bar)
