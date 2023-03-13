@@ -49,9 +49,9 @@ class VmcInterface (QThread) :
         
         #self.__logger.debug(f"Sending {serialized_message_str} ({serialized_message_len} bytes)")
 
-        self.__serial_port_mux.lock()
+        #self.__serial_port_mux.lock()
         c   = self.__serial_port.write(serialized_message)
-        self.__serial_port_mux.unlock()
+        #self.__serial_port_mux.unlock()
 
         if c!=len(serialized_message):
             self.__logger.error(f"Wrote {c} bytes, message len is {serialized_message_len}.\nMessage is:\t{serialized_message_str}")
