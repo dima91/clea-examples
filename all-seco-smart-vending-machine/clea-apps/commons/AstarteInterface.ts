@@ -4,6 +4,7 @@ import AstarteClient from './AstarteClient';
 import moment from 'moment';
 import { isArray, isObject} from 'lodash';
 import _ from 'lodash';
+import { Console } from 'console';
 
 type AstarteInterfaceProps = {
     astarteUrl: URL;
@@ -98,16 +99,18 @@ class AstarteInterface {
         return this.config.token
     }
 
-    build_request(method:Method, request_url:URL, query:any){
+    build_request(method:Method, request_url:URL, query:any, payload:any){
         let request_params  = {
             method  : method,
             headers : {
                 "Authorization" : `Bearer ${this.astarteClient.getAuthorizationToken()}`,
-                "Content-type"  : "application/json:charset=UTF-8"
-            }
+                "Content-Type"  : "application/json;charset=UTF-8"
+            },
+            data    : JSON.stringify({data:payload})
         }
         if (query)
             request_url.search  = new URLSearchParams(query).toString()
+        
         return axios(request_url.toString(), request_params)
     }
 
@@ -140,7 +143,7 @@ class AstarteInterface {
             let query           = {"since":since.format("YYYY-MM-DDTHH:mm:ss"), "to":to.format('YYYY-MM-DDTHH:mm:ss')};
             
             try {
-                let response    = await this.build_request("get", request_url, query)
+                let response    = await this.build_request("get", request_url, query, undefined)
                 if (response.data.data!=undefined && isArray(response.data.data)) {
                     _.reverse(response.data.data).map((item:any, idx:number) => {
                         results.push(item)
@@ -163,12 +166,23 @@ class AstarteInterface {
         const request_url   = new URL(path, this.get_appengine_url())
         let query           = {"since":since.format("YYYY-MM-DDTHH:mm:ss"), "to":to.format('YYYY-MM-DDTHH:mm:ss')}
         
-        return this.build_request("get", request_url, query)
+        return this.build_request("get", request_url, query, undefined)
     }
 
     private async get_property(path:string) {
         const request_url   = new URL(path, this.get_appengine_url())
-        return this.build_request("get", request_url, undefined)
+        return this.build_request("get", request_url, undefined, undefined)
+    }
+
+    private async update_property(path:string, value:any) {
+        const request_url   = new URL(path, this.get_appengine_url())
+        console.log (`requurl ${request_url.toString()}`)
+        return this.build_request("post", request_url, undefined, value)
+    }
+
+    private async publish_datatstream_item(path:string, data:any) {
+        const request_url   = new URL(path, this.get_appengine_url())
+        return this.build_request("POST", request_url, undefined, data)
     }
 
 
@@ -191,12 +205,40 @@ class AstarteInterface {
         const path          = `${this.build_path(this.device_setup_interface)}`
         return this.get_property(path).then((response) => response.data?.data)
     }
+
+
+    async get_sales_product_details() {
+        const path  = `${this.build_path(this.sale_product_details_interface)}`
+        return this.get_property(path).then((response) => response.data?.data)
+    }
     
     
-    // async get_product_details(product_id) {
-    //     const path          = `${this.build_path(this.product_details_interface)}`
-    //     return this.get_property(path).then((response) => response.data?.data)
-    // }
+    async get_product_details() {
+        let path    = `${this.build_path(this.product_details_interface)}`
+        return this.get_property(path).then((response) => response.data?.data)
+    }
+
+
+    async get_last_refill_events(count:number|undefined = undefined) {
+        const actual_path   = this.build_path(this.refill_event_interface)
+        return this.get_datastream_items(actual_path, moment().subtract(1, 'year'), undefined).then((response) => response.data?.data)
+    }
+
+
+    async set_property(path:string, new_value:any) {
+        const actual_path   = `${this.build_path(this.device_setup_interface)}/${path}`
+        return this.update_property(actual_path, new_value).then((response) => response)
+    }
+
+    async make_refill(note:string, refiller_id:string) {
+        let data    = {
+            'note'          : note,
+            'refillerID'    : refiller_id
+        }
+        let path    = `${this.build_path(this.refill_event_interface)}/refill`
+        return this.publish_datatstream_item(path, data)
+        .then((response) => console.log(response))
+    }
 }
 
 export default AstarteInterface;
