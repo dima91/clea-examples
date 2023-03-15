@@ -39,7 +39,6 @@ const messages                          = { en, it };
 
 
 const App : React.FC<AppProps>  = ({astarteUrl, realm, token, deviceId}:AppProps) => {
-    // TODO
 
     const [is_ready, set_is_ready]              = React.useState(false)
     const [introspection, set_introspection]    = React.useState<any>(undefined)

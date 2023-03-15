@@ -66,7 +66,8 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
     }, [astarte_interface])
 
     useEffect(() => {
-        set_is_ready(status!=undefined && device_setup!=undefined && introspection!=undefined)
+        if (status && device_setup)
+            set_is_ready(status!=undefined && device_setup!=undefined && introspection!=undefined)
     }, [status, device_setup, introspection])
 
     return (

@@ -26,7 +26,7 @@ let efficiency_descriptor   = {
     },
     "warning"   : {
         title       : "Warning",
-        description : "This vending machine is in very good condition.\nPredicitive maintenance will alert you in time of any anomalies so you can schedule a technician's intervention.",
+        description : "There is a suspected increase of consumption and engine vibration to maintain the chamber temperature.\nRequest assistance to check temotor before it breaks down.",
         bg          : "warning-gradient-bg"
     }
 }
@@ -65,7 +65,7 @@ const build_efficiency_details_card = (efficiency:number) => {
                 <Row>
                     <div className="fs-1 d-flex justify-content-center">{desc.title}</div>
                 </Row>
-                <Row>
+                <Row className="mt-4">
                     <div className="fs-6 d-flex justify-content-center">{desc.description}</div>
                 </Row>
             </Card.Body>
@@ -94,8 +94,8 @@ export const StatusOverview : React.FC<StatusOverviewProps>  = ({temperature, co
                                data_retriever_cb={(a:AstarteInterface, s:moment.Moment, t:moment.Moment) => {
                                                     return a.get_device_status_time_series(s,t)}}
                                data_filter_cb={(items:any) => {
-                                                let downsampled   = downsample(items, 30)
-                                                return _.map(downsampled, (it:any, idx:number) => {
+                                                //let downsampled   = downsample(items, 30)
+                                                return _.map(items, (it:any, idx:number) => {
                                                                 return [new Date(it.timestamp), derive_efficiency(it.chamberTemperature, it.powerConsumption,
                                                                                                                     it.engineVibration, device_setup)]})}}
                                ></OverviewChartCard>
