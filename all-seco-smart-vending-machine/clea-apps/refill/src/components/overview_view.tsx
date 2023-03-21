@@ -64,7 +64,7 @@ export const OverviewView : React.FC<OverviewViewProps> = ({astarte, products_de
         
     }
     const get_percentage            = (max:number, curr_value:number) => {
-        return max/100*curr_value
+        return Number((max/100*curr_value).toFixed(2))
     }
     const percentage_to_status      = (percentage:number) : Status => {
         if (percentage>=.7)
@@ -152,7 +152,7 @@ export const OverviewView : React.FC<OverviewViewProps> = ({astarte, products_de
             }
         }
         let curr_status = percentage_to_status(min_percentage)
-        mean            = mean/(Object.keys(sale_details).length)
+        mean            = Number(((mean/(Object.keys(sale_details).length))*100).toFixed(0))
         
         return (
             <Card className={`${curr_status == Status.NORMAL?"primary-bg":"warning-gradient-bg"} p-2 m-2 text-white`}>
@@ -183,7 +183,7 @@ export const OverviewView : React.FC<OverviewViewProps> = ({astarte, products_de
                                         <span>Remaining products</span>
                                     </Col>
                                     <Col sm={6} md={6} className="d-flex justify-content-end align-items-baseline">
-                                        <span className="fs-2">{mean*100}</span>
+                                        <span className="fs-2">{mean}</span>
                                         <span>%</span>
                                     </Col>
                                 </Row>

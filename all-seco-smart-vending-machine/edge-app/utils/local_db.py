@@ -63,6 +63,7 @@ class LocalDB:
         self.__logger.debug("Handling refill event!!!!\n\n\n")
         for p in self.__sold_products:
             self.__sold_products[p]["remainingItems"]   = self.__max_products_count
+            self.__sold_products[p]["maxItemsCount"]    = self.__max_products_count
             self.__update_product_values(p)
 
 

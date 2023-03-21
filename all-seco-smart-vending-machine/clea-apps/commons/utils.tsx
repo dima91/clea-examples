@@ -21,9 +21,7 @@ export const derive_efficiency = (temperature:number, consumption:number, vibrat
     console.log (`n_% of ${consumption} among ${setup.device.minPower} and ${setup.device.maxPower} is ${n_c}`)
     console.log (`n_% of ${vibration} among ${setup.device.minVibration} and ${setup.device.maxVibration} is ${n_v}`)
 
-    result  = Number(((1-((n_t+n_c+n_v)/3))*100).toFixed(2))
-
-    return result
+    return Number(((1-((n_t+n_c+n_v)/3))*100).toFixed(2))
 }
 
 
