@@ -3,7 +3,7 @@ import requests, json, time
 from dateutil import parser
 from datetime import datetime
 
-base_url="https://api.eu1.astarte.cloud/appengine/v1/tester/devices/5y1wzoO0Tiic7f7wP2Mzig/interfaces/ai.clea.examples.vendingMachine.PromoDetails"
+base_url="https://api.demo.clea.cloud/appengine/v1/showcase/devices/rK9K_J3ATZeRJRxYo7GWWg/interfaces/ai.clea.examples.vendingMachine.PromoDetails"
 appengine_token="Bearer "
 
 def publish_promo(p, data):
