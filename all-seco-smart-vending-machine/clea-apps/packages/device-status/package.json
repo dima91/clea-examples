@@ -1,0 +1,36 @@
+{
+    "name": "device-status",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+      "build": "webpack",
+      "watch": "webpack --mode=development --watch",
+      "extract": "formatjs extract 'src/**/*.js*' --out-file lang/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'",
+      "compile": "formatjs compile-folder lang src/lang",
+      "format": "prettier --write ."
+    },
+    "keywords": [],
+    "author": "",
+    "private": true,
+    "license": "ISC",
+    "dependencies": {
+        "commons"   : ""
+    },
+    "devDependencies": {},
+    "babel": {
+      "presets": [
+        "@babel/preset-env",
+        "@babel/preset-react"
+      ],
+      "plugins": [
+        [
+          "formatjs",
+          {
+            "idInterpolationPattern": "[sha512:contenthash:base64:6]",
+            "ast": true
+          }
+        ]
+      ]
+    }
+  }
+  
