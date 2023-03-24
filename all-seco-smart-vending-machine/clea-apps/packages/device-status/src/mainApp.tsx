@@ -10,6 +10,7 @@ import AstarteInterface from "commons/AstarteInterface";
 import StatusOverview from "./components/StatusOverview";
 import ChartCard from "commons/ChartCard";
 import MapCard from "commons/MapCard";
+import SelectorsListCard from "commons/SelectorsListCard";
 
 
 
@@ -134,7 +135,9 @@ export const MainApp = ({is_ready, astarte, introspection, device_status, device
                     <Col sm={12} md={12}>
                         <Row>
                             <Col sm={3} md={3}>
-                                <Card className="shadow rounded">
+                                <SelectorsListCard  descriptors={selectors_descriptors}
+                                                    selected_selector={{value:selected_descriptor_key, setter:set_descriptor_key}}/>
+                                {/* <Card className="shadow rounded">
                                     <Card.Body>
                                         <Nav variant="pills" defaultActiveKey={0}  className="flex-column">
                                             {
@@ -142,8 +145,7 @@ export const MainApp = ({is_ready, astarte, introspection, device_status, device
                                                     return (
                                                         <Button key={key} value={item.descriptor_id} onClick={item.on_click} variant=""
                                                                 className={`mt-2 text-start ${get_selector_text_color(item.descriptor_id)}
-                                                                                        ${get_selector_bg_color(item.descriptor_id)}`}
-                                                                /*variant={selected_descriptor_key == item.descriptor_id ? "info" : ""}*/>
+                                                                                        ${get_selector_bg_color(item.descriptor_id)}`}>
                                                             {item.text}
                                                         </Button>
                                                     )
@@ -151,7 +153,7 @@ export const MainApp = ({is_ready, astarte, introspection, device_status, device
                                             }
                                         </Nav>
                                     </Card.Body>
-                                </Card>
+                                </Card> */}
                             </Col>
 
                             <Col sm={9} md={9}>
