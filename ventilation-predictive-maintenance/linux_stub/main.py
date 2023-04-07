@@ -12,20 +12,20 @@ def generate_random_value(curr, min, max, delta):
     elif next_v>max:
         next_v  = next_v-delta
 
-    print (f'Next value is {next_v}')
+    #print (f'Next value is {next_v}')
     return next_v
 
 
 async def simulator(astarte_client):
 
-    LOOP_DELAY_S            = 1
-    EVENTS_BASE_DELAY_S     = 20            # FIXME restore me: 60*8      # 8 minutes
-    EVENTS_DELTA_S          = 5             # FIXME restore me: 60*2      # 2 minutes
+    LOOP_DELAY_S            = 5
+    EVENTS_BASE_DELAY_S     = 60*5      # 5 minutes
+    EVENTS_DELTA_S          = 40
     BASE_EVENT_DURATION_S   = 10.0
-    EVENT_DURATION_DELTA_S  = 5.0
+    EVENT_DURATION_DELTA_S  = 2.5
 
     DELTA_FLOW      = 0.1
-    DELTA_POLLUTION = 5.0
+    DELTA_POLLUTION = 2.5
 
     last_event_timestamp    = datetime.now()
     event_type              = None
