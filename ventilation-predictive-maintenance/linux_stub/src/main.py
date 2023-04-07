@@ -1,8 +1,7 @@
 
-import asyncio, time, random
+import os, asyncio, time, random
 from datetime import datetime, timedelta
-from argparse import ArgumentParser
-from src.astarteClient import AstarteClient
+from astarteClient import AstarteClient
 
 
 def generate_random_value(curr, min, max, delta):
@@ -99,20 +98,18 @@ async def simulator(astarte_client):
 
 
 if __name__== "__main__" :
-    parser  = ArgumentParser ()
-    parser.add_argument ("-i", "--device-id", required=True)
-    parser.add_argument ("-s", "--device-secret", required=True)
-    parser.add_argument ("-u", "--api-base-url", required=True)
-    parser.add_argument ("-n", "--realm-name", required=True)
-    parser.add_argument ("-p", "--persistency-path", required=True)
-    parser.add_argument ("-f", "--interfaces-folder", required=True)
-    args    = parser.parse_args()
+    device_id           = os.environ["DEVICE_ID"]
+    device_secret       = os.environ["DEVICE_SECRET"]
+    api_base_url        = os.environ["API_BASE_URL"]
+    realm_name          = os.environ["REALM_NAME"]
+    persistency_path    = os.environ["PERSISTENCY_PATH"]
+    interfaces_folder   = os.environ["INTERFACES_FOLDER"]
 
     loop    = asyncio.get_event_loop()
 
     # Building AstarteClient object with command line arguments
-    client  = AstarteClient(args.device_id, args.realm_name, args.device_secret, args.api_base_url,
-                            args.persistency_path, args.interfaces_folder, loop)
+    client  = AstarteClient(device_id, realm_name, device_secret, api_base_url,
+                            persistency_path, interfaces_folder, loop)
     client.connect()
 
     # Creating simulator task
