@@ -1,5 +1,6 @@
 
 import os, glob, json
+from pathlib import Path
 from datetime import datetime
 from astarte.device import Device
 
@@ -60,10 +61,11 @@ class AstarteClient :
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
-            path    = os.path.join(interfaces_folder, filename)
-            if os.path.isfile(path) :
-                print (f"Loading interface in {path}...")
-                self.__device.add_interface (json.load(open(path)))
+            if os.path.isfile(filename) :
+                print (f"Loading interface in {filename}...")
+                self.__device.add_interface (json.load(open(filename)))
+            else:
+                print (f"File {filename} is not file!")
 
 
     def __connection_cb(self, dvc) :
