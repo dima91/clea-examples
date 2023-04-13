@@ -1,3 +1,0 @@
-
-astarte-device-sdk == 0.10.0a5
-redis == 4.4.0
