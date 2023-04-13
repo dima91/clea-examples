@@ -1,0 +1,2 @@
+
+astarte-device-sdk == 0.10.0a5
