@@ -1,4 +1,3 @@
-
 {
     "interface_name": "ai.clea.examples.machine.Counters",
     "version_major": 0,
@@ -7,18 +6,16 @@
     "ownership": "device",
     "mappings": [
         {
-            "endpoint": "/containerStatus",
-            "type": "string",
+            "endpoint": "/longCoffee",
+            "type": "integer",
             "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 31536000,
-            "description": "Event code. Possible values [ 'CONTAINER_OFF_ALARM_EVENT' | 'CONTAINER_OPEN_ALARM_EVENT' | 'CONTAINER_FULL_ALARM_EVENT' ]"
+            "database_retention_ttl": 31536000
         },
         {
-            "endpoint": "/waterStatus",
-            "type": "string",
+            "endpoint": "/shortCoffee",
+            "type": "integer",
             "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 31536000,
-            "description": "Event code. Possible values [ 'WATER_OFF_ALARM_EVENT' | 'WATER_EMPTY_ALARM_EVENT' | 'WATER_OPEN_ALARM_EVENT' ]"
+            "database_retention_ttl": 31536000
         }
     ]
 }
