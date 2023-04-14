@@ -1,5 +1,5 @@
 
-import random, time
+import random, time, holidays
 from datetime import datetime
 
 
@@ -11,7 +11,7 @@ week_day_presence_percentage   = {
     0   : [.5, .8],     # Monday
     1   : [.75, 1],     # Tuesday
     2   : [.4, .65],    # Wednesday
-    3   : [.85, 1],      # Thursday
+    3   : [.85, 1],     # Thursday
     4   : [0, .3],      # Friday
     5   : [0, .1],      # Saturday
     6   : [0, 0],       # Sunday
@@ -40,6 +40,7 @@ class CoffeeMachineSimulator:
     __client        = None
     __db            = None
     __is_running    = False
+    __holidays      = None
 
     ## .. params
     __PEOPLE_COUNT          = 0
@@ -48,9 +49,10 @@ class CoffeeMachineSimulator:
     __ERROR_SOLVING_DELAY_S = [30, 100]
 
 
-    def __init__(self, client:AstarteClient, db:LocalDB) -> None:
+    def __init__(self, client:AstarteClient, db:LocalDB, country:str) -> None:
         self.__client   = client
         self.__db       = db
+        self.__holidays = holidays.country_holidays(country)
 
         d   = datetime.now()
         print(f"\nStarting time is {d.astimezone()}\n\n")
@@ -67,15 +69,18 @@ class CoffeeMachineSimulator:
         coffees_per_hour    = {}
         total_coffees       = 0
 
-        # TODO Checking if it is a celebration day
+        # Checking if it is a celebration day
+        if now.date() in self.__holidays :
+            # Do nothing
+            pass
+        else:
+            for i in coffees_per_hour_percentage:
+                coffees_range       = coffees_per_hour_percentage[i]
+                coffees_per_hour[i] = self.__compute_int_percentage(curr_people_count, coffees_range)
+                if i-1 in coffees_per_hour_percentage  and  coffees_per_hour[i]-coffees_per_hour[i-1]>=0:
+                    coffees_per_hour[i] -= coffees_per_hour[i-1]
 
-        for i in coffees_per_hour_percentage:
-            coffees_range       = coffees_per_hour_percentage[i]
-            coffees_per_hour[i] = self.__compute_int_percentage(curr_people_count, coffees_range)
-            if i-1 in coffees_per_hour_percentage  and  coffees_per_hour[i]-coffees_per_hour[i-1]>=0:
-                coffees_per_hour[i] -= coffees_per_hour[i-1]
-
-            total_coffees += coffees_per_hour[i]
+                total_coffees += coffees_per_hour[i]
 
         print (f"Params for today ({now.date()}) are:\n\tpeople_count: {curr_people_count}\n\tcoffees_per_hour:{coffees_per_hour}\n\ttotal_coffees:{total_coffees}")
         return curr_people_count, coffees_per_hour
@@ -161,6 +166,7 @@ class CoffeeMachineSimulator:
                 while curr_hour_coffees_count>0:
                     target_minutes.append(minutes.pop(0))
                     curr_hour_coffees_count -= 1
+                target_minutes.sort()
 
                 print(f"[{curr_hour}] -> Delivering coffees at minutes {target_minutes}")
                 
@@ -168,7 +174,6 @@ class CoffeeMachineSimulator:
                 while curr_hour==datetime.now().hour:
                     time.sleep(20+random.randint(0,20))
                     
-                    print("Checking..")
                     if len(target_minutes)>0 and datetime.now().minute==target_minutes[0]:
 
                         # Checking if container needs to be emptied

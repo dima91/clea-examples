@@ -13,6 +13,7 @@ def main():
     realm_name          = os.environ["REALM_NAME"]
     persistency_path    = os.environ["PERSISTENCY_PATH"]
     interfaces_folder   = os.environ["INTERFACES_FOLDER"]
+    country             = os.environ["COUNTRY"]
 
     local_db_path       = "/data/local.db"
 
@@ -27,7 +28,7 @@ def main():
     local_db    = LocalDB(local_db_path)
 
     # Setting up coffe machine simulator
-    simulator   = CoffeeMachineSimulator(client, local_db)
+    simulator   = CoffeeMachineSimulator(client, local_db, country)
     simulator.set_people_count(12)          # FIXME
     simulator.set_container_capacity(27)    # FIXME
     simulator.set_water_capacity(14)        # FIXME
