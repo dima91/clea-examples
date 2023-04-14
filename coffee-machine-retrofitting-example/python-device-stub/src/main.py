@@ -1,14 +1,9 @@
 
-from astarteClient import AstarteClient, ContainerStatus, WaterStatus
+from astarteClient import AstarteClient
 from localDB import LocalDB
+from simulator import CoffeeMachineSimulator
 
 import os, asyncio, time, random
-
-
-async def simulator(client:AstarteClient, db:LocalDB):
-    while True:
-        #TODO
-        pass
 
 
 def main():
@@ -31,8 +26,14 @@ def main():
     # Creating LocalDB object
     local_db    = LocalDB(local_db_path)
 
+    # Setting up coffe machine simulator
+    simulator   = CoffeeMachineSimulator(client, local_db)
+    simulator.set_people_count(12)          # FIXME
+    simulator.set_container_capacity(27)    # FIXME
+    simulator.set_water_capacity(14)        # FIXME
+
     # Creating simulator task
-    loop.create_task (simulator(client, local_db))
+    loop.create_task (simulator.run())
 
     loop.run_forever()
 

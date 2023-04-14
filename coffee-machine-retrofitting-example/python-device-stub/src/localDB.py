@@ -43,7 +43,9 @@ class LocalDB:
     def new_short_coffee(self):
         self.__short_coffee_counter += 1
         self.__dump_db()
+        return self.get_short_coffee_counter()
     
     def new_long_coffee(self):
         self.__long_coffee_counter += 1
         self.__dump_db()
+        return self.get_long_coffee_counter()

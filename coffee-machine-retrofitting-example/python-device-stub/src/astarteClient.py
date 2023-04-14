@@ -13,8 +13,8 @@ class ContainerStatus(enum.Enum):
 
 class WaterStatus(enum.Enum):
     WATER_OFF_ALARM_EVENT   = "WATER_OFF_ALARM_EVENT"
-    WATER_EMPTY_ALARM_EVENT = "WATER_EMPTY_ALARM_EVENT"
     WATER_OPEN_ALARM_EVENT  = "WATER_OPEN_ALARM_EVENT"
+    WATER_EMPTY_ALARM_EVENT = "WATER_EMPTY_ALARM_EVENT"
 
 
 class AstarteClient :
@@ -64,7 +64,7 @@ class AstarteClient :
         print ('================\nDevice connected\n================\n\n')
 
     def __disconnecton_cb(self, dvc, code) :
-        print ("Device disconnected")
+        print ('====================\nDevice disconnected!\n====================\n\n')
     
     def __data_cb(self, astarte_device, interface, path, data) :
         print ("Received server data")
