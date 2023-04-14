@@ -29,9 +29,9 @@ def main():
 
     # Setting up coffe machine simulator
     simulator   = CoffeeMachineSimulator(client, local_db, country)
-    simulator.set_people_count(12)          # FIXME
-    simulator.set_container_capacity(27)    # FIXME
-    simulator.set_water_capacity(14)        # FIXME
+    simulator.set_people_count(int(os.environ["MAX_PEOPLE_COUNT"]))
+    simulator.set_container_capacity(int(os.environ["CONTAINER_CAPACITY"]))
+    simulator.set_water_capacity(int(os.environ["WATER_CAPACITY"]))
 
     # Creating simulator task
     loop.create_task (simulator.run())
