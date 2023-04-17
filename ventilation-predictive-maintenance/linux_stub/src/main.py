@@ -18,10 +18,10 @@ def generate_random_value(curr, min, max, delta):
 async def simulator(astarte_client):
 
     LOOP_DELAY_S            = 5
-    EVENTS_BASE_DELAY_S     = 60*5      # 5 minutes
-    EVENTS_DELTA_S          = 40
-    BASE_EVENT_DURATION_S   = 10.0
-    EVENT_DURATION_DELTA_S  = 2.5
+    EVENTS_BASE_DELAY_S     = int(os.environ["EVENTS_DELAY_BASE_S"])
+    EVENTS_DELTA_S          = int(os.environ["EVENTS_DELAY_DELTA_S"])
+    BASE_EVENT_DURATION_S   = float(os.environ["EVENTS_DURATION_BASE_S"])
+    EVENT_DURATION_DELTA_S  = float(os.environ["EVENTS_DURATION_DELTA_S"])
 
     DELTA_FLOW      = 0.1
     DELTA_POLLUTION = 2.5
