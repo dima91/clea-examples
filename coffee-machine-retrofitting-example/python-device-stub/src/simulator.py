@@ -145,8 +145,6 @@ class CoffeeMachineSimulator:
                 # Generating parameters for current day
                 curr_day_people_count,\
                 curr_day_coffees_per_hour   = self.__generate_day_params(now)
-
-                print (f"Params for {curr_date.date()}")
             
             else :
                 # Genrating parameters for current hour
