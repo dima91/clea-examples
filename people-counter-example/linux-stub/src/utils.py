@@ -1,4 +1,5 @@
 
+import math
 from datetime import timedelta, datetime
 
 
@@ -11,7 +12,7 @@ def compute_min_probability_if_among(min_t, max_t, max_p, curr_t) :
         time_percentage = time_delta.total_seconds()/time_range.total_seconds()
         #print(f"Acceptable value! max_p is {max_p} -> {time_delta.total_seconds()} mapped in {time_range.total_seconds()} = {time_percentage}")
         # TODO Generate a min probability value with more accuracy
-        result  = time_percentage
+        result  = math.sqrt(time_percentage)
     return result
 
 DETECTION_CONFIDENCE_RANGE  = [.65, 1]
@@ -29,8 +30,7 @@ PEOPLE_DAY_PERCENTAGE   = {
     6   : [0, 0],       # Sunday
 }
 
-ENTRANCE_EXIT_DELAY_S   = 10
-#ENTRANCE_EXIT_DELAY_S   = 300   # FIXME Adjust this value!
+ENTRANCE_EXIT_DELAY_S   = 10    # FIXME Adjust this value
 ENTRANCE_PARAMS         = {
     "GET_START_TIME"        : lambda d : d.replace(hour=8, minute=0, second=0, microsecond=0),
     "GET_END_TIME"          : lambda d : d.replace(hour=10, minute=15, second=0, microsecond=0),
