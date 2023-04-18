@@ -122,14 +122,6 @@ class Simulator:
             time.sleep(self.__update_interval)
 
             now = datetime.now()
-            # FIXME Test section -> TODO Delete me!
-            #now = now - timedelta(hours=4)
-            curr_people_count   = 12
-            utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] = 2
-            utils.ZONES_DESCRIPTORS["Break Area"]["current_people_count"] = 1
-            utils.ZONES_DESCRIPTORS["Meeting Area"]["current_people_count"] = 4
-            utils.ZONES_DESCRIPTORS["UX Area"]["current_people_count"] = 5
-            # FIXME End of test section
             
             if curr_date==None or curr_date!=now.date():
                 # Generating parameters for current day
@@ -138,6 +130,15 @@ class Simulator:
                 curr_date                   = now.date()
                 max_people_count            = self.__generate_day_params(now)
                 curr_people_count           = 0
+
+                # FIXME Test section -> TODO Delete me!
+                #now = now - timedelta(hours=4)
+                curr_people_count   = 12
+                utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] = 2
+                utils.ZONES_DESCRIPTORS["Break Area"]["current_people_count"] = 1
+                utils.ZONES_DESCRIPTORS["Meeting Area"]["current_people_count"] = 4
+                utils.ZONES_DESCRIPTORS["UX Area"]["current_people_count"] = 5
+                # FIXME End of test section
 
             if now.timestamp()-last_entrance_exit_check.timestamp()>utils.ENTRANCE_EXIT_DELAY_S:
                 last_entrance_exit_check    = now
@@ -170,7 +171,7 @@ class Simulator:
                         min_exit_probability    = random.uniform(curr_exit_probabilities[0], curr_exit_probabilities[1])
                         if exit_probability>min_exit_probability:
                             # A person can exit from current area
-                            # FIXME Considering weights of connected areas
+                            # Considering weights of connected areas
                             areas_weights   = []
                             for ca in desc["CONNECTED_AREAS"]:
                                 factor              = random.uniform(0,1)
