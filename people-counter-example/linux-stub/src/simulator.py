@@ -123,8 +123,14 @@ class Simulator:
 
             now = datetime.now()
             # FIXME Test section -> TODO Delete me!
-            now = now - timedelta(hours=4)
+            #now = now - timedelta(hours=4)
+            curr_people_count   = 12
+            utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] = 2
+            utils.ZONES_DESCRIPTORS["Break Area"]["current_people_count"] = 1
+            utils.ZONES_DESCRIPTORS["Meeting Area"]["current_people_count"] = 4
+            utils.ZONES_DESCRIPTORS["UX Area"]["current_people_count"] = 5
             # FIXME End of test section
+            
             if curr_date==None or curr_date!=now.date():
                 # Generating parameters for current day
                 last_entrance_exit_check    = now
@@ -132,9 +138,6 @@ class Simulator:
                 curr_date                   = now.date()
                 max_people_count            = self.__generate_day_params(now)
                 curr_people_count           = 0
-
-                utils.ENTRANCE_PARAMS["current_probability"]    = 0
-                utils.EXIT_PARAMS["current_probability"]        = 0
 
             if now.timestamp()-last_entrance_exit_check.timestamp()>utils.ENTRANCE_EXIT_DELAY_S:
                 last_entrance_exit_check    = now
@@ -161,17 +164,24 @@ class Simulator:
                 actions = []    # Array item: [source_area, taregt_area]
                 for d in utils.ZONES_DESCRIPTORS:
                     desc    = utils.ZONES_DESCRIPTORS[d]
-                    # print (d)
-                    # print (desc)
                     if desc["current_people_count"]>0:
                         exit_probability        = random.uniform(0,1)
                         curr_exit_probabilities = desc["EXIT_PROBABILITIES"][now.hour]
                         min_exit_probability    = random.uniform(curr_exit_probabilities[0], curr_exit_probabilities[1])
-                        #print(f"curr_exit_probabilities for {now.hour}:{curr_exit_probabilities}")
                         if exit_probability>min_exit_probability:
-                            # A person can exit from curent area
-                            target_area = random.randint(0, len(desc["CONNECTED_AREAS"])-1)
-                            actions.append([d, desc["CONNECTED_AREAS"][target_area]])
+                            # A person can exit from current area
+                            # FIXME Considering weights of connected areas
+                            areas_weights   = []
+                            for ca in desc["CONNECTED_AREAS"]:
+                                factor              = random.uniform(0,1)
+                                target_area_weights = utils.ZONES_DESCRIPTORS[ca]["ENTRANCE_WEIGHTS"][now.hour]
+                                weight              = random.uniform(target_area_weights[0], target_area_weights[1])
+                                areas_weights.append({"target_area":ca, "weight":factor*weight})
+                            #print(f"Chosing among {areas_weights}")
+                            areas_weights.sort(key=lambda e:e["weight"], reverse=True)
+                            #print(f"Chosing among {areas_weights}")
+                            target_area = areas_weights[0]["target_area"]
+                            actions.append([d, target_area])
 
                 # Applying actions prepared in the previous step
                 for a in actions:

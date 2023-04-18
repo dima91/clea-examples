@@ -52,8 +52,23 @@ EXIT_PARAMS             = {
 
 ZONES_DESCRIPTORS   = {
     "Entrance"      : {
-        "MAX_PEOPLE_COUNT"      : 12,
-        "CONNECTED_AREAS"       : ["Break Area", "Meeting Area", "UX Area"],
+        "MAX_PEOPLE_COUNT"          : 12,
+        "CONNECTED_AREAS"           : ["Break Area", "Meeting Area", "UX Area"],
+        # FIXME Insert correct values
+        "ENTRANCE_WEIGHTS"    : {
+                # min -max
+            8   : [.3, .7],
+            9   : [.3, .7],
+            10  : [.3, .7],
+            11  : [.3, .7],
+            12  : [.3, .7],
+            13  : [.3, .7],
+            14  : [.3, .7],
+            15  : [.3, .7],
+            16  : [.3, .7],
+            17  : [.3, .7],
+            18  : [.3, .7],
+        },
         "EXIT_PROBABILITIES"    : {
                 # min -max
             8   : [.3, .75],
@@ -65,15 +80,30 @@ ZONES_DESCRIPTORS   = {
             14  : [.3, .75],
             15  : [.65, .75],
             16  : [.70, .9],
-            17  : [.6, .9],
-            18  : [.6, .9],
+            17  : [.7, .9],
+            18  : [1, 1],
         },
 
         "current_people_count"  : 0
     },
     "Break Area"    : {
-        "MAX_PEOPLE_COUNT"      : 15,
-        "CONNECTED_AREAS"       : ["Entrance"],
+        "MAX_PEOPLE_COUNT"          : 15,
+        "CONNECTED_AREAS"           : ["Entrance"],
+        # FIXME Insert correct values
+        "ENTRANCE_WEIGHTS"    : {
+                # min -max
+            8   : [.3, .7],
+            9   : [.3, .7],
+            10  : [.3, .7],
+            11  : [.3, .7],
+            12  : [.3, .7],
+            13  : [.3, .7],
+            14  : [.3, .7],
+            15  : [.3, .7],
+            16  : [.3, .7],
+            17  : [.3, .7],
+            18  : [.3, .7],
+        },
         "EXIT_PROBABILITIES"    : {
                 # min -max
             8   : [.6, .8],
@@ -92,8 +122,23 @@ ZONES_DESCRIPTORS   = {
         "current_people_count"  : 0
     },
     "Meeting Area"  : {
-        "MAX_PEOPLE_COUNT"      : 8,
-        "CONNECTED_AREAS"       : ["Entrance"],
+        "MAX_PEOPLE_COUNT"          : 8,
+        "CONNECTED_AREAS"           : ["Entrance"],
+        # FIXME Insert correct values
+        "ENTRANCE_WEIGHTS"    : {
+                # min -max
+            8   : [.3, .7],
+            9   : [.3, .7],
+            10  : [.3, .7],
+            11  : [.3, .7],
+            12  : [.3, .7],
+            13  : [.3, .7],
+            14  : [.3, .7],
+            15  : [.3, .7],
+            16  : [.3, .7],
+            17  : [.3, .7],
+            18  : [.3, .7],
+        },
         "EXIT_PROBABILITIES"    : {
                 # min -max
             8   : [.3, .4],
@@ -112,8 +157,23 @@ ZONES_DESCRIPTORS   = {
         "current_people_count"  : 0
     },
     "UX Area"   : {
-        "MAX_PEOPLE_COUNT"      : 8,
-        "CONNECTED_AREAS"       : ["Entrance"],
+        "MAX_PEOPLE_COUNT"          : 8,
+        "CONNECTED_AREAS"           : ["Entrance"],
+        # FIXME Insert correct values
+        "ENTRANCE_WEIGHTS"    : {
+                # min -max
+            8   : [.3, .7],
+            9   : [.3, .7],
+            10  : [.3, .7],
+            11  : [.3, .7],
+            12  : [.3, .7],
+            13  : [.3, .7],
+            14  : [.3, .7],
+            15  : [.3, .7],
+            16  : [.3, .7],
+            17  : [.3, .7],
+            18  : [.3, .7],
+        },
         "EXIT_PROBABILITIES"    : {
                 # min -max
             8   : [.6, .75],
