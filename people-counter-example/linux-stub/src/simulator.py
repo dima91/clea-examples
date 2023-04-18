@@ -114,6 +114,7 @@ class Simulator:
         max_people_count            = 0
         curr_people_count           = 0
         last_entrance_exit_check    = 0
+        last_movements_check        = 0
 
         self.__is_running   = True
 
@@ -127,6 +128,7 @@ class Simulator:
             if curr_date==None or curr_date!=now.date():
                 # Generating parameters for current day
                 last_entrance_exit_check    = now
+                last_movements_check        = now
                 curr_date                   = now.date()
                 max_people_count            = self.__generate_day_params(now)
                 curr_people_count           = 0
@@ -152,35 +154,38 @@ class Simulator:
                     curr_people_count -= 1
                     utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] -= 1
 
-            # Computing movements around the office
-            actions = []    # Array item: [source_area, taregt_area]
-            for d in utils.ZONES_DESCRIPTORS:
-                desc    = utils.ZONES_DESCRIPTORS[d]
-                # print (d)
-                # print (desc)
-                if desc["current_people_count"]>0:
-                    exit_probability        = random.uniform(0,1)
-                    curr_exit_probabilities = desc["EXIT_PROBABILITIES"][now.hour]
-                    #print(f"curr_exit_probabilities for {now.hour}:{curr_exit_probabilities}")
-                    min_exit_probability    = random.uniform(curr_exit_probabilities[0], curr_exit_probabilities[1])
-                    if exit_probability>min_exit_probability:
-                        # A person can exit from curent area
-                        target_area = random.randint(0, len(desc["CONNECTED_AREAS"])-1)
-                        actions.append([d, desc["CONNECTED_AREAS"][target_area]])
+            if now.timestamp()-last_movements_check.timestamp()>utils.MOVEMENTS_DELAY_S:
+                last_movements_check    = now
 
-            # Applying actions prepared in the previous step
-            for a in actions:
-                #print (a)
-                src_desc        = utils.ZONES_DESCRIPTORS[a[0]]
-                dst_desc        = utils.ZONES_DESCRIPTORS[a[1]]
-                
-                if src_desc["current_people_count"]>0:
-                    moved_people    = random.randint(1, src_desc["current_people_count"])
-                    while dst_desc["MAX_PEOPLE_COUNT"]<dst_desc["current_people_count"]+moved_people:
-                        moved_people -= 1
-                    print(f"Moving {moved_people} people from {a[0]} to {a[1]}")
-                    src_desc["current_people_count"] -= moved_people
-                    dst_desc["current_people_count"] += moved_people
+                # Computing movements around the office
+                actions = []    # Array item: [source_area, taregt_area]
+                for d in utils.ZONES_DESCRIPTORS:
+                    desc    = utils.ZONES_DESCRIPTORS[d]
+                    # print (d)
+                    # print (desc)
+                    if desc["current_people_count"]>0:
+                        exit_probability        = random.uniform(0,1)
+                        curr_exit_probabilities = desc["EXIT_PROBABILITIES"][now.hour]
+                        min_exit_probability    = random.uniform(curr_exit_probabilities[0], curr_exit_probabilities[1])
+                        #print(f"curr_exit_probabilities for {now.hour}:{curr_exit_probabilities}")
+                        if exit_probability>min_exit_probability:
+                            # A person can exit from curent area
+                            target_area = random.randint(0, len(desc["CONNECTED_AREAS"])-1)
+                            actions.append([d, desc["CONNECTED_AREAS"][target_area]])
+
+                # Applying actions prepared in the previous step
+                for a in actions:
+                    #print (a)
+                    src_desc        = utils.ZONES_DESCRIPTORS[a[0]]
+                    dst_desc        = utils.ZONES_DESCRIPTORS[a[1]]
+                    
+                    if src_desc["current_people_count"]>0:
+                        moved_people    = random.randint(1, src_desc["current_people_count"])
+                        while dst_desc["MAX_PEOPLE_COUNT"]<dst_desc["current_people_count"]+moved_people:
+                            moved_people -= 1
+                        print(f"Moving {moved_people} people from {a[0]} to {a[1]}")
+                        src_desc["current_people_count"] -= moved_people
+                        dst_desc["current_people_count"] += moved_people
 
 
             # Generating detections

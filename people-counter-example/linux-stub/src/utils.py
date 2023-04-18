@@ -30,7 +30,8 @@ PEOPLE_DAY_PERCENTAGE   = {
     6   : [0, 0],       # Sunday
 }
 
-ENTRANCE_EXIT_DELAY_S   = 10    # FIXME Adjust this value
+ENTRANCE_EXIT_DELAY_S   = 60    # FIXME Adjust this value
+MOVEMENTS_DELAY_S       = 10    # FIXME Adjust this Value
 ENTRANCE_PARAMS         = {
     "GET_START_TIME"        : lambda d : d.replace(hour=8, minute=0, second=0, microsecond=0),
     "GET_END_TIME"          : lambda d : d.replace(hour=10, minute=15, second=0, microsecond=0),
@@ -51,81 +52,81 @@ EXIT_PARAMS             = {
 
 ZONES_DESCRIPTORS   = {
     "Entrance"      : {
-        "MAX_PEOPLE_COUNT"      : 10,
+        "MAX_PEOPLE_COUNT"      : 12,
         "CONNECTED_AREAS"       : ["Break Area", "Meeting Area", "UX Area"],
         "EXIT_PROBABILITIES"    : {
                 # min -max
             8   : [.3, .75],
             9   : [.3, .75],
-            10  : [.3, .75],
-            11  : [.3, .75],
-            12  : [.3, .75],
+            10  : [.5, .8],
+            11  : [.65, .85],
+            12  : [.65, .75],
             13  : [.3, .75],
             14  : [.3, .75],
-            15  : [.3, .75],
-            16  : [.3, .75],
-            17  : [.3, .75],
-            18  : [.3, .75],
+            15  : [.65, .75],
+            16  : [.70, .9],
+            17  : [.6, .9],
+            18  : [.6, .9],
         },
 
         "current_people_count"  : 0
     },
     "Break Area"    : {
-        "MAX_PEOPLE_COUNT"      : 10,
+        "MAX_PEOPLE_COUNT"      : 15,
         "CONNECTED_AREAS"       : ["Entrance"],
         "EXIT_PROBABILITIES"    : {
                 # min -max
-            8   : [.3, .75],
-            9   : [.3, .75],
-            10  : [.3, .75],
-            11  : [.3, .75],
-            12  : [.3, .75],
-            13  : [.3, .75],
-            14  : [.3, .75],
-            15  : [.3, .75],
-            16  : [.3, .75],
-            17  : [.3, .75],
-            18  : [.3, .75],
+            8   : [.6, .8],
+            9   : [.4, .7],
+            10  : [.4, .7],
+            11  : [.65, .85],
+            12  : [.65, .75],
+            13  : [.7, .9],
+            14  : [.7, .9],
+            15  : [.65, .75],
+            16  : [.4, .9],
+            17  : [.4, .7],
+            18  : [.2, .4],
         },
 
         "current_people_count"  : 0
     },
     "Meeting Area"  : {
-        "MAX_PEOPLE_COUNT"      : 10,
+        "MAX_PEOPLE_COUNT"      : 8,
         "CONNECTED_AREAS"       : ["Entrance"],
         "EXIT_PROBABILITIES"    : {
                 # min -max
-            8   : [.3, .75],
-            9   : [.3, .75],
-            10  : [.3, .75],
-            11  : [.3, .75],
-            12  : [.3, .75],
-            13  : [.3, .75],
-            14  : [.3, .75],
-            15  : [.3, .75],
-            16  : [.3, .75],
-            17  : [.3, .75],
-            18  : [.3, .75],
+            8   : [.3, .4],
+            9   : [.3, .4],
+            10  : [.5, .75],
+            11  : [.6, .85],
+            12  : [.7, .85],
+            13  : [.4, .5],
+            14  : [.3, .5],
+            15  : [.5, .75],
+            16  : [.6, .75],
+            17  : [.4, .65],
+            18  : [.4, .65],
         },
 
         "current_people_count"  : 0
     },
     "UX Area"   : {
-        "MAX_PEOPLE_COUNT"      : 10,
+        "MAX_PEOPLE_COUNT"      : 8,
         "CONNECTED_AREAS"       : ["Entrance"],
         "EXIT_PROBABILITIES"    : {
                 # min -max
-            8   : [.3, .75],
-            9   : [.3, .75],
-            10  : [.3, .75],
-            11  : [.3, .75],
-            12  : [.3, .75],
-            13  : [.3, .75],
-            14  : [.3, .75],
-            15  : [.3, .75],
-            16  : [.3, .75],
-            17  : [.3, .75],
-            18  : [.3, .75],
+            8   : [.6, .75],
+            9   : [.7, .85],
+            10  : [.8, .9],
+            11  : [.8, .9],
+            12  : [.8, .9],
+            13  : [.8, .9],
+            14  : [.3, .5],
+            15  : [.3, .5],
+            16  : [.7, .9],
+            17  : [.8, .9],
+            18  : [.2, .3],
         },
 
         "current_people_count"  : 0
