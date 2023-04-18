@@ -91,6 +91,8 @@ class AstarteClient :
         }
 
         for p in people:
-            payload["people"].append(str(p))
+            data    = str(p)
+            data    = data.replace("'", '\"')
+            payload["people"].append(data)
         
         self.__device.send_aggregate(self.__PEOPLE_COUNTER_INTERFACE, "/camera", payload)

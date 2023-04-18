@@ -1,5 +1,5 @@
 
-import random, time, asyncio, holidays
+import random, time, asyncio, holidays, json
 from datetime import datetime, timedelta
 
 import utils
@@ -27,7 +27,7 @@ class Simulator:
         self.__holidays         = holidays.country_holidays(country)
 
         for z in self.__scene_zones:
-            zone    = self.__scene_zones[z]
+            zone    = json.loads(self.__scene_zones[z])
             self.__scene_zones_keys.append(zone["zone_name"])
 
 
@@ -97,8 +97,8 @@ class Simulator:
         return detection
     
 
-    def dump(self, now, people_count) -> None:
-        print(f"[{now.time()}] -> {people_count}")
+    def dump(self, now, max_people_count, people_count) -> None:
+        print(f"[{now.time()}] -> {people_count}/{max_people_count}")
         for d in utils.ZONES_DESCRIPTORS:
             desc    = utils.ZONES_DESCRIPTORS[d]
             print(f"\t{d}:{desc['current_people_count']}")
@@ -195,4 +195,4 @@ class Simulator:
             # Publishing detections to Astarte
             self.__client.send_people_count(detections)
 
-            self.dump(now, curr_people_count)
+            self.dump(now, max_people_count, curr_people_count)
