@@ -38,7 +38,14 @@ class Simulator:
 
 
     def __generate_day_params(self, now:datetime):
-        curr_people_count   = self.__compute_int_percentage(utils.MAX_PEOPLE_COUNT, utils.PEOPLE_DAY_PERCENTAGE[now.weekday()])
+        curr_people_count   = 0
+        
+        # Checking if current day is acelebration day in current country
+        if now.date() in self.__holidays :
+            # Do nothing: today is a celebration day
+            pass
+        else:
+            curr_people_count   = self.__compute_int_percentage(utils.MAX_PEOPLE_COUNT, utils.PEOPLE_DAY_PERCENTAGE[now.weekday()])
 
         print(f"Params for today({now.date()}):\n\tpeople_count:{curr_people_count}\n\n")
         return curr_people_count
