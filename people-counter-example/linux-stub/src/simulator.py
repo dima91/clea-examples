@@ -40,7 +40,7 @@ class Simulator:
     def __generate_day_params(self, now:datetime):
         curr_people_count   = self.__compute_int_percentage(utils.MAX_PEOPLE_COUNT, utils.PEOPLE_DAY_PERCENTAGE[now.weekday()])
 
-        print(f"Params for today({now.date()}):\n\tpeople_count:{curr_people_count}")
+        print(f"Params for today({now.date()}):\n\tpeople_count:{curr_people_count}\n\n")
         return curr_people_count
     
 
@@ -51,7 +51,7 @@ class Simulator:
         end_t       = utils.ENTRANCE_PARAMS["GET_END_TIME"](now)
         is_among    = start_t <= now <= end_t
 
-        if remaining_people>0 and desc["current_pople_count"]<=desc["MAX_PEOPLE_COUNT"] and is_among:
+        if remaining_people>0 and desc["current_people_count"]<=desc["MAX_PEOPLE_COUNT"] and is_among:
             return random.uniform(0, 1)
 
         return 0
@@ -63,7 +63,7 @@ class Simulator:
         end_t       = utils.EXIT_PARAMS["GET_END_TIME"](now)
         is_among    = start_t <= now <= end_t
 
-        if remaining_people>0 and desc["current_pople_count"]>0 and is_among:
+        if remaining_people>0 and desc["current_people_count"]>0 and is_among:
             return random.uniform(0, 1)
 
         return 0
@@ -90,9 +90,12 @@ class Simulator:
         return detection
     
 
-    def dump(self, now) -> None:
-        print(f"\n\n[{now.time()}]\n\tEntrance:{utils.ZONES_DESCRIPTORS['Entrance']['current_pople_count']}")
-              #f"\n\tBreak Area:{utils.ZONES_DESCRIPTORS['Break Area']['current_pople_count']}")
+    def dump(self, now, people_count) -> None:
+        print(f"[{now.time()}] -> {people_count}")
+        for d in utils.ZONES_DESCRIPTORS:
+            desc    = utils.ZONES_DESCRIPTORS[d]
+            print(f"\t{d}:{desc['current_people_count']}")
+        print ("\n\n")
 
 
     async def run(self) -> None:
@@ -112,7 +115,7 @@ class Simulator:
 
             now = datetime.now()
             # FIXME Test section -> TODO Delete me!
-            now = now - timedelta(hours=2)
+            now = now - timedelta(hours=4)
             # FIXME End of test section
             if curr_date==None or curr_date!=now.date():
                 # Generating parameters for current day
@@ -129,23 +132,60 @@ class Simulator:
                 
                 # Computing incoming people
                 entrance_prob   = self.__allowed_to_enter(now, max_people_count-curr_people_count)
+                print (f"{entrance_prob}>{utils.ENTRANCE_PARAMS['GET_MIN_PROBABILITY'](now)}?")
                 if entrance_prob>utils.ENTRANCE_PARAMS["GET_MIN_PROBABILITY"](now):
                     print("Putting a person in the Entrance")
-                    utils.ZONES_DESCRIPTORS["Entrance"]["current_pople_count"] += 1
+                    curr_people_count += 1
+                    utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] += 1
 
                 # Computing outcoming people
                 exit_prob   = self.__allowed_to_exit(now, curr_people_count)
                 if exit_prob>utils.EXIT_PARAMS["GET_MIN_PROBABILITY"](now):
                     print ("Removing a person from the Entrance")
-                    utils.ZONES_DESCRIPTORS["Entrance"]["current_pople_count"] -= 1
+                    curr_people_count -= 1
+                    utils.ZONES_DESCRIPTORS["Entrance"]["current_people_count"] -= 1
 
-            # TODO Computing movements around the office
+            # Computing movements around the office
+            actions = []    # Array item: [source_area, taregt_area]
+            for d in utils.ZONES_DESCRIPTORS:
+                desc    = utils.ZONES_DESCRIPTORS[d]
+                # print (d)
+                # print (desc)
+                if desc["current_people_count"]>0:
+                    exit_probability        = random.uniform(0,1)
+                    curr_exit_probabilities = desc["EXIT_PROBABILITIES"][now.hour]
+                    #print(f"curr_exit_probabilities for {now.hour}:{curr_exit_probabilities}")
+                    min_exit_probability    = random.uniform(curr_exit_probabilities[0], curr_exit_probabilities[1])
+                    if exit_probability>min_exit_probability:
+                        # A person can exit from curent area
+                        target_area = random.randint(0, len(desc["CONNECTED_AREAS"])-1)
+                        actions.append([d, desc["CONNECTED_AREAS"][target_area]])
 
-            # TODO Generating detections
+            # Applying actions prepared in the previous step
+            for a in actions:
+                #print (a)
+                src_desc        = utils.ZONES_DESCRIPTORS[a[0]]
+                dst_desc        = utils.ZONES_DESCRIPTORS[a[1]]
+                
+                if src_desc["current_people_count"]>0:
+                    moved_people    = random.randint(1, src_desc["current_people_count"])
+                    while dst_desc["MAX_PEOPLE_COUNT"]<dst_desc["current_people_count"]+moved_people:
+                        moved_people -= 1
+                    print(f"Moving {moved_people} people from {a[0]} to {a[1]}")
+                    src_desc["current_people_count"] -= moved_people
+                    dst_desc["current_people_count"] += moved_people
+
+
+            # Generating detections
             detections  = []
-            #detections.append(self.__build_detection(??, ??))
+            for d in utils.ZONES_DESCRIPTORS:
+                desc    = utils.ZONES_DESCRIPTORS[d]
+                for i in range(0, desc["current_people_count"]):
+                    confidence  = random.uniform(utils.DETECTION_CONFIDENCE_RANGE[0], utils.DETECTION_CONFIDENCE_RANGE[1])
+                    if confidence>=utils.MIN_CONFIDENCE:
+                        detections.append(self.__build_detection(confidence, d))
 
             # Publishing detections to Astarte
             self.__client.send_people_count(detections)
 
-            self.dump(now)
+            self.dump(now, curr_people_count)
