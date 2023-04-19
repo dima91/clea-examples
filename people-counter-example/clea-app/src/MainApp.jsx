@@ -94,6 +94,11 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
         }
     }
 
+    const handleChannelEvent    = (evt) => {
+        console.log("New channel event!")
+        console.log(evt)
+    }
+
 
     React.useEffect(() => {
         if (sceneSettings.length > 0) {
@@ -125,6 +130,10 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                 // Updating chart with recent data
                 update_viz_and_stats (data)
                 
+                // TODO Registering to channel
+                // astarteClient.register_incoming_data_trigger(handleChannelEvent, deviceId, astarteClient.people_counter_interface, "*", "/*")
+                // .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
+                // .catch((error) => {console.log(`Catched this error during channel registration: ${error}`)})
 
                 // Creating periodic task that fetch and update data
                 if (!updateInterval) {
@@ -353,10 +362,6 @@ const chartOptions = {
     },
     markers: {
         size: 0,
-    },
-    title: {
-        text: '',
-        align: 'left'
     },
     tooltip: {
         shared: false,
