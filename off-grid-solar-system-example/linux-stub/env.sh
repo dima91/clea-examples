@@ -12,4 +12,3 @@ INTERFACES_FOLDER=astarte-interfaces
 CONFIG_FILE_PATH=/app/config.json
 
 TZ=Europe/Rome
-COUNTRY=IT
