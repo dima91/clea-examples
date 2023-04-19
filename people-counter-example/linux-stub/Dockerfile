@@ -11,6 +11,7 @@ RUN apt update && \
 RUN pip install -r requirements.txt
 
 ADD linux-stub/scene-settings.json ./
+ADD linux-stub/config.json ./
 ADD astarte-interfaces astarte-interfaces
 ADD linux-stub/src/ .
 
