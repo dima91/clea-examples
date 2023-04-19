@@ -94,6 +94,11 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
         }
     }
 
+    const handleChannelEvent    = (evt) => {
+        console.log("New channel event!")
+        console.log(evt)
+    }
+
 
     React.useEffect(() => {
         if (sceneSettings.length > 0) {
@@ -125,6 +130,10 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                 // Updating chart with recent data
                 update_viz_and_stats (data)
                 
+                // TODO Registering to channel
+                // astarteClient.register_incoming_data_trigger(handleChannelEvent, deviceId, astarteClient.people_counter_interface, "*", "/*")
+                // .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
+                // .catch((error) => {console.log(`Catched this error during channel registration: ${error}`)})
 
                 // Creating periodic task that fetch and update data
                 if (!updateInterval) {
@@ -175,6 +184,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                 setViz(viz => {return { ...viz, width: new_width, height:new_heigth }});
             }
             window.addEventListener("resize", resizeChart);
+            resizeChart()
 
             return () => {
                 window.removeEventListener("resize", resizeChart, false);
@@ -225,6 +235,12 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                     <Col sm={12} md={6}>
                         <Card className="chart-section rounded">
                             <Card.Body>
+
+                                <Card.Title>
+                                    <div className="pb-2">
+                                        People
+                                    </div>
+                                </Card.Title>
                                 
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text>Chart History Size (minutes)</InputGroup.Text>
@@ -347,10 +363,6 @@ const chartOptions = {
     markers: {
         size: 0,
     },
-    title: {
-        text: 'People',
-        align: 'left'
-    },
     tooltip: {
         shared: false,
         y: {
@@ -370,6 +382,7 @@ const chartOptions = {
         rotate  : 0
     },
     yaxis: {
+        min:0,
         labels: {
             formatter: function (val) {
                 return (val).toFixed(0);
@@ -724,7 +737,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
 
 
     return (
-        <Container>
+        <Col sm={12} md={12}>
             <Navbar className="bg-light d-flex justify-content-end">
                 {
                     _.map (buttons_descriptors, (item, idx) => {
@@ -757,6 +770,6 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             <Container className="d-flex justify-content-center">
                 {chart_provider (stats_chart_desc.data)}
             </Container>
-        </Container>
+        </Col>
     )
 }

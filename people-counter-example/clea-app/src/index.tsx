@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import ReactDOM from "react-dom";
 import { IntlProvider, FormattedMessage, useIntl } from "react-intl";
 
-import AstarteClient from "./AstarteClient";
+import AstarteInterface from "./AstarteInterface";
 
 import en from "./lang/en.json";
 import it from "./lang/it.json";
@@ -35,8 +35,8 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
     const [updateInterval, setUpdateInterval] = useState<Number>();
 
     const astarteClient = useMemo(() => {
-        return new AstarteClient({ astarteUrl, realm, token });
-    }, [astarteUrl, realm, token]);
+        return new AstarteInterface({ astarteUrl, realm, token, deviceId });
+    }, [astarteUrl, realm, token, deviceId]);
 
 
     useEffect(() => {

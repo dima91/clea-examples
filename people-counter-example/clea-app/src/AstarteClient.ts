@@ -1,208 +1,166 @@
 import axios from "axios";
+import { Channel, Socket } from "phoenix";
+
+// https://docs.astarte-platform.org/latest/052-using_channels.html
+// https://docs.astarte-platform.org/latest/060-using_triggers.html
+
+type AstarteClientEvent = "socketError" | "socketClose";
 
 type AstarteClientProps = {
     astarteUrl: URL;
     realm: string;
     token: string;
+    deviceId: string;
 };
 
 type Config = AstarteClientProps & {
     appEngineUrl: URL;
+    socketUrl: URL;
 };
 
-type CameraDataParameters = {
-    deviceId: string;
-    sinceAfter?: string;
-    since?: Date;
-    to?: Date;
-    limit?: number;
-};
+type InterfaceDescriptor    = {
+    exchanged_bytes : Number,
+    exchanged_msgs : Number,
+    major : Number,
+    minor : Number
+}
+type FullInterfaceDescriptor    = InterfaceDescriptor & {name:String}
 
-type MultipleCameraDataParameters = {
-    deviceId: string;
-    since: Date;
-    to: Date;
-};
+type Introspection  = null | {
+    [key: string]: InterfaceDescriptor
+}
 
-type CameraData = {
-    people: Array<string>,
-    people_count: Number,
-    timestamp: string
-};
+type DeviceInformation  = {
+    aliases : Map<String, String>,
+    connected   : Boolean,
+    redentials_inhibited: Boolean,
+    first_credentials_request: null,
+    first_registration: Date,
+    groups: [any],
+    id: String,
+    introspection : Introspection,
+    last_connection: Date,
+    last_credentials_request_ip: string,
+    last_disconnection: Date,
+    last_seen_ip: String,
+    previous_interfaces : [FullInterfaceDescriptor],
+    total_received_bytes: Number,
+    total_received_msgs: Number
+}
+
+// Wrap phoenix lib calls in promise for async handling
+async function openNewSocketConnection(
+    connectionParams: { socketUrl: string; realm: string; token: string },
+    onErrorHanlder: () => void,
+    onCloseHandler: () => void
+): Promise<Socket> {
+    const { socketUrl, realm, token } = connectionParams;
+
+    return new Promise((resolve) => {
+        const phoenixSocket = new Socket(socketUrl, {
+            params: {
+                realm,
+                token,
+            },
+        });
+        phoenixSocket.onError(onErrorHanlder);
+        phoenixSocket.onClose(onCloseHandler);
+        phoenixSocket.onOpen(() => {
+            resolve(phoenixSocket);
+        });
+        phoenixSocket.connect();
+    });
+}
+
+async function joinChannel(
+    phoenixSocket: Socket,
+    channelString: string,
+    token: string
+): Promise<Channel> {
+    return new Promise((resolve, reject) => {
+        const channel = phoenixSocket.channel(channelString, { token: token });
+        channel
+            .join()
+            .receive("ok", () => {
+                resolve(channel);
+            })
+            .receive("error", (err: unknown) => {
+                reject(err);
+            });
+    });
+}
+
+async function leaveChannel(channel: Channel): Promise<void> {
+    return new Promise((resolve, reject) => {
+        channel
+            .leave()
+            .receive("ok", () => {
+                resolve();
+            })
+            .receive("error", (err: unknown) => {
+                reject(err);
+            });
+    });
+}
+
+async function registerTrigger(
+    channel: Channel,
+    triggerPayload: object
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        channel
+            .push("watch", triggerPayload)
+            .receive("ok", () => {
+                resolve();
+            })
+            .receive("error", (err: unknown) => {
+                reject(err);
+            });
+    });
+}
 
 class AstarteClient {
-    config: Config;
+    private config: Config;
 
+    private introspection : Introspection;
 
-    constructor({ astarteUrl, realm, token }: AstarteClientProps) {
+    private phoenixSocket: Socket | null;
+
+    private joinedChannels: {
+        [roomName: string]: Channel;
+    };
+
+    private listeners: {
+        [eventName: string]: Array<() => void>;
+    };
+
+    constructor({ astarteUrl, realm, token, deviceId }: AstarteClientProps) {
+        const appEngineUrl = new URL("appengine/", astarteUrl);
+        const socketUrl = new URL("v1/socket", appEngineUrl);
+        socketUrl.protocol = socketUrl.protocol === "https:" ? "wss:" : "ws:";
         this.config = {
             astarteUrl,
             realm,
             token,
-            appEngineUrl: new URL("/", astarteUrl),
+            deviceId,
+            appEngineUrl,
+            socketUrl
         };
+
+        this.phoenixSocket = null;
+        this.joinedChannels = {};
+        this.listeners = {};
+        this.introspection = null;
     }
 
-
-
-    // FIXME Remove me!!!
-    sleep (ms : number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-
-
-
-    async getSceneSettings ({deviceId}: {deviceId: string}) {
-        const {appEngineUrl, realm, token}  = this.config;
-        const interfaceName                 = "ai.clea.examples.SceneSettings";
-        const path                          = `appengine/v1/${realm}/devices/${deviceId}/interfaces/${interfaceName}`;
-        const requestUrl                    = new URL(path, appEngineUrl);
-        
-        return axios ({
-            method  : "get",
-            url     : requestUrl.toString(),
-            headers : {
-                "Authorization" : `Bearer ${token}`,
-                "Content-Type"  : "application/json;charset=UTF-8",
-            },
-            validateStatus : (status) => {return true}
-        }).then ((response) => {
-            let scene_zones     = response.data.data["scene_zones"]
-            let parsed_zones    = []
-            for (let i in scene_zones) {
-                parsed_zones.push (JSON.parse(scene_zones[i]))
-            }
-
-            return parsed_zones
-        })
-    }
-
-
-
-    async getUpdateInterval ({deviceId}: {deviceId: string}) {
-        const {appEngineUrl, realm, token}  = this.config;
-        const interfaceName                 = "ai.clea.examples.SceneSettings";
-        const path                          = `appengine/v1/${realm}/devices/${deviceId}/interfaces/${interfaceName}`;
-        const requestUrl                    = new URL(path, appEngineUrl);
-        
-        return axios ({
-            method  : "get",
-            url     : requestUrl.toString(),
-            headers : {
-                "Authorization" : `Bearer ${token}`,
-                "Content-Type"  : "application/json;charset=UTF-8",
-            },
-            validateStatus : (status) => {return true}
-        }).then ((response) => {
-            return response.data.data["update_interval"]
-        })
-    }
-
-
-
-    async getMultipleCameraData ({deviceId, since, to}:MultipleCameraDataParameters) {
-        // Retrieving camera data 12 hours for 12 jours
-        const PROMISES_MAX_LENGTH               = 50;
-        const { appEngineUrl, realm, token }    = this.config;
-        const interfaceName                     = "ai.clea.examples.PeopleCounter";
-        const path                              = `appengine/v1/${realm}/devices/${deviceId}/interfaces/${interfaceName}/camera`;
-        const requestUrl                        = new URL(path, appEngineUrl.toString());
-
-        let promises                            = [];
-        let results                             = [];
-        let tmp_start_date                      = new Date(since);
-        let tmp_end_date                        = new Date(since);
-        tmp_end_date.setHours(tmp_end_date.getHours()+12);
-
-        while (tmp_start_date < to) {
-            if (tmp_end_date>to) {
-                tmp_end_date    = new Date(to)
-            }
-            
-            const query: Record<string, string> = {};
-            query.since                         = tmp_start_date.toISOString();
-            query.to                            = tmp_end_date.toISOString();
-            requestUrl.search = new URLSearchParams(query).toString();
-
-            promises.push (axios({
-                method  : 'get',
-                url     : requestUrl.toString(),
-                headers : {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json;charset=UTF-8",
-                },
-                validateStatus : (status) => {return true}
-            }))
-
-            // Updating start and end date
-            tmp_start_date.setHours(tmp_start_date.getHours()+12)
-            tmp_end_date.setHours(tmp_end_date.getHours()+12);
-
-            // Checking if promises has to be awaitied
-            if (promises.length > PROMISES_MAX_LENGTH) {
-                for (let i in promises) {
-                    try {
-                        let res = await promises[i]
-                        for (let ri in res.data.data) {
-                            let item        = res.data.data[ri]
-                            results.push ({
-                                people          : item.people,
-                                people_count    : item.people_count,
-                                timestamp       : item.timestamp
-                            })
-                        }
-                    } catch (err) {
-                        // Do nothing
-                        console.warn (`Catched an error`)
-                    }
-                }
-                promises    = []
-            }
+    async getIntrospection() {
+        if (this.introspection) {
+            return this.introspection
         }
 
-        // Awaiting remaining promises
-        for (let i in promises) {
-            try {
-                let res = await promises[i]
-                for (let ri in res.data.data) {
-                    let item        = res.data.data[ri]
-                    results.push ({
-                        people          : item.people,
-                        people_count    : item.people_count,
-                        timestamp       : item.timestamp
-                    })
-                }
-            } catch (err) {
-                // Do nothing
-                console.warn (`Catched another error`)
-            }
-        }
-
-        return results;
-    }
-
-
-
-    async getCameraData({deviceId, sinceAfter, since, to, limit}: CameraDataParameters) {
-        const { appEngineUrl, realm, token } = this.config;
-        const interfaceName = "ai.clea.examples.PeopleCounter";
-        const path = `appengine/v1/${realm}/devices/${deviceId}/interfaces/${interfaceName}/camera`;
-        const requestUrl = new URL(path, appEngineUrl.toString());
-        const query: Record<string, string> = {};
-        if (sinceAfter) {
-            query.sinceAfter = sinceAfter;
-        }
-        if (since) {
-            query.since = since.toISOString();
-        }
-        if (to) {
-            query.to = to.toISOString();
-        }
-        if (limit) {
-            query.limit = limit.toString();
-        }
-        requestUrl.search = new URLSearchParams(query).toString();
+        const { appEngineUrl, realm, token, deviceId } = this.config;
+        const path = `v1/${realm}/devices/${deviceId}`;
+        const requestUrl = new URL(path, appEngineUrl);
         return axios({
             method: "get",
             url: requestUrl.toString(),
@@ -210,10 +168,176 @@ class AstarteClient {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json;charset=UTF-8",
             },
-            validateStatus : (status) => {return true}
         }).then((response) => {
-            return response.data.data;
+            if (response.data.data) {
+                this.introspection  = response.data.data.introspection
+                return this.introspection
+            }
+            else
+                throw "Cannot get introspection"
         });
+    }
+
+    async getDeviceInformation() {
+        const { appEngineUrl, realm, token, deviceId } = this.config;
+        const path = `v1/${realm}/devices/${deviceId}`;
+        const requestUrl = new URL(path, appEngineUrl);
+        return axios({
+            method: "get",
+            url: requestUrl.toString(),
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json;charset=UTF-8",
+            },
+        }).then((response) => {
+            if (response.data.data) {
+                let info : DeviceInformation = response.data.data
+                return info
+            }
+            else
+                throw "Cannot get device information"
+        });
+
+
+
+        
+    }
+
+    getRealm() : String {
+        return this.config.realm;
+    }
+    getDeviceId() : String {
+        return this.config.deviceId
+    }
+    getAppEngineUrl() : URL {
+        return this.config.appEngineUrl
+    }
+    getAuthorizationToken() : string {
+        return this.config.token
+    }
+
+    addListener(eventName: AstarteClientEvent, callback: () => void): void {
+        if (!this.listeners[eventName]) {
+            this.listeners[eventName] = [];
+        }
+
+        this.listeners[eventName].push(callback);
+    }
+
+    removeListener(eventName: AstarteClientEvent, callback: () => void): void {
+        const previousListeners = this.listeners[eventName];
+        if (previousListeners) {
+            this.listeners[eventName] = previousListeners.filter(
+                (listener) => listener !== callback
+            );
+        }
+    }
+
+    private dispatch(eventName: AstarteClientEvent): void {
+        const listeners = this.listeners[eventName];
+        if (listeners) {
+            listeners.forEach((listener) => listener());
+        }
+    }
+
+    private async openSocketConnection(): Promise<Socket> {
+        if (this.phoenixSocket) {
+            return Promise.resolve(this.phoenixSocket);
+        }
+
+        const { socketUrl, realm, token } = this.config;
+
+        return new Promise((resolve) => {
+            openNewSocketConnection(
+                { socketUrl: socketUrl.toString(), realm, token },
+                () => {
+                    this.dispatch("socketError");
+                },
+                () => {
+                    this.dispatch("socketClose");
+                }
+            ).then((socket) => {
+                this.phoenixSocket = socket;
+                resolve(socket);
+            });
+        });
+    }
+
+    async joinRoom(roomName: string): Promise<Channel> {
+        const { phoenixSocket } = this;
+        if (!phoenixSocket) {
+            return new Promise((resolve) => {
+                this.openSocketConnection().then(() => {
+                    resolve(this.joinRoom(roomName));
+                });
+            });
+        }
+
+        const channel = this.joinedChannels[roomName];
+        if (channel) {
+            return Promise.resolve(channel);
+        }
+
+        return new Promise((resolve) => {
+            joinChannel(phoenixSocket, `rooms:${this.config.realm}:${roomName}`, this.config.token).then(
+                (joinedChannel) => {
+                    this.joinedChannels[roomName] = joinedChannel;
+                    resolve(joinedChannel);
+                }
+            );
+        });
+    }
+
+    async listenForEvents(
+        roomName: string,
+        eventHandler: (event: any) => void
+    ): Promise<void> {
+        const channel = this.joinedChannels[roomName];
+        if (!channel) {
+            return Promise.reject(
+                new Error("Can't listen for room events before joining it first")
+            );
+        }
+
+        channel.on("new_event", (jsonEvent: unknown) => {
+            eventHandler(jsonEvent);
+        });
+        return Promise.resolve();
+    }
+
+    async registerVolatileTrigger(
+        roomName: string,
+        triggerPayload: object
+    ): Promise<void> {
+        const channel = this.joinedChannels[roomName];
+        if (!channel) {
+            return Promise.reject(
+                new Error("Room not joined, couldn't register trigger")
+            );
+        }
+
+        return registerTrigger(channel, triggerPayload);
+    }
+
+    async leaveRoom(roomName: string): Promise<void> {
+        const channel = this.joinedChannels[roomName];
+        if (!channel) {
+            return Promise.reject(
+                new Error("Can't leave a room without joining it first")
+            );
+        }
+
+        return leaveChannel(channel).then(() => {
+            delete this.joinedChannels[roomName];
+        });
+    }
+
+    get joinedRooms(): string[] {
+        const rooms: string[] = [];
+        Object.keys(this.joinedChannels).forEach((roomName) => {
+            rooms.push(roomName);
+        });
+        return rooms;
     }
 }
 
