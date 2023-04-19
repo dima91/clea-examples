@@ -24,8 +24,11 @@ def main() -> None:
     client.publish_scene_settings(scene_settings)
     client.publish_update_interval(int(os.environ["UPDATE_INTERVAL_MS"]))
 
+    # Loading configuration file
+    config  = json.load(open(os.environ["CONFIG_FILE_PATH"]))
+
     # Creating Simulator
-    simulator   = Simulator(client, loop, int(os.environ["UPDATE_INTERVAL_MS"]), scene_settings, os.environ["COUNTRY"])
+    simulator   = Simulator(config, client, loop, int(os.environ["UPDATE_INTERVAL_MS"]), scene_settings, os.environ["COUNTRY"])
     loop.create_task(simulator.run())
 
     loop.run_forever()
