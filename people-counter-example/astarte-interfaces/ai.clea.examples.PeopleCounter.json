@@ -16,8 +16,9 @@
             "database_retention_ttl": 15768000
         },
         {
+            "documentation":"array element: '{id, conf, pos_zone:{id, name}}'",
             "endpoint": "/camera/people",
-            "type": "stringarray",                      // array element: "{id, conf, pos_zone:{id, name}}"
+            "type": "stringarray",
             "reliability":"unique",
             "retention":"volatile",
             "expiry":60,
