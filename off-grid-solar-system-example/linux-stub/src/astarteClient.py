@@ -3,6 +3,7 @@ import os, glob, json
 from pathlib import Path
 from datetime import datetime
 from astarte.device import Device
+from utils import DayPeriod
 
 
 class AstarteClient :
@@ -67,9 +68,50 @@ class AstarteClient :
     ##### ================================ #####
 
 
+    def __build_external_sensor_payload(self, value, sensor_type, display_string) -> dict:
+        return {
+            "sensorValue"           : value,
+            "sensorType"            : sensor_type,
+            "sensorDisplayString"   : display_string
+        }
+    
+    def __build_stats_payload(self, voltage:float, current:float) -> dict:
+        return {
+            "voltage"   : voltage,
+            "current"   : current
+        }
+
+
     def connect(self):
         self.__device.connect()
     
     
     def is_connected(self) :
         return self.__device.is_connected()
+    
+
+    def publish_day_period(self, day_period:DayPeriod) -> None:
+        self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/day_period",
+                                    self.__build_external_sensor_payload(day_period.value, "day_period", "day_period"))
+
+    def publish_reference_current(self, value:float) -> None:
+        self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/reference_electrical_current",
+                                    self.__build_external_sensor_payload(value, "reference_electrical_current", "reference_electrical_current"))
+
+    def publish_temperature(self, value:float) -> None:
+        self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/temperature",
+                                    self.__build_external_sensor_payload(value, "temperature", "temperature"))
+    
+    def publish_wind_speed(self, value:float) -> None:
+        self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/wind_velocity",
+                                    self.__build_external_sensor_payload(value, "wind_velocity", "wind_velocity"))
+        
+    
+    def publish_panel_stats(self, voltage:float, current:float) -> None:
+        self.__device.send_aggregate(self.__PANEL_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))
+
+    def publish_battery_stats(self, voltage:float, current:float) -> None:
+        self.__device.send_aggregate(self.__BATTERY_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))
+    
+    def publish_load_stats(self, voltage:float, current:float) -> None:
+        self.__device.send_aggregate(self.__LOAD_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))

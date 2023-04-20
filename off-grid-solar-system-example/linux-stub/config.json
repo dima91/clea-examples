@@ -1,5 +1,8 @@
 {
+    "external_sensors_publish_delay_s"  : 30,
+
     "WEATHER_PARAMS"    : {
-        "city"  : "Siena"
+        "city"          : "Siena",
+        "loop_delay_s"  : 10
     }
 }
