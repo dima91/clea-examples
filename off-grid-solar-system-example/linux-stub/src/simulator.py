@@ -7,6 +7,8 @@ from weatherCollector import WeatherCollector
 
 class Simulator:
 
+    __MAX_REF_SOLAR_PWR = 30        # Watts
+
     __config            = None
     __client            = None
     __weather_collector = None
@@ -35,8 +37,7 @@ class Simulator:
                     self.__client.publish_day_period(self.__weather_collector.current_day_period())
                     self.__client.publish_temperature(self.__weather_collector.current_temperature())
                     self.__client.publish_wind_speed(self.__weather_collector.current_wind_speed())
-                    #self.__client.publish_reference_current(??)     #FIXME
-                    self.__client.publish_reference_current(1.5)
+                    self.__client.publish_reference_current(self.__weather_collector.reference_solar_power(30))
 
         except Exception as e:
             print (f"[S] Catched this exception: {e}")

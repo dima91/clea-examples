@@ -12,7 +12,6 @@ from utils import DayPeriod
 class WeatherCollector:
 
     __KMPH_to_MPS       = lambda self,kmph_speed: kmph_speed*0.277778
-    __MAX_SOLAR_POWER   = 36    # Watts
 
     __config            = None
     __last_weather_data = None
