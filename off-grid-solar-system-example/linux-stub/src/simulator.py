@@ -49,12 +49,16 @@ class Simulator:
         return voltage, current
     
 
+    def __remaining_battery_charge(self) -> float:
+        battery_config      = self.__config["BATTERY"]
+        return battery_config["max_charge_watts"]*battery_config["curr_charge_percentage"]
+
     # Updates battery charge basing on load requirements and power provided by panel
     #   Returns current battery stats
     def __update_battery_charge(self, load_requirements:float, panel_power:float) -> Tuple[float, float, float]:
         # Updating battery charge basing on the update_value (in watts)
         battery_config      = self.__config["BATTERY"]
-        remaining_charge    = battery_config["max_charge_watts"]*battery_config["curr_charge_percentage"]
+        remaining_charge    = self.__remaining_battery_charge()
         remaining_charge += load_requirements
         remaining_charge += panel_power
 
@@ -119,7 +123,7 @@ class Simulator:
 
                 if remaining_charge<=0:
                     # No data will be published!
-                    pass
+                    print(f'No battery charge! Remaining carge:{self.__remaining_battery_charge()}')
                 elif (now-last_stats_publish_time)>stats_publish_delay:
                     print('Publishing stats values..')
                     last_stats_publish_time = now
