@@ -1,9 +1,12 @@
 {
-    "external_sensors_publish_delay_s"  : 30,
-    "stats_publish_delay_s"             : 60,
+    "external_sensors_publish_delay_s"  : 20,
+    "stats_publish_delay_s"             : 20,
+    "max_reference_solar_power"         : 10,
 
     "WEATHER_PARAMS"    : {
         "city"          : "Siena",
+        "latitude"      : 43.310791,
+        "longitude"     : 11.358798,
         "loop_delay_s"  : 10
     },
 
@@ -14,15 +17,17 @@
     },
 
     "BOARD"             : {
-        "required_power"    : 7.5,
+        "required_voltage"  : 12,
+        "required_current"  : 0.65,
         "max_voltage"       : 12
     },
 
     "BATTERY"           : {
         "max_voltage"               : 12,
         "max_current"               : 24,
-        "curr_charge_percentage"    : 1,
-        "max_charge_current"        : 1000
+        "max_charge_watts"          : 10000,
+        "charge_percentage_factor"  : 0.00015,
+        "curr_charge_percentage"    : 0.1
     },
 
     "EXTERNAL_LOAD"     : {
