@@ -1,21 +1,17 @@
 {
-    "FIXME external_sensors_publish_delay_s"  : 600,
-    "FIXME stats_publish_delay_s"             : 900,
-    "external_sensors_publish_delay_s"  : 45,
-    "stats_publish_delay_s"             : 60,
+    "external_sensors_publish_delay_s"  : 600,
+    "stats_publish_delay_s"             : 900,
     "reference_solar_panel_size"        : 0.02,
 
     "EVENTS"            : {
         "generation_time_interval"  : ["08:00:00", "21:00:00"],
         "max_events_count"          : 2,
         "min_probability"           : 0.995,
-        "FIXME base_delay_s"              : 5400,
-        "base_delay_s"              : 1800,
+        "base_delay_s"              : 5400,
         "delay_error"               : 0.7,
         
-        "FIXME base_duration_s"   : 1200,
-        "base_duration_s"   : 600,
-        "duration_error"    : 0.3
+        "base_duration_s"   : 4000,
+        "duration_error"    : 0.4
     },
 
     "WEATHER_PARAMS"    : {
