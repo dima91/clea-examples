@@ -11,6 +11,8 @@ class Simulator:
 
     __config                = None
     __client                = None
+    __events_config         = None
+    __current_events        = None
     __weather_collector     = None
     __solar_panel_config    = None
 
@@ -18,6 +20,8 @@ class Simulator:
     def __init__(self, config, client, weather_collector:WeatherCollector) -> None:
         self.__config               = config
         self.__client               = client
+        self.__events_config        = self.__config["EVENTS"]
+        self.__current_events       = list()
         self.__weather_collector    = weather_collector
         self.__solar_panel_config   = self.__config["SOLAR_PANEL"]
 
@@ -32,16 +36,25 @@ class Simulator:
         return voltage,current
 
 
-    # TODO Compute the total required power considering board and external appliances
+    # Compute the total required power considering board and external appliances
     def __total_load(self) -> float:
-        total_load  = self.__config["BOARD"]["required_voltage"]*self.__config["BOARD"]["required_current"]
+        total_load  = (self.__config["BOARD"]["required_voltage"]*self.__config["BOARD"]["required_current"])
+        
+        for evt in self.__current_events:
+            actual_voltage  = evt["required_voltage"]
+            actual_current  = utils.get_random_value(evt["required_current"], evt["current_error"])
+            total_load += (actual_current*actual_voltage)
 
         return total_load
     
-    # TODO Return total current stats considering board and external appliances
+    # Return total current stats considering board and external appliances
     def __get_load_stats(self):
         voltage = self.__config["BOARD"]["required_voltage"]
         current = self.__config["BOARD"]["required_current"]
+
+        for evt in self.__current_events:
+            voltage += evt["required_voltage"]
+            current += utils.get_random_value(evt["required_current"], evt["current_error"])
 
         return voltage, current
     
@@ -80,15 +93,32 @@ class Simulator:
         return remaining_charge,voltage,current
 
 
+    def __create_event(self) -> dict:
+        event_duration_s    = utils.get_random_value(self.__events_config["base_duration_s"], self.__events_config["duration_error"])
+        event   = {
+            "end_time"          : datetime.now()+timedelta(seconds=event_duration_s),
+            "required_voltage"  : 5,
+            "voltage_error"     : .02,
+            "required_current"  : utils.get_random_value(1.5, 0.5),
+            "current_error"     : .02
+        }
+
+        return event
+    
+    
     async def run(self) -> None:
         try :
 
             ext_sensors_publish_delay   = timedelta(seconds=float(self.__config["external_sensors_publish_delay_s"]))
             stats_publish_delay         = timedelta(seconds=float(self.__config["stats_publish_delay_s"]))
+            events_base_delay           = self.__events_config["base_delay_s"]
+            events_delay_error          = self.__events_config["delay_error"]
+            max_events_count            = self.__events_config["max_events_count"]
 
             now                             = datetime.now()
             last_ext_sensors_publish_time   = now
             last_stats_publish_time         = now
+            last_event_generation_time      = now
 
             while True:
                 await asyncio.sleep(5)
@@ -98,9 +128,9 @@ class Simulator:
                 sunrise_sunset_times    = self.__weather_collector.get_sunrise_sunset_times()
                 current_irradiance      = self.__weather_collector.get_current_irradiance()
 
-                # Publishing external sensors values
+                # Eventually publishing external sensors values
                 if (now-last_ext_sensors_publish_time)>ext_sensors_publish_delay:
-                    print('Publishing external sensors values..')
+                    #print('Publishing external sensors values..')
                     last_ext_sensors_publish_time   = now
                     self.__client.publish_day_period(self.__weather_collector.current_day_period())
                     self.__client.publish_temperature(self.__weather_collector.current_temperature())
@@ -134,7 +164,7 @@ class Simulator:
                     # No data will be published!
                     print(f'No battery charge! Remaining charge:{self.__remaining_battery_charge()}')
                 elif (now-last_stats_publish_time)>stats_publish_delay:
-                    print('Publishing stats values..')
+                    #print('Publishing stats values..')
                     last_stats_publish_time = now
 
                     # Publishing battery, battery and load stats
@@ -146,7 +176,26 @@ class Simulator:
                     voltage,current = self.__get_load_stats()
                     self.__client.publish_load_stats(voltage, current)
 
-                print("=====\n\n")  #FIXME Remove me!
+                # Checking if there exist ended events
+                i   = 0
+                while i<len(self.__current_events):
+                    evt = self.__current_events[i]
+                    if now>evt["end_time"]:
+                        del self.__current_events[i]
+                        #print(f"Removed event {i} -> {len(self.__current_events)}")
+                    else:
+                        i+=1
+
+                # Eventually creating an event
+                actual_events_delay     = utils.get_random_value(events_base_delay, events_delay_error)
+                current_events_count    = len(self.__current_events)
+                if (current_events_count<max_events_count) and (now-last_event_generation_time).total_seconds()>actual_events_delay:
+                    last_event_generation_time  = now
+                    new_event                   = self.__create_event()
+                    #print (f"Generating this event:\t{new_event}")
+                    self.__current_events.append(new_event)
+
+                print(f"===== {len(self.__current_events)}\n\n")  #FIXME Remove me!
 
 
         except Exception as e:
