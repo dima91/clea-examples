@@ -213,15 +213,16 @@ class Simulator:
                 # Eventually creating an event
                 actual_events_delay     = utils.get_random_value(events_base_delay, events_delay_error)
                 current_events_count    = len(self.__current_events)
-                if last_event_generation_time!=None and \
-                   (current_events_count<max_events_count) and \
-                   (now-last_event_generation_time).total_seconds()>actual_events_delay and \
-                   random.uniform(0,1)>self.__events_config["min_probability"]:
-                    
-                    last_event_generation_time  = now
-                    new_event                   = self.__create_event()
-                    print (f"Generated this event:\t{new_event}")
-                    self.__current_events.append(new_event)
+                if last_event_generation_time!=None and (current_events_count<max_events_count) and \
+                   (now-last_event_generation_time).total_seconds()>actual_events_delay:
+
+                    event_probability       = random.uniform(0,1)
+                    #print(f"event_probability:{event_probability}")
+                    if event_probability>self.__events_config["min_probability"]:
+                        last_event_generation_time  = now
+                        new_event                   = self.__create_event()
+                        print (f"Generated this event:\t{new_event}")
+                        self.__current_events.append(new_event)
 
                 print(f"===== {len(self.__current_events)}\n\n")  #FIXME Remove me!
 
