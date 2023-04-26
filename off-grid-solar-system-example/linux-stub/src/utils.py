@@ -8,6 +8,10 @@ class DayPeriod(enum.Enum):
     NIGHT   = 0
     DAY     = 1
 
+class PowerSupplySource(enum.Enum):
+    PANEL   = 0
+    BATTERY = 1
+
 
 def get_random_value(base_value:float, error_percentage:float) -> float:
     error_value = base_value*error_percentage

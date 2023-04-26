@@ -1,5 +1,5 @@
 
-import time, asyncio
+import time, asyncio, random
 from typing import Tuple
 from datetime import datetime, timedelta
 
@@ -159,21 +159,26 @@ class Simulator:
                 # Computing generated power by solar panel
                 actual_panel_power      = utils.solar_power_to_watts(self.__solar_panel_config["size"], current_day_period,
                                                                      current_irradiance, cloud_cover_percentage, sunrise_sunset_times)
-                remaining_panel_power   = actual_panel_power
-                total_load              = self.__total_load()
-                if remaining_panel_power>=total_load:
+                remaining_panel_power       = actual_panel_power
+                curr_power_supply_source    = None
+                total_load_power            = self.__total_load()
+                if remaining_panel_power>=total_load_power:
                     # Providing power supply from solar panel
                     print("Power supply from PANEL")
-                    remaining_panel_power -= total_load
-                    total_load  = 0
+                    remaining_panel_power -= total_load_power
+                    total_load_power            = 0
+                    curr_power_supply_source    = utils.PowerSupplySource.PANEL
                 else :
                     # Providing power supply from battery charge
                     print("Power supply from BATTERY")
-                    pass
+                    curr_power_supply_source    = utils.PowerSupplySource.BATTERY
 
                 # Updating battery charge
-                remaining_charge,voltage, current   = self.__update_battery_charge(-total_load, remaining_panel_power)
+                remaining_charge,voltage, current   = self.__update_battery_charge(-total_load_power, remaining_panel_power)
                 print (f"{remaining_panel_power}/{actual_panel_power} W goes to battery")
+
+                load_voltage,load_current       = self.__get_load_stats()
+                panel_voltage, panel_current    = self.__get_panel_stats(actual_panel_power)
 
                 if remaining_charge<=0:
                     # No data will be published!
@@ -183,13 +188,17 @@ class Simulator:
                     last_stats_publish_time = now
 
                     # Publishing battery, battery and load stats
-                    self.__client.publish_battery_stats(voltage, current)
+                    if curr_power_supply_source==utils.PowerSupplySource.PANEL:
+                        self.__client.publish_battery_stats(voltage, 0)
+                    else:
+                        # Applying a percentage to current (battery discharge)
+                        discharge_factor    = voltage/self.__config["BATTERY"]["max_voltage"]
+                        #print(f"discharge_factor: {discharge_factor} -> {current*discharge_factor}")
+                        current             = min(load_current, current*discharge_factor)
+                        self.__client.publish_battery_stats(voltage, current)
 
-                    voltage,current = self.__get_panel_stats(actual_panel_power)
                     self.__client.publish_panel_stats(voltage, current)
-                    
-                    voltage,current = self.__get_load_stats()
-                    self.__client.publish_load_stats(voltage, current)
+                    self.__client.publish_load_stats(load_voltage, load_current)
 
                 # Checking if there exist ended events
                 i   = 0
