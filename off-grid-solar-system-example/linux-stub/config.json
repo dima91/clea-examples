@@ -1,7 +1,7 @@
 {
     "external_sensors_publish_delay_s"  : 20,
-    "stats_publish_delay_s"             : 20,
-    "max_reference_solar_power"         : 10,
+    "stats_publish_delay_s"             : 240,
+    "reference_solar_panel_size"        : 0.02,
 
     "WEATHER_PARAMS"    : {
         "city"          : "Siena",
@@ -11,9 +11,10 @@
     },
 
     "SOLAR_PANEL"       : {
+        "size"          : 1.5,
         "input_error"   : 0.01,
         "max_voltage"   : 24,
-        "max_current"   : 1.5
+        "max_current"   : 9
     },
 
     "BOARD"             : {

@@ -9,28 +9,25 @@ from weatherCollector import WeatherCollector
 
 class Simulator:
 
-    __config            = None
-    __client            = None
-    __weather_collector = None
-    __solar_panel       = None
+    __config                = None
+    __client                = None
+    __weather_collector     = None
+    __solar_panel_config    = None
 
 
     def __init__(self, config, client, weather_collector:WeatherCollector) -> None:
         self.__config               = config
         self.__client               = client
         self.__weather_collector    = weather_collector
-        self.__solar_panel          = {
-            "max_current"   : self.__config["SOLAR_PANEL"]["max_current"],
-            "max_voltage"   : self.__config["SOLAR_PANEL"]["max_voltage"],
-            "max_power"     : self.__config["SOLAR_PANEL"]["max_current"]*self.__config["SOLAR_PANEL"]["max_voltage"]
-        }
+        self.__solar_panel_config   = self.__config["SOLAR_PANEL"]
 
 
     def __get_panel_stats(self, actual_panel_power):
-        voltage = utils.get_random_value(actual_panel_power/self.__config["SOLAR_PANEL"]["max_current"],
-                                                 self.__config["SOLAR_PANEL"]["input_error"])
-        current = utils.get_random_value(actual_panel_power/self.__config["SOLAR_PANEL"]["max_voltage"],
-                                            self.__config["SOLAR_PANEL"]["input_error"])
+        solar_panel_input_err   = self.__solar_panel_config["input_error"]
+        voltage                 = utils.get_random_value(self.__solar_panel_config["max_voltage"], solar_panel_input_err)
+        # voltage = utils.get_random_value(actual_panel_power/self.__config["SOLAR_PANEL"]["max_current"],
+        #                                          self.__config["SOLAR_PANEL"]["input_error"])
+        current                 = utils.get_random_value(min(actual_panel_power/voltage, self.__solar_panel_config["max_current"]), solar_panel_input_err)
         
         return voltage,current
 
@@ -63,7 +60,10 @@ class Simulator:
         remaining_charge += panel_power
 
         if remaining_charge<=0:
+            battery_config["curr_charge_percentage"]    = 0
             return 0,0,0
+        elif remaining_charge>battery_config["max_charge_watts"]:
+            remaining_charge    = battery_config["max_charge_watts"]
 
         # Updating current percentage
         battery_config["curr_charge_percentage"]    = remaining_charge/battery_config["max_charge_watts"]
@@ -92,7 +92,11 @@ class Simulator:
 
             while True:
                 await asyncio.sleep(5)
-                now                             = datetime.now()
+                now                     = datetime.now()
+                current_day_period      = self.__weather_collector.current_day_period()
+                cloud_cover_percentage  = self.__weather_collector.cloud_cover_percentage()
+                sunrise_sunset_times    = self.__weather_collector.get_sunrise_sunset_times()
+                current_irradiance      = self.__weather_collector.get_current_irradiance()
 
                 # Publishing external sensors values
                 if (now-last_ext_sensors_publish_time)>ext_sensors_publish_delay:
@@ -101,10 +105,15 @@ class Simulator:
                     self.__client.publish_day_period(self.__weather_collector.current_day_period())
                     self.__client.publish_temperature(self.__weather_collector.current_temperature())
                     self.__client.publish_wind_speed(self.__weather_collector.current_wind_speed())
-                    self.__client.publish_reference_current(round(self.__weather_collector.solar_power_to_watts(self.__config["max_reference_solar_power"]),2))
+                    self.__client.publish_reference_current(round(utils.solar_power_to_watts(self.__config["reference_solar_panel_size"],
+                                                                                                                current_day_period,
+                                                                                                                current_irradiance,
+                                                                                                                cloud_cover_percentage,
+                                                                                                                sunrise_sunset_times),2))
 
                 # Computing generated power by solar panel
-                actual_panel_power      = self.__weather_collector.solar_power_to_watts(self.__solar_panel["max_power"])
+                actual_panel_power      = utils.solar_power_to_watts(self.__solar_panel_config["size"], current_day_period,
+                                                                     current_irradiance, cloud_cover_percentage, sunrise_sunset_times)
                 remaining_panel_power   = actual_panel_power
                 total_load              = self.__total_load()
                 if remaining_panel_power>=total_load:
@@ -123,7 +132,7 @@ class Simulator:
 
                 if remaining_charge<=0:
                     # No data will be published!
-                    print(f'No battery charge! Remaining carge:{self.__remaining_battery_charge()}')
+                    print(f'No battery charge! Remaining charge:{self.__remaining_battery_charge()}')
                 elif (now-last_stats_publish_time)>stats_publish_delay:
                     print('Publishing stats values..')
                     last_stats_publish_time = now
