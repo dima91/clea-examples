@@ -6,10 +6,11 @@
     "reference_solar_panel_size"        : 0.02,
 
     "EVENTS"            : {
+        "generation_time_interval"  : ["08:00:00", "21:00:00"],
         "max_events_count"          : 2,
         "FIXME base_delay_s"              : 5400,
-        "base_delay_s"              : 20,
-        "delay_error"               : 0.5,
+        "base_delay_s"              : 1800,
+        "delay_error"               : 0.7,
         
         "FIXME base_duration_s"   : 1200,
         "base_duration_s"   : 600,

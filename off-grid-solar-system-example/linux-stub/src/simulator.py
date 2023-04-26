@@ -105,7 +105,14 @@ class Simulator:
 
         return event
     
-    
+
+    def __in_publish_interval(self, now:datetime) -> bool:
+        time_format = "%H:%M:%S"
+        start       = datetime.strptime(self.__events_config["generation_time_interval"][0], time_format)
+        end         = datetime.strptime(self.__events_config["generation_time_interval"][1], time_format)
+        return now.time()>=start.time() and now.time()<=end.time()
+
+
     async def run(self) -> None:
         try :
 
@@ -118,11 +125,19 @@ class Simulator:
             now                             = datetime.now()
             last_ext_sensors_publish_time   = now
             last_stats_publish_time         = now
-            last_event_generation_time      = now
+            last_event_generation_time      = None
 
             while True:
                 await asyncio.sleep(5)
                 now                     = datetime.now()
+                print(f"[{now}]")
+                #print(f"[{now}] -> _in_publish_interval? {self.__in_publish_interval(now)}")
+
+                if last_event_generation_time==None and self.__in_publish_interval(now):
+                    last_event_generation_time  = now
+                elif not self.__in_publish_interval(now):
+                    last_event_generation_time  = None
+
                 current_day_period      = self.__weather_collector.current_day_period()
                 cloud_cover_percentage  = self.__weather_collector.cloud_cover_percentage()
                 sunrise_sunset_times    = self.__weather_collector.get_sunrise_sunset_times()
@@ -189,10 +204,12 @@ class Simulator:
                 # Eventually creating an event
                 actual_events_delay     = utils.get_random_value(events_base_delay, events_delay_error)
                 current_events_count    = len(self.__current_events)
-                if (current_events_count<max_events_count) and (now-last_event_generation_time).total_seconds()>actual_events_delay:
+                if last_event_generation_time!=None and (current_events_count<max_events_count) and \
+                   (now-last_event_generation_time).total_seconds()>actual_events_delay:
+                    
                     last_event_generation_time  = now
                     new_event                   = self.__create_event()
-                    #print (f"Generating this event:\t{new_event}")
+                    print (f"Generated this event:\t{new_event}")
                     self.__current_events.append(new_event)
 
                 print(f"===== {len(self.__current_events)}\n\n")  #FIXME Remove me!
