@@ -39,7 +39,8 @@
         "max_current"               : 24,
         "max_charge_watts"          : 10000,
         "charge_percentage_factor"  : 0.00015,
-        "curr_charge_percentage"    : 1.0
+        "curr_charge_percentage"    : 1.0,
+        "update_delay_s"            : 60
     },
 
     "EXTERNAL_LOAD"     : {

@@ -12,6 +12,9 @@ class PowerSupplySource(enum.Enum):
     PANEL   = 0
     BATTERY = 1
 
+    def __str__(self) -> str:
+        return "PANEL" if self.value==0 else "BATTERY"
+
 
 def get_random_value(base_value:float, error_percentage:float) -> float:
     error_value = base_value*error_percentage
