@@ -402,6 +402,9 @@ export const MainApp = ({astarteClient}) => {
 
             window.addEventListener("resize", resizeChart);
             resizeChart();
+            setTimeout(() => {
+                resizeChart()
+            }, 2000);
 
             // Returning clean up function
             return () => {
