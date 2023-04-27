@@ -64,7 +64,7 @@ class Simulator:
         return battery_config["max_charge_watts"]*battery_config["curr_charge_percentage"]
 
     # Updates battery charge basing on load requirements and power provided by panel
-    #   Returns current battery stats
+    #   Returns remaining charge, charge delta and delta factor
     def __update_battery_charge(self, load_requirements:float, panel_power:float) -> Tuple[float, float, float]:
         # Updating battery charge basing on the update_value (in watts)
         battery_config      = self.__config["BATTERY"]
@@ -81,16 +81,24 @@ class Simulator:
         # Updating current percentage
         battery_config["curr_charge_percentage"]    = remaining_charge/battery_config["max_charge_watts"]
 
+        delta   = battery_config["max_charge_watts"]-remaining_charge
+        factor  = battery_config["charge_percentage_factor"]*delta
+
+        return remaining_charge, delta, factor
+
+
+    def __get_battery_stats(self) -> Tuple[float, float]:
+        battery_config      = self.__config["BATTERY"]
+        remaining_charge    = self.__remaining_battery_charge()
+
         # Computing charge stats
         charge_delta    = battery_config["max_charge_watts"]-remaining_charge
         delta_factor    = battery_config["charge_percentage_factor"]*charge_delta
 
-        print(f'remaining_charge:{remaining_charge}, charge_delta:{charge_delta}, delta_factor:{delta_factor}')
-
         voltage = battery_config["max_voltage"]-delta_factor
         current = battery_config["max_current"]*(voltage/battery_config["max_voltage"])
 
-        return remaining_charge,voltage,current
+        return voltage,current
 
 
     def __create_event(self) -> dict:
@@ -125,13 +133,13 @@ class Simulator:
             now                             = datetime.now()
             last_ext_sensors_publish_time   = now
             last_stats_publish_time         = now
+            last_battery_update_time        = now
             last_event_generation_time      = None
 
             while True:
                 await asyncio.sleep(5)
                 now                     = datetime.now()
                 print(f"[{now}]")
-                #print(f"[{now}] -> _in_publish_interval? {self.__in_publish_interval(now)}")
 
                 if last_event_generation_time==None and self.__in_publish_interval(now):
                     last_event_generation_time  = now
@@ -164,40 +172,41 @@ class Simulator:
                 total_load_power            = self.__total_load()
                 if remaining_panel_power>=total_load_power:
                     # Providing power supply from solar panel
-                    print("Power supply from PANEL")
                     remaining_panel_power -= total_load_power
                     total_load_power            = 0
                     curr_power_supply_source    = utils.PowerSupplySource.PANEL
                 else :
                     # Providing power supply from battery charge
-                    print("Power supply from BATTERY")
                     curr_power_supply_source    = utils.PowerSupplySource.BATTERY
 
                 # Updating battery charge
-                remaining_charge,voltage, current   = self.__update_battery_charge(-total_load_power, remaining_panel_power)
-                print (f"{remaining_panel_power}/{actual_panel_power} W goes to battery")
+                if (now-last_battery_update_time).total_seconds() > self.__config["BATTERY"]["update_delay_s"]:
+                    last_battery_update_time        = now
+                    remaining_charge, delta, factor = self.__update_battery_charge(-total_load_power,remaining_panel_power)
+                    print(f'remaining_charge:{remaining_charge}, charge_delta:{delta}, delta_factor:{factor}')
+                
+                print (f"[{curr_power_supply_source}] {remaining_panel_power}/{actual_panel_power} W goes to battery")
 
+                battery_voltage,battery_current = self.__get_battery_stats()
                 load_voltage,load_current       = self.__get_load_stats()
-                panel_voltage, panel_current    = self.__get_panel_stats(actual_panel_power)
+                panel_voltage,panel_current     = self.__get_panel_stats(actual_panel_power)
 
-                if remaining_charge<=0:
+                if self.__remaining_battery_charge()<=0:
                     # No data will be published!
                     print(f'No battery charge! Remaining charge:{self.__remaining_battery_charge()}')
                 elif (now-last_stats_publish_time)>stats_publish_delay:
-                    #print('Publishing stats values..')
                     last_stats_publish_time = now
 
                     # Publishing battery, battery and load stats
                     if curr_power_supply_source==utils.PowerSupplySource.PANEL:
-                        self.__client.publish_battery_stats(voltage, 0)
+                        self.__client.publish_battery_stats(battery_voltage, 0)
                     else:
                         # Applying a percentage to current (battery discharge)
-                        discharge_factor    = voltage/self.__config["BATTERY"]["max_voltage"]
-                        #print(f"discharge_factor: {discharge_factor} -> {current*discharge_factor}")
-                        current             = min(load_current, current*discharge_factor)
-                        self.__client.publish_battery_stats(voltage, current)
+                        discharge_factor    = battery_voltage/self.__config["BATTERY"]["max_voltage"]
+                        battery_current             = min(load_current, battery_current*discharge_factor)
+                        self.__client.publish_battery_stats(battery_voltage, battery_current)
 
-                    self.__client.publish_panel_stats(voltage, current)
+                    self.__client.publish_panel_stats(panel_voltage, panel_current)
                     self.__client.publish_load_stats(load_voltage, load_current)
 
                 # Checking if there exist ended events
@@ -206,7 +215,6 @@ class Simulator:
                     evt = self.__current_events[i]
                     if now>evt["end_time"]:
                         del self.__current_events[i]
-                        #print(f"Removed event {i} -> {len(self.__current_events)}")
                     else:
                         i+=1
 
@@ -224,7 +232,7 @@ class Simulator:
                         print (f"Generated this event:\t{new_event}")
                         self.__current_events.append(new_event)
 
-                print(f"===== {len(self.__current_events)}\n\n")  #FIXME Remove me!
+                print(f"===== {len(self.__current_events)}\n")  #FIXME Remove me!
 
 
         except Exception as e:
