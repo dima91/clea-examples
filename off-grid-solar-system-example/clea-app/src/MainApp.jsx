@@ -42,8 +42,8 @@ export const MainApp = ({astarteClient}) => {
                             text            : "Temperature",
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getTemperature(date)},
-                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue+"°"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+"°"},
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         windSpeed      : {
                             value           : React.useState(null),
@@ -51,8 +51,8 @@ export const MainApp = ({astarteClient}) => {
                             text            : "Wind Velocity",
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getWindSpeed(date)},
-                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue+" m/s"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" m/s"},
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         refSolarCell    : {
                             value           : React.useState(null),
@@ -60,8 +60,8 @@ export const MainApp = ({astarteClient}) => {
                             text            : "Reference Solar Power",
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getReferenceCellCurrent(date)},
-                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue+" W"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" W"},
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         dayPeriod       : {
                             // TODO Handle unknown value of day period
@@ -72,7 +72,7 @@ export const MainApp = ({astarteClient}) => {
                             query           : (date) => {return astarteClient.getDayPeriod(date)},
                             displayValue    : (currValue) => {return currValue==0 ? <BsMoonFill size={43} color="white"/>
                                                                                     : <BsSunFill size={43} color="white"/>},
-                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded shadow"}
+                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded shadow h-100"}
         }
     }
 
@@ -132,6 +132,8 @@ export const MainApp = ({astarteClient}) => {
         ]
     }
     const [shownUnit, setShownUnit]     = React.useState(2);
+    /*const [shownPeriod, setShownPeriod] = React.useState(4);
+    const [dateRange, setDateRange]     = React.useState([new Date(1654041600000), new Date(1656626340000)]);*/
     const [shownPeriod, setShownPeriod] = React.useState(0);
     const [dateRange, setDateRange]     = React.useState([new Date(new Date().getTime() - MS_IN_24_HOURS), new Date()]);
 
@@ -402,6 +404,9 @@ export const MainApp = ({astarteClient}) => {
 
             window.addEventListener("resize", resizeChart);
             resizeChart();
+            setTimeout(() => {
+                resizeChart()
+            }, 2000);
 
             // Returning clean up function
             return () => {
