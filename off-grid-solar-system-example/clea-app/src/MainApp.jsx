@@ -43,7 +43,7 @@ export const MainApp = ({astarteClient}) => {
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getTemperature(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+"°"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         windSpeed      : {
                             value           : React.useState(null),
@@ -52,7 +52,7 @@ export const MainApp = ({astarteClient}) => {
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getWindSpeed(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" m/s"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         refSolarCell    : {
                             value           : React.useState(null),
@@ -61,7 +61,7 @@ export const MainApp = ({astarteClient}) => {
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getReferenceCellCurrent(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" W"},
-                            className       : (currValue) => {return "card-info rounded shadow"}
+                            className       : (currValue) => {return "card-info rounded shadow h-100"}
                         },
         dayPeriod       : {
                             // TODO Handle unknown value of day period
@@ -72,7 +72,7 @@ export const MainApp = ({astarteClient}) => {
                             query           : (date) => {return astarteClient.getDayPeriod(date)},
                             displayValue    : (currValue) => {return currValue==0 ? <BsMoonFill size={43} color="white"/>
                                                                                     : <BsSunFill size={43} color="white"/>},
-                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded shadow"}
+                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded shadow h-100"}
         }
     }
 
