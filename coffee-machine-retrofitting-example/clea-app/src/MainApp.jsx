@@ -682,7 +682,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
     else if (time_period == 2) {
         // Considering a month
         let days_number = days_in_month(query_params.since)
-        for (let i=0; i<days_number; i++) {
+        for (let i=1; i<=days_number; i++) {
             y_data[i]   = 0
         }
 
@@ -695,7 +695,7 @@ const parse_retrieved_data  = (raw_data, beverages_descriptors, group_by, time_p
             y_data[idx] = calculator (y_data[idx], beverages_descriptors.long_coffee.revenue)
         }
         y_data.map ((item, idx) => {
-            new_data.push ({x:Number(idx+1).toString(), y:item})
+            new_data.push ({x:Number(idx).toString(), y:item})
         })
     }
     else if (time_period == 3) {
