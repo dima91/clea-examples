@@ -536,7 +536,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             }
 
             case 2 :
-                return `${t+1}`;
+                return `${t}`;
             
 
             default :
@@ -589,12 +589,13 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             })
         }
         else if (filter_grain == 2) {
+            
             // Analyzing data basing on months days
-            for (let i=0; i<31; i++) {
+            for (let i=1; i<=31; i++) {
                 results[i]          = 0
                 item_per_unit[i]    = 0
             }
-
+            
             _.map (data, (item, idx) => {
                 let item_date   = new Date (item['timestamp']).getDate()
                 results[item_date] += item['people_count']
@@ -607,18 +608,19 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
         }
 
         //console.log (`Building results\n\tfg: ${filter_grain}\n\tlen: ${item_per_unit.length}`)
-        results = _.map (item_per_unit, (item, idx) => {
-            return {
-                // Considering 'filter_grain' value to specify the 'x' value
-                x:value_to_axis_text(idx),
-                // x:'lol',
-                y:item==0 ? 0 : Number((results[idx]/item).toFixed(2))}
+        let final_results   = []
+        _.map (item_per_unit, (item, idx) => {
+            if (item!=undefined) {
+                final_results.push({
+                    // Considering 'filter_grain' value to specify the 'x' value
+                    x:value_to_axis_text(idx),
+                    // x:'lol',
+                    y:item==0 ? 0 : Number((results[idx]/item).toFixed(2))
+                })
+            }
         })
 
-        /*console.log ('data_analyzer results:')
-        console.log (results)*/
-
-        return results
+        return final_results
     }
 
 
