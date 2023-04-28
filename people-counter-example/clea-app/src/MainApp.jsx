@@ -95,8 +95,15 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
     }
 
     const handleChannelEvent    = (evt) => {
-        console.log("New channel event!")
-        console.log(evt)
+        if (evt.event && evt.event.type=="incoming_data" && evt.event.interface=="ai.clea.examples.PeopleCounter") {
+            let data            = evt.event.value
+            data["timestamp"]   = evt.timestamp
+            update_viz_and_stats([data])
+        }
+        else {
+            console.log("Wrong payload")
+            console.log(evt)
+        }
     }
 
 
@@ -130,7 +137,6 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                 // Updating chart with recent data
                 update_viz_and_stats (data)
                 
-                // TODO Registering to channel
                 astarteClient.register_incoming_data_trigger(handleChannelEvent, astarteClient.people_counter_interface, "*", "/*")
                 .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
                 .catch((error) => {console.log(`Catched this error during channel registration: ${error}`)})
@@ -140,7 +146,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                     console.error (`Wrong updateInterval value: ${updateInterval}.\nSetting it to default value`)
                     updateInterval  = 5000
                 }
-                interval_id = setInterval(() => {
+                /*interval_id = setInterval(() => {
                     if (mount) {
                         // Querying data only from last update
                         getData(deviceId, astarteClient, undefined, last_query_date)
@@ -151,17 +157,17 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                                 return;
                             }
 
-                            update_viz_and_stats (data)
+                            //update_viz_and_stats (data)
                         })
                     }
-                }, updateInterval);
+                }, updateInterval);*/
             })
 
             return () => {
-                if (interval_id) {
+                /*if (interval_id) {
                     console.warn ("Clearing interval...")
                     clearInterval(interval_id);
-                }
+                }*/
                 mount = false;
             }
         }
