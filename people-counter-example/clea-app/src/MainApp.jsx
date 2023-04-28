@@ -131,9 +131,9 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                 update_viz_and_stats (data)
                 
                 // TODO Registering to channel
-                // astarteClient.register_incoming_data_trigger(handleChannelEvent, deviceId, astarteClient.people_counter_interface, "*", "/*")
-                // .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
-                // .catch((error) => {console.log(`Catched this error during channel registration: ${error}`)})
+                astarteClient.register_incoming_data_trigger(handleChannelEvent, astarteClient.people_counter_interface, "*", "/*")
+                .then ((roomName) => {console.log (`Trigger created! The room is  ${roomName}`)})
+                .catch((error) => {console.log(`Catched this error during channel registration: ${error}`)})
 
                 // Creating periodic task that fetch and update data
                 if (!updateInterval) {
