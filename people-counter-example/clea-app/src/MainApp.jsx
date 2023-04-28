@@ -691,13 +691,48 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     )
 
 
+    const update_filter_grain   = (new_value, curr_date_range) => {
+        let new_start_date  = undefined
+        let new_end_date    = undefined
+
+        new_start_date  = new Date()
+        new_start_date.setHours (0)
+        new_start_date.setMinutes (0)
+        new_start_date.setSeconds (0)
+        new_start_date.setMilliseconds (0)
+
+        new_end_date    = new Date()
+        new_end_date.setHours (0)
+        new_end_date.setMinutes (0)
+        new_end_date.setSeconds (0)
+        new_end_date.setMilliseconds (0)
+        new_end_date.setDate (new_end_date.getDate()+1)
+        new_end_date.setMilliseconds (new_end_date.getMilliseconds()-1)
+
+        if (new_value==0) {
+            // Do nothing
+        }
+        if (new_value==1) {
+            // Setting new_start_date on monday
+            while (new_start_date.getDay()!=1)
+                new_start_date.setDate(new_start_date.getDate()-1)
+
+            // Setting new_start_date on sunday
+            while (new_end_date.getDay()!=0)
+                new_end_date.setDate(new_end_date.getDate()+1)
+        }
+
+        set_filter_grain(new_value)
+        set_date_range ([new_start_date, new_end_date])
+    }
+    
     const create_button = (item, idx) => {
         return (
             <ToggleButton variant="outline-light" type="radio"
                             className={`m-2 ${filter_grain==item.value ?
                                                 "shadow text-primary" : "text-dark"}`}
                             id={`filter-btn-${item.id}`} key={`filter-btn-${item.id}`}
-                            onChange={(e) => {set_filter_grain(item.value)}}>
+                            onChange={(e) => {update_filter_grain(item.value, date_range)}}>
                 {item.content}
             </ToggleButton>
         )
