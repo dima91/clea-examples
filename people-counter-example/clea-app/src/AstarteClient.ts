@@ -1,4 +1,5 @@
 import axios from "axios";
+//import ApiHandler from "./ApiHandler";
 import { Channel, Socket } from "phoenix";
 
 // https://docs.astarte-platform.org/latest/052-using_channels.html
@@ -120,6 +121,8 @@ async function registerTrigger(
 }
 
 class AstarteClient {
+    //private apiHandler:ApiHandler;
+
     private config: Config;
 
     private introspection : Introspection;
@@ -151,6 +154,8 @@ class AstarteClient {
         this.joinedChannels = {};
         this.listeners = {};
         this.introspection = null;
+
+        //this.apiHandler = new ApiHandler({"endpoint":astarteUrl, "realm":realm, "token":token})
     }
 
     async getIntrospection() {
