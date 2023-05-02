@@ -101,38 +101,18 @@ class AstarteClient :
         self.__device.send_aggregate(self.__BLE_DEVICES_INTERFACE, "/", payload)
 
 
-    def publish_transaction(self) -> None:
-        # TODO
-        pass
+    def publish_transaction(self, descriptor) -> None:
+        print (f"Publishing following transaction\n{descriptor}\n")
+        payload = {
+            "age"           : descriptor["age"],
+            "emotion"       : descriptor["emotion"],
+            "gender"        : descriptor["gender"],
+            "suggestion"    : descriptor["suggestion"]
+        }
 
-
-    def publish_rejected_transaction(self) -> None:
-        # TODO
-        pass
-    
-
-    # def publish_day_period(self, day_period:DayPeriod) -> None:
-    #     self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/day_period",
-    #                                 self.__build_external_sensor_payload(day_period.value, "day_period", "day_period"))
-
-    # def publish_reference_current(self, value:float) -> None:
-    #     self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/reference_electrical_current",
-    #                                 self.__build_external_sensor_payload(value, "reference_electrical_current", "reference_electrical_current"))
-
-    # def publish_temperature(self, value:float) -> None:
-    #     self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/temperature",
-    #                                 self.__build_external_sensor_payload(value, "temperature", "temperature"))
-    
-    # def publish_wind_speed(self, value:float) -> None:
-    #     self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/wind_velocity",
-    #                                 self.__build_external_sensor_payload(value, "wind_velocity", "wind_velocity"))
-        
-    
-    # def publish_panel_stats(self, voltage:float, current:float) -> None:
-    #     self.__device.send_aggregate(self.__PANEL_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))
-
-    # def publish_battery_stats(self, voltage:float, current:float) -> None:
-    #     self.__device.send_aggregate(self.__BATTERY_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))
-    
-    # def publish_load_stats(self, voltage:float, current:float) -> None:
-    #     self.__device.send_aggregate(self.__LOAD_STATS_INTERFACE, "/", self.__build_stats_payload(voltage, current))
+        if not descriptor["is_rejected"]:
+            payload["choice"]   = descriptor["choice"]
+            payload["price"]    = descriptor["price"]
+            self.__device.send_aggregate(self.__TRANSACTION_INTERFACE, "/transaction", payload)
+        else:    
+            self.__device.send_aggregate(self.__REJECTED_TRANSACTION_INTERFACE, "/transaction", payload)

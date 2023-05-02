@@ -1,54 +1,90 @@
 
 {
+    "country"   : "IT",
     "devices"   : {
-        "creation_delay_s"          : 5,
-        "min_creation_probability"  : 0.7,
-        "min_presence_time_s"       : 10,
-        "max_presence_time_s"       : 120,
-        "max_devices_count"         : 20
+        "creation_delay_s"              : 5,
+        "min_creation_probabilities"    : {
+            "0" : 0.95,
+            "1" : 0.95,
+            "2" : 0.95,
+            "3" : 0.95,
+            "4" : 0.95,
+            "5" : 0.95,
+            "6" : 0.95,
+            "7" : 0.90,
+            "8" : 0.85,
+            "9" : 0.80,
+            "10" : 0.78,
+            "11" : 0.7,
+            "12" : 0.7,
+            "13" : 0.7,
+            "14" : 0.7,
+            "15" : 0.7,
+            "16" : 0.7,
+            "17" : 0.8,
+            "18" : 0.8,
+            "19" : 0.85,
+            "20" : 0.9,
+            "21" : 1,
+            "22" : 1,
+            "23" : 1
+        },
+        "min_presence_time_s"           : 10,
+        "max_presence_time_s"           : 200,
+        "max_devices_count"             : 9
     },
-    "emotions"  : ["Neutral", "Happy", "Sad", "Anger", "Surprise"],
-    "genders"   : ["M", "W"],
-    "products"  : [
-        {
-            "name"  : "Espresso",
-            "price" : 1
-        },
-        {
-            "name"  : "Americano",
-            "price" : 1.5
-        },
-        {
-            "name"  : "Milky Coffee",
-            "price" : 1.5
-        },
-        {
-            "name"  : "Ginseng",
-            "price" : 1.20
-        },
-        {
-            "name"  : "Cappuccino",
-            "price" : 1.50
-        },
-        {
-            "name"  : "Tea",
-            "price" : 1.20
-        },
-        {
-            "name"  : "Green Tea",
-            "price" : 1.20
-        },
-        {
-            "name"  : "Milk Tea",
-            "price" : 1.20
-        },
-        {
-            "name"  : "Hot Chocolate",
-            "price" : 1.5
-        },
-        {
-            "name"  : "Latte",
-            "price" : 1.5
-        }
-    ]
+    "transactions"  : {
+        "FIXME delay_s"                       : 1200,
+        "delay_s"                       : 20,
+        "delay_error"                   : 0.40,
+        "FIXME min_creation_probabilities"     : 0.70,
+        "min_creation_probabilities"    : 0.2,
+        "rejection_probability"         : 0.70,
+        "min_age"                       : 20,
+        "max_age"                       : 60,
+        "emotions"                      : ["Neutral", "Happy", "Sad", "Anger", "Surprise"],
+        "genders"                       : ["M", "W"],
+        "products"                      : [
+            {
+                "name"  : "Espresso",
+                "price" : 1
+            },
+            {
+                "name"  : "Americano",
+                "price" : 1.5
+            },
+            {
+                "name"  : "Milky Coffee",
+                "price" : 1.5
+            },
+            {
+                "name"  : "Ginseng",
+                "price" : 1.20
+            },
+            {
+                "name"  : "Cappuccino",
+                "price" : 1.50
+            },
+            {
+                "name"  : "Tea",
+                "price" : 1.20
+            },
+            {
+                "name"  : "Green Tea",
+                "price" : 1.20
+            },
+            {
+                "name"  : "Milk Tea",
+                "price" : 1.20
+            },
+            {
+                "name"  : "Hot Chocolate",
+                "price" : 1.5
+            },
+            {
+                "name"  : "Latte",
+                "price" : 1.5
+            }
+        ]
+    }
 }
