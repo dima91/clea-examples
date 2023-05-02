@@ -1,1 +1,54 @@
-{}
+
+{
+    "devices"   : {
+        "creation_delay_s"          : 5,
+        "min_creation_probability"  : 0.7,
+        "min_presence_time_s"       : 10,
+        "max_presence_time_s"       : 120,
+        "max_devices_count"         : 20
+    },
+    "emotions"  : ["Neutral", "Happy", "Sad", "Anger", "Surprise"],
+    "genders"   : ["M", "W"],
+    "products"  : [
+        {
+            "name"  : "Espresso",
+            "price" : 1
+        },
+        {
+            "name"  : "Americano",
+            "price" : 1.5
+        },
+        {
+            "name"  : "Milky Coffee",
+            "price" : 1.5
+        },
+        {
+            "name"  : "Ginseng",
+            "price" : 1.20
+        },
+        {
+            "name"  : "Cappuccino",
+            "price" : 1.50
+        },
+        {
+            "name"  : "Tea",
+            "price" : 1.20
+        },
+        {
+            "name"  : "Green Tea",
+            "price" : 1.20
+        },
+        {
+            "name"  : "Milk Tea",
+            "price" : 1.20
+        },
+        {
+            "name"  : "Hot Chocolate",
+            "price" : 1.5
+        },
+        {
+            "name"  : "Latte",
+            "price" : 1.5
+        }
+    ]
+}

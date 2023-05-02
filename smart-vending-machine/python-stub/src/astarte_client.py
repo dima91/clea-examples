@@ -89,6 +89,28 @@ class AstarteClient :
         return self.__device.is_connected()
     
 
+    def publish_devices(self, devices) -> None:
+        payload = {
+            "devices"       : [],
+            "presence_time" : []
+        }
+        for d in devices:
+            payload["devices"].append(d["device_address"])
+            payload["presence_time"].append(int(d["presence_time"]))
+        
+        self.__device.send_aggregate(self.__BLE_DEVICES_INTERFACE, "/", payload)
+
+
+    def publish_transaction(self) -> None:
+        # TODO
+        pass
+
+
+    def publish_rejected_transaction(self) -> None:
+        # TODO
+        pass
+    
+
     # def publish_day_period(self, day_period:DayPeriod) -> None:
     #     self.__device.send_aggregate(self.__EXTERNAL_SENSORS_INTERFACE, "/day_period",
     #                                 self.__build_external_sensor_payload(day_period.value, "day_period", "day_period"))
