@@ -5,9 +5,6 @@ ADD python-stub/requirements.txt app/
 
 WORKDIR /app
 
-# RUN apt update && \
-#     apt install -y virtualenv git
-
 RUN pip install -r requirements.txt
 
 ADD astarte-interfaces astarte-interfaces
