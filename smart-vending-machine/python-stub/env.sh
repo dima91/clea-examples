@@ -1,0 +1,14 @@
+
+PYTHONUNBUFFERED=1
+
+# Astarte details
+DEVICE_ID=
+DEVICE_SECRET=
+API_BASE_URL=
+REALM_NAME=
+PERSISTENCY_PATH=persistency.d
+INTERFACES_FOLDER=astarte-interfaces
+
+CONFIG_FILE_PATH=/app/config.json
+
+TZ=Europe/Rome
