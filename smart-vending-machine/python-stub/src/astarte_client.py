@@ -85,7 +85,7 @@ class AstarteClient :
 
 
     def publish_transaction(self, descriptor) -> None:
-        print (f"Publishing following transaction\n{descriptor}\n")
+        #print (f"Publishing following transaction\n{descriptor}")
         
         payload = {
             "age"           : descriptor["age"] if not descriptor["detection_failed"] else 0,
