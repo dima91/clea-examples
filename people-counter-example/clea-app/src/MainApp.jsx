@@ -6,9 +6,10 @@ import { Button, Col, Container, Card, Row, InputGroup, FormControl, ToggleButto
             ToggleButtonGroup, Spinner, Navbar, Nav} from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 import Chart from "react-apexcharts";
+import {FaRegCalendarAlt} from 'react-icons/fa';
 import DatePicker from "react-datepicker";
 import DatePickerStyle from "react-datepicker/dist/react-datepicker.css";
-import _ from 'lodash';
+import _, { result } from 'lodash';
 
 let historical_data_size        = 5;            // minutes
 const default_areas             = [];           // item : {zone_count, zone_name, zone_id}
@@ -471,7 +472,7 @@ const stats_chart_options   = {
 
 const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     const [stats_chart_desc, set_stats_desc]    = React.useState ({data:undefined, width:0, height:0})
-    const [filter_grain, set_filter_grain]      = React.useState (0)                        // 0:hours, 1:weekdays, 2:moth days
+    const [filter_grain, set_filter_grain]      = React.useState (0)                        // 0:hours, 1:weekdays, 2:moth days, 3:calendar dates
     const [date_range, set_date_range]          = React.useState ([new Date(), new Date()]) // DatePicker result
     const [start_date, end_date]                = date_range;
     const buttons_descriptors                   = [
@@ -517,40 +518,6 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     }
 
 
-    const value_to_axis_text    = (t) => {
-        switch (filter_grain) {
-            case 0 :
-                return `${t}`;
-
-            case 1 : {
-                if (t==0)
-                    return 'Sunday';
-                if (t==1)
-                    return 'Monday';
-                if (t==2)
-                    return 'Tuesday';
-                if (t==3)
-                    return 'Wednesday'
-                if (t==4)
-                    return 'Thursday';
-                if (t==5)
-                    return 'Friday';
-                if (t==6)
-                    return 'Saturday';
-
-                return undefined;
-            }
-
-            case 2 :
-                return `${t}`;
-            
-
-            default :
-                return undefined
-        }
-    }
-
-
     const data_analyzer     = (data) => {
         /* data item:
             {
@@ -564,6 +531,52 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
          */
         let item_per_unit   = []
         let results         = []
+
+        let timestamp_to_item_idx   = (timestamp) => {
+            return timestamp.toDateString()
+        }
+        let item_idx_to_string_date = (item_idx) => {
+            let d   = new Date(Date.parse(item_idx))
+            // console.log(d)
+            // console.log(d.getMonth())
+            return `${d.getFullYear()}/${d.getMonth()}/${d.getDate()}`
+        }
+        const value_to_axis_text    = (t) => {
+            switch (filter_grain) {
+                case 0 :
+                    return `${t}`;
+    
+                case 1 : {
+                    if (t==0)
+                        return 'Sunday';
+                    if (t==1)
+                        return 'Monday';
+                    if (t==2)
+                        return 'Tuesday';
+                    if (t==3)
+                        return 'Wednesday'
+                    if (t==4)
+                        return 'Thursday';
+                    if (t==5)
+                        return 'Friday';
+                    if (t==6)
+                        return 'Saturday';
+    
+                    return undefined;
+                }
+    
+                case 2 :
+                    return `${t}`;
+                    
+                    case 3 :
+                    // console.log(`t -> ${t}`)
+                    return item_idx_to_string_date(t)
+                
+    
+                default :
+                    return undefined
+            }
+        }
         
         
         if (filter_grain == 0) {
@@ -609,6 +622,22 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
                 //console.log (`item_day: ${item_date}`)
             })
         }
+        else if (filter_grain == 3) {
+            // TODO Building data
+            results         = {}
+            item_per_unit   = {}
+            // console.log("Building to be shown data!!!")
+            // console.log(data)
+            _.map(data, (item,idx) => {
+                let item_idx    = timestamp_to_item_idx(new Date(item['timestamp']))
+                if (!results.hasOwnProperty(item_idx) || !item_per_unit.hasOwnProperty(item_idx)) {
+                    results[item_idx]       = 0
+                    item_per_unit[item_idx] = 0
+                }
+                results[item_idx] += item['people_count']
+                item_per_unit[item_idx] += 1
+            })
+        }
         else {
             console.error (`Invalid filter_grain value: ${filter_grain}`)
         }
@@ -616,6 +645,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
         //console.log (`Building results\n\tfg: ${filter_grain}\n\tlen: ${item_per_unit.length}`)
         let final_results   = []
         _.map (item_per_unit, (item, idx) => {
+            // console.log(item)
             if (item!=undefined) {
                 final_results.push({
                     // Considering 'filter_grain' value to specify the 'x' value
@@ -626,6 +656,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             }
         })
 
+        // console.log(final_results)
         return final_results
     }
 
@@ -663,7 +694,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
         else {
             set_stats_desc ((desc) => {return {...desc, data:[]}})
         }
-    }, [filter_grain, date_range])
+    }, [date_range])
 
 
     React.useEffect (() => {
@@ -698,16 +729,16 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
 
 
     const update_filter_grain   = (new_value, curr_date_range) => {
-        let new_start_date  = undefined
-        let new_end_date    = undefined
 
-        new_start_date  = new Date()
+        set_filter_grain(new_value)
+
+        let new_start_date  = new Date()
         new_start_date.setHours (0)
         new_start_date.setMinutes (0)
         new_start_date.setSeconds (0)
         new_start_date.setMilliseconds (0)
 
-        new_end_date    = new Date()
+        let new_end_date    = new Date()
         new_end_date.setHours (0)
         new_end_date.setMinutes (0)
         new_end_date.setSeconds (0)
@@ -727,9 +758,13 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             while (new_end_date.getDay()!=0)
                 new_end_date.setDate(new_end_date.getDate()+1)
         }
-
-        set_filter_grain(new_value)
-        set_date_range ([new_start_date, new_end_date])
+        if (new_value==3) {
+            // Do nothing
+            return
+        }
+    
+        if (new_start_date && new_end_date)
+            set_date_range ([new_start_date, new_end_date])
     }
     
     const create_button = (item, idx) => {
@@ -757,6 +792,28 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             end_date_str    = end_date==null?``:` - ${end_date.getDate()}/${end_date.getMonth()+1}/${end_date.getFullYear()}`
         }
         return `${start_date_str}${end_date_str}`
+    }
+
+
+    const date_updater  = (range) => {
+
+        update_filter_grain(3)
+        
+        let start_d = new Date(range[0])
+        let end_d   = undefined
+        
+        if (range[1]) {
+            end_d   = new Date(range[1])
+        }
+
+        set_date_range([start_d, end_d])
+    }
+
+
+    const range_to_string = (start, end) => {
+        let startDateString = start ? start.toDateString() : "";
+        let endDateString   = end ? end.toDateString() : "";
+        return `${startDateString}   -   ${endDateString}`
     }
 
 
@@ -790,7 +847,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
                 <div className="m-2">
                     <style>{DatePickerStyle.toString()}</style>
                     {/*DATE PICKER*/}
-                    <DatePicker
+                    {/* <DatePicker
                         showMonthYearPicker={filter_grain==2}
                         selectsRange={true}
                         startDate={start_date}
@@ -798,17 +855,37 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
                         onChange    = {(new_range) => {
                             set_date_range (new_range)
                         }} 
-                        isClearable={true}
+                        isClearable={false}
                         customInput={
                             <InputGroup>
                                     <InputGroup.Text>Period Range</InputGroup.Text>
-                                    <FormControl onChange={() => {/*Do nothing*/}}
+                                    <FormControl onChange={() => {}}
                                                     value={date_calculator()}/>
                             </InputGroup>
+                        }
+                    /> */}
+                    <style>{DatePickerStyle.toString()}</style>
+                    <DatePicker
+                        selectsRange={true}
+                        startDate={date_range[0]}
+                        endDate={date_range[1]}
+                        //FIXME maxDate={endOfDay(new Date())}
+                        maxDate={new Date()}
+                        onChange={date_updater}
+                        className="ms-4 me-2"
+                        customInput={
+                            <Button variant={`light ${filter_grain==3 ? 'shadow text-primary' : 'text-dark'}`}
+                                    className="d-flex align-items-center p-3">
+                                <FaRegCalendarAlt size={20} onClick={()=>{update_filter_grain(3, undefined)}}/>
+                            </Button>
                         }
                     />
                 </div>
             </Navbar>
+
+            <div className="d-flex justify-content-end pe-3">
+                {range_to_string(date_range[0], date_range[1])}
+            </div>
 
             <Container className="d-flex justify-content-center">
                 {chart_provider (stats_chart_desc.data)}
