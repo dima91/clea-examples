@@ -478,7 +478,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     const buttons_descriptors                   = [
         {
             value       : 0,
-            content     : "Days",
+            content     : "Day",
             id          : "hrs"
         },
         {
