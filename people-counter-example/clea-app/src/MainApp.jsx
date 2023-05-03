@@ -478,7 +478,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     const buttons_descriptors                   = [
         {
             value       : 0,
-            content     : "Days",
+            content     : "Day",
             id          : "hrs"
         },
         {
@@ -539,7 +539,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             let d   = new Date(Date.parse(item_idx))
             // console.log(d)
             // console.log(d.getMonth())
-            return `${d.getFullYear()}/${d.getMonth()}/${d.getDate()}`
+            return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`
         }
         const value_to_axis_text    = (t) => {
             switch (filter_grain) {
