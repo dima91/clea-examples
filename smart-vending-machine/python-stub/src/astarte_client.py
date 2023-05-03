@@ -79,7 +79,7 @@ class AstarteClient :
         }
         for d in devices:
             payload["devices"].append(d["device_address"])
-            payload["presence_time"].append(int(d["presence_time"]))
+            payload["presence_time"].append(int(d["presence_time"])*1000)
         
         self.__device.send_aggregate(self.__BLE_DEVICES_INTERFACE, "/", payload)
 
