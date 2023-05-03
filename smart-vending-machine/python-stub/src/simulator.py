@@ -39,11 +39,25 @@ class TransactionsGenerator:
     __config                = None
     __holidays              = None
     __last_generation_time  = None
+    __products_weights      = None
 
     def __init__(self, config, country) -> None:
         self.__config               = config
         self.__holidays             = holidays.country_holidays(country)
         self.__last_generation_time = datetime.now()
+        self.__products_weights     = []
+        # Checking that producs weights summation is equal to one
+        tmp_sum = 0
+        for p in self.__config["products"]:
+            tmp_sum += p["weight"]
+            if len(self.__products_weights)==0:
+                self.__products_weights.append({"name":p["name"], "lower_bound":p["weight"]})
+            else:
+                last    = self.__products_weights[-1]
+                self.__products_weights.append({"name":p["name"], "lower_bound":p["weight"]+last["lower_bound"]})
+        if tmp_sum!=1:
+            print(f"Products weitghts summation differs from 1 -> {tmp_sum}")
+            raise Exception
 
 
     def generate_transaction(self) -> dict:
@@ -51,18 +65,29 @@ class TransactionsGenerator:
         now         = datetime.now()
 
         if (now-self.__last_generation_time).total_seconds()>utils.generate_float_with_error(self.__config["delay_s"], self.__config["delay_error"]) and \
-            random.random()>self.__config["min_creation_probabilities"]:
-            #FIXME random.random()>self.__config["min_creation_probabilities"][str(now.hour)] and \:
+            random.random()>self.__config["min_creation_probabilities"][str(now.hour)] :
             
             self.__last_generation_time = now
+            
+            # Generating weighted product
+            weight  = random.random()
+            i       = 0
+            while i<len(self.__products_weights) and weight>self.__products_weights[i]["lower_bound"]:
+                i += 1
+            if i>=len(self.__products_weights):
+                i   = len(self.__products_weights)-1
 
-            # TODO Generate also null values
 
             # Generating a transaction
-            choice      = self.__config["products"][random.randint(0, len(self.__config["products"])-1)]
-            suggestion  = self.__config["products"][random.randint(0, len(self.__config["products"])-1)]
-            is_rejected = True if random.uniform(0,1) <= self.__config["rejection_probability"] else False
-            descriptor  = {
+            product_name    = self.__products_weights[i]["name"]
+            # print(product_name)
+            # print(weight)
+            # print(self.__products_weights)
+            # print(list(filter(lambda p: p["name"]==product_name, self.__config["products"])))
+            choice          = list(filter(lambda p: p["name"]==product_name, self.__config["products"]))[0]
+            suggestion      = self.__config["products"][random.randint(0, len(self.__config["products"])-1)]
+            is_rejected     = True if random.uniform(0,1) <= self.__config["rejection_probability"] else False
+            descriptor      = {
                 "age"           : random.randint(self.__config["min_age"], self.__config["max_age"]),
                 "emotion"       : self.__config["emotions"][random.randint(0, len(self.__config["emotions"])-1)],
                 "gender"        : self.__config["genders"][random.randint(0, len(self.__config["genders"])-1)],
@@ -107,7 +132,7 @@ class Simulator:
                 # Trying to generate a new device
                 device, presence_time   = self.__devices_generator.generate_device(len(self.__current_devices))
                 if device!="":
-                    print (f"Registering a new device! (Current device count {len(self.__current_devices)})")
+                    #print (f"Registering a new device! (Current device count {len(self.__current_devices)})")
                     self.__current_devices.append({
                         "device_address"    : device,
                         "creation_time"     : now,

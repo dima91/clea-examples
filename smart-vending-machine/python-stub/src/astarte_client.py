@@ -62,23 +62,6 @@ class AstarteClient :
     def __aggregated_data_cb(self, device, ifname, ifpath, data) :
         print ("Received aggregated server data")
 
-
-    ##### ================================ #####
-
-
-    # def __build_external_sensor_payload(self, value, sensor_type, display_string) -> dict:
-    #     return {
-    #         "sensorValue"           : value,
-    #         "sensorType"            : sensor_type,
-    #         "sensorDisplayString"   : display_string
-    #     }
-    
-    # def __build_stats_payload(self, voltage:float, current:float) -> dict:
-    #     return {
-    #         "voltage"   : voltage,
-    #         "current"   : current
-    #     }
-
     ########################################
 
     def connect(self):
@@ -102,7 +85,7 @@ class AstarteClient :
 
 
     def publish_transaction(self, descriptor) -> None:
-        print (f"Publishing following transaction\n{descriptor}\n")
+        #print (f"Publishing following transaction\n{descriptor}\n")
         payload = {
             "age"           : descriptor["age"],
             "emotion"       : descriptor["emotion"],
