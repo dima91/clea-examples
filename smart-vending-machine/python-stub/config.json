@@ -34,7 +34,7 @@
         "max_devices_count"             : 9
     },
     "transactions"  : {
-        "delay_s"                       : 1200,
+        "delay_s"                       : 1000,
         "delay_error"                   : 0.40,
         "min_creation_probabilities"    : {
             "0" : 0.95,
