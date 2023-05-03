@@ -63,6 +63,7 @@
             "23" : 1
         },
         "rejection_probability"         : 0.70,
+        "detection_failure_probability" : 0.10,
         "min_age"                       : 20,
         "max_age"                       : 60,
         "emotions"                      : ["Neutral", "Happy", "Sad", "Anger", "Surprise"],

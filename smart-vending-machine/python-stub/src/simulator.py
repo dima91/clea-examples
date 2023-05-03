@@ -80,21 +80,18 @@ class TransactionsGenerator:
 
             # Generating a transaction
             product_name    = self.__products_weights[i]["name"]
-            # print(product_name)
-            # print(weight)
-            # print(self.__products_weights)
-            # print(list(filter(lambda p: p["name"]==product_name, self.__config["products"])))
             choice          = list(filter(lambda p: p["name"]==product_name, self.__config["products"]))[0]
             suggestion      = self.__config["products"][random.randint(0, len(self.__config["products"])-1)]
             is_rejected     = True if random.uniform(0,1) <= self.__config["rejection_probability"] else False
             descriptor      = {
-                "age"           : random.randint(self.__config["min_age"], self.__config["max_age"]),
-                "emotion"       : self.__config["emotions"][random.randint(0, len(self.__config["emotions"])-1)],
-                "gender"        : self.__config["genders"][random.randint(0, len(self.__config["genders"])-1)],
-                "suggestion"    : suggestion["name"],
-                "choice"        : choice["name"],
-                "price"         : choice["price"],
-                "is_rejected"   : is_rejected
+                "age"               : random.randint(self.__config["min_age"], self.__config["max_age"]),
+                "emotion"           : self.__config["emotions"][random.randint(0, len(self.__config["emotions"])-1)],
+                "gender"            : self.__config["genders"][random.randint(0, len(self.__config["genders"])-1)],
+                "suggestion"        : suggestion["name"],
+                "choice"            : choice["name"],
+                "price"             : choice["price"],
+                "is_rejected"       : is_rejected,
+                "detection_failed"  : True if random.uniform(0,1) <= self.__config["detection_failure_probability"] else False
             }
         
         return descriptor
@@ -132,7 +129,6 @@ class Simulator:
                 # Trying to generate a new device
                 device, presence_time   = self.__devices_generator.generate_device(len(self.__current_devices))
                 if device!="":
-                    #print (f"Registering a new device! (Current device count {len(self.__current_devices)})")
                     self.__current_devices.append({
                         "device_address"    : device,
                         "creation_time"     : now,
