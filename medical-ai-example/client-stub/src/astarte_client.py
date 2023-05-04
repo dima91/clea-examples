@@ -1,5 +1,6 @@
 
-import os, glob, json
+import os, glob, json, utils
+from datetime import datetime
 from astarte.device import Device
 
 
@@ -70,3 +71,30 @@ class AstarteClient :
     
     def is_connected(self) :
         return self.__device.is_connected()
+    
+
+    def publish_rooms_identifiers(self, rooms_id) -> None:
+        self.__device.send(self.__ROOMS_MANAGER_DESCRIPTOR_INTERFACE, "/roomsIds", rooms_id)
+
+
+    def publish_room_descriptor(self, room_id:int, patient_id:int, diagnosis:str, hospitalization_date:datetime,
+                                release_date:datetime) -> None:
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientId", patient_id)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/diagnosis", diagnosis)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientHospitalizationDate", hospitalization_date)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientReleaseDate", release_date)
+
+    
+    def publish_event(self, event_type:utils.EventType, confidence:float, init_frame_content:bytes, init_frame_url:str,
+                      room_id:int) -> None:
+        payload = {
+            "eventType"     : event_type.value,
+            "confidence"    : confidence,
+            "roomId"        : room_id
+        }
+        if init_frame_content:
+            payload['initFrameContent'] = init_frame_content
+        if init_frame_url:
+            payload['initFrameURL']     = init_frame_url
+        
+        self.__device.send_aggregate(self.__EVENT_INTERFACE, f"/{room_id}", payload)
