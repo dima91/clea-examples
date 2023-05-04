@@ -1,0 +1,141 @@
+{
+    "country"       : "IT",
+    "loop_delay_s"  : 5,
+
+    "rooms"     : {
+        "diagnoses_list"            : [
+            "A very very very very long list of words! It is not sufficient to entirely cover a single text box line...",
+            "B",
+            "C"],
+        "max_patient_id"                        : 99999999,
+        "hospitalization_duration_range_d"      : [1, 5],
+        "patient_generation_min_probability"    : 0.7,
+        "hospitalization_range_h"               : ["14:00:00", "18:00:00"],
+        "release_range_h"                       : ["08:00:00", "12:00:00"],
+        
+        "descriptors"                           : [
+            {
+                "id"                            : 2,
+                "patient_id"                    : 89524365,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/08 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "WARNING",
+                    "start_time"        : "2023/05/04 12:56:00",
+                    "duration_s"        : 30,
+                    "confidence"        : 1
+                }
+            },
+            {
+                "id"                            : 7, 
+                "patient_id"                    : 91382680,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/08 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "NORMAL",
+                    "start_time"        : null,
+                    "duration_s"        : null,
+                    "confidence"        : 1
+                }
+            },
+            {
+                "id"                            : 19,
+                "patient_id"                    : 61984690,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/03 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "NORMAL",
+                    "start_time"        : null,
+                    "duration_s"        : null,
+                    "confidence"        : 1
+                }
+            },
+            {
+                "id"                            : 21,
+                "patient_id"                    : 57778808,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/08 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "NORMAL",
+                    "start_time"        : null,
+                    "duration_s"        : null,
+                    "confidence"        : 1
+                }
+            },
+            {
+                "id"                            : 24,
+                "patient_id"                    : 70765834,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/08 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "NORMAL",
+                    "start_time"        : null,
+                    "duration_s"        : null,
+                    "confidence"        : 1
+                }
+            },
+            {
+                "id"                            : 34,
+                "patient_id"                    : 80347035,
+                "diagnosis_idx"                 : 0,
+                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_release_date"          : "2023/05/08 16:30:00",
+                "status"                        : {
+                    "previous_status"   : "NORMAL",
+                    "current_status"    : "NORMAL",
+                    "start_time"        : null,
+                    "duration_s"        : null,
+                    "confidence"        : 1
+                }
+            }
+        ]
+    },
+
+    "events"    : {
+        "min_delay_s"           : 600,
+        "max_delay_s"           : 3600,
+
+        "min_confidence"        : 0.75,
+        "max_confidence"        : 1,
+
+        "min_event_duration_s"  : 20,
+        "max_event_duration_s"  : 60,
+
+        "hourly_probabilities"  : {
+            "0"     : 0.02,
+            "1"     : 0.12,
+            "2"     : 0.082,
+            "3"     : 0.1,
+            "4"     : 0.12,
+            "5"     : 0.06,
+            "6"     : 0.02,
+            "7"     : 0.19,
+            "8"     : 0.11,
+            "9"     : 0.115,
+            "10"    : 0.08,
+            "11"    : 0.078,
+            "12"    : 0.05,
+            "13"    : 0.08,
+            "14"    : 0.02,
+            "15"    : 0.01,
+            "16"    : 0.07,
+            "17"    : 0.08,
+            "18"    : 0.088,
+            "19"    : 0.64,
+            "20"    : 0.119,
+            "21"    : 0.18,
+            "22"    : 0.08,
+            "23"    : 0.08
+        }
+    }
+}
