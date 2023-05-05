@@ -31,7 +31,7 @@
                 "patient_id"                    : 89524365,
                 "diagnosis_idx"                 : 0,
                 "patient_hospitalization_date"  : "2023/05/01 10:27:03",
-                "patient_release_date"          : "2023/05/08 16:30:00",
+                "patient_release_date"          : "2023/05/05 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
                     "current_status"    : "WARNING",
@@ -44,8 +44,8 @@
                 "id"                            : 7, 
                 "patient_id"                    : 91382680,
                 "diagnosis_idx"                 : 0,
-                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
-                "patient_release_date"          : "2023/05/08 16:30:00",
+                "patient_hospitalization_date"  : "2023/05/04 10:27:03",
+                "patient_release_date"          : "2023/05/06 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
                     "current_status"    : "NORMAL",
@@ -58,8 +58,8 @@
                 "id"                            : 19,
                 "patient_id"                    : 61984690,
                 "diagnosis_idx"                 : 0,
-                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
-                "patient_release_date"          : "2023/05/03 16:30:00",
+                "patient_hospitalization_date"  : "2023/05/04 10:27:03",
+                "patient_release_date"          : "2023/05/07 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
                     "current_status"    : "NORMAL",
@@ -72,7 +72,7 @@
                 "id"                            : 21,
                 "patient_id"                    : 57778808,
                 "diagnosis_idx"                 : 0,
-                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
+                "patient_hospitalization_date"  : "2023/05/04 10:27:03",
                 "patient_release_date"          : "2023/05/08 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
@@ -87,7 +87,7 @@
                 "patient_id"                    : 70765834,
                 "diagnosis_idx"                 : 0,
                 "patient_hospitalization_date"  : "2023/05/01 10:27:03",
-                "patient_release_date"          : "2023/05/08 16:30:00",
+                "patient_release_date"          : "2023/05/05 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
                     "current_status"    : "NORMAL",
@@ -100,8 +100,8 @@
                 "id"                            : 34,
                 "patient_id"                    : 80347035,
                 "diagnosis_idx"                 : 0,
-                "patient_hospitalization_date"  : "2023/05/01 10:27:03",
-                "patient_release_date"          : "2023/05/08 16:30:00",
+                "patient_hospitalization_date"  : "2023/05/04 10:27:03",
+                "patient_release_date"          : "2023/05/05 16:30:00",
                 "status"                        : {
                     "previous_status"   : "NORMAL",
                     "current_status"    : "NORMAL",
