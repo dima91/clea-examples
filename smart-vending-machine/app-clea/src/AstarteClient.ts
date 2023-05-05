@@ -149,12 +149,44 @@ class AstarteClient {
   }
 
 
+  async getPaginatedBleData({deviceId, since, to, limit, downsamplingTo} : GetBleDataValuesParams) : Promise<DeviceEntry[]> {
+      
+    if (!since) {
+        throw "'since' paramenter not defined"
+    }
+    if (!to) {
+        throw "'to' paramenter not defined"
+    }
+        
+    const MS_PER_TWO_HOURS                      = 2*60*60*1000
+    let tmp_results:Promise<DeviceEntry[]>[]    = []
+    let tmp_start_date                          = new Date(since)
+    let tmp_final_date                          = new Date(since.valueOf()+MS_PER_TWO_HOURS)
+
+    while (tmp_final_date<to){
+        tmp_results.push(this.getBleData({deviceId:deviceId, since:tmp_start_date, to:tmp_final_date, limit:limit, downsamplingTo:downsamplingTo}))
+        tmp_start_date  = new Date(tmp_final_date.valueOf()+1)
+        tmp_final_date  = new Date(tmp_final_date.valueOf()+MS_PER_TWO_HOURS)
+    }
+
+    let results:DeviceEntry[]   = []
+
+    for (let r in tmp_results) {
+        let res = await tmp_results[r]
+        results = results.concat(res)
+    }
+
+    return results
+}
+
+
   async getBleData ({deviceId, sinceAfter, since, to, limit, downsamplingTo} : GetBleDataValuesParams) : Promise<DeviceEntry[]> {
     const { appEngineUrl, realm, token } = this.config;
     const interfaceName = "ai.clea.examples.BLEDevices";
     const path = `v1/${realm}/devices/${deviceId}/interfaces/${interfaceName}/`;
     const requestUrl = new URL(path, appEngineUrl);
     const query: Record<string, string> = {};
+    
     if (sinceAfter) {
       query.sinceAfter = sinceAfter.toISOString();
     }
@@ -189,8 +221,8 @@ class AstarteClient {
     }).then((response) => {
       // console.log("Got BLE response from Astarte:", response);
       let result : any[] = [];
-
-      if (response.data.data && Array.isArray(response.data.data)) {
+      
+      if (response.status=200 && response.data.data && Array.isArray(response.data.data)) {
         response.data.data.forEach ((item:any) => {
             if (Array.isArray(item.devices) && Array.isArray(item.presence_time)) {
                 if (item.devices.length != item.presence_time.length) {
@@ -209,11 +241,10 @@ class AstarteClient {
         })
       }
       else {
-        console.error (`[BLE] Cannot parse response payload: ${response.data}`)
+        //console.error (`[BLE] Cannot parse response payload: `, response)
       }
       result.sort ((a:DeviceEntry, b:DeviceEntry) => a.timestamp-b.timestamp)
-      /*console.log (`result`)
-      console.log (result)*/
+      
       return result;
     }).catch ((err) => {
         console.error (`[BLE] Catched this error:\n${err}`)

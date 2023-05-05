@@ -296,7 +296,8 @@ const AudienceChartCard = ( params : ChartCardProps ) : JSX.Element => {
 
         // Retrieving interesting information from Astarte
         let queryParams = {deviceId:deviceId, since:new Date(dateRange.start*1000), to:new Date(dateRange.end*1000)}
-        const bleData = astarte.getBleData (queryParams)
+        //const bleData = astarte.getBleData (queryParams)
+        const bleData = astarte.getPaginatedBleData(queryParams)
         const transactionsData = astarte.getTransactionData (queryParams)
         const rejectedTransactions = astarte.getRejectedTransactions (queryParams)
 
