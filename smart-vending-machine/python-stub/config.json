@@ -2,8 +2,9 @@
 {
     "country"   : "IT",
     "devices"   : {
-        "creation_delay_s"              : 5,
-        "min_creation_probabilities"    : {
+        "creation_delay_s"                  : 5,
+        "expired_devices_publish_delay_s"   : 60,
+        "min_creation_probabilities"        : {
             "0" : 0.95,
             "1" : 0.95,
             "2" : 0.95,

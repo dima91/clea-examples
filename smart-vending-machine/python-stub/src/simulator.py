@@ -120,11 +120,13 @@ class Simulator:
         try:
             print ("Running Simulator loop..")
 
+            last_publish_time   = datetime.now()
+            expired_devices     = []
+
             while True:
                 await asyncio.sleep(5)
 
                 now             = datetime.now()
-                expired_devices = []
 
                 # Trying to generate a new device
                 device, presence_time   = self.__devices_generator.generate_device(len(self.__current_devices))
@@ -145,8 +147,11 @@ class Simulator:
                     else:
                         i += 1
                 
-                # Publishing expired device
-                self.__client.publish_devices(expired_devices)
+                # Eventually publishing expired device
+                if (now-last_publish_time).total_seconds()>self.__config['devices']['expired_devices_publish_delay_s']:
+                    self.__client.publish_devices(expired_devices)
+                    expired_devices     = []
+                    last_publish_time   = now
 
                 # Eventually generating a transaction
                 transaction = self.__transactions_generator.generate_transaction()
