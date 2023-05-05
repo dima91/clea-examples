@@ -91,7 +91,7 @@ class Simulator:
             if prev_status=="NORMAL":
                 # Can move to ALERT or NORMAL status
                 prev_status = curr_status
-                curr_status = "ALERT" if random.random() > 5 else "NORMAL"
+                curr_status = "ALERT" if random.random() > .5 else "NORMAL"
             elif prev_status=="ALERT":
                 # Can move only to NORMAL status
                 prev_status = curr_status
