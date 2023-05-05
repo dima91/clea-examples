@@ -150,6 +150,8 @@ class AstarteClient {
 
 
   async getPaginatedBleData({deviceId, since, to, limit, downsamplingTo} : GetBleDataValuesParams) : Promise<DeviceEntry[]> {
+
+    console.log ("Since:" , since, "\nTo:", to)
       
     if (!since) {
         throw "'since' paramenter not defined"
@@ -168,6 +170,7 @@ class AstarteClient {
         tmp_start_date  = new Date(tmp_final_date.valueOf()+1)
         tmp_final_date  = new Date(tmp_final_date.valueOf()+MS_PER_TWO_HOURS)
     }
+    tmp_results.push(this.getBleData({deviceId:deviceId, since:tmp_start_date, to:tmp_final_date, limit:limit, downsamplingTo:downsamplingTo}))
 
     let results:DeviceEntry[]   = []
 
