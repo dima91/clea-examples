@@ -8,6 +8,9 @@ from astarte.device import Device
 class AstarteClient :
 
     # Astarte interfaces
+    MINUTE_STATISTICS_INTERFACE = "ai.clea.examples.blelogger.MinuteStats"
+    HOURLY_STATISTICS_INTERFACE = "ai.clea.examples.blelogger.HourlyStats"
+    DAILY_STATISTICS_INTERFACE  = "ai.clea.examples.blelogger.DailyStats"
 
     __device        = None
     __device_id     = None
@@ -59,6 +62,19 @@ class AstarteClient :
     def __aggregated_data_cb(self, device, ifname, ifpath, data) :
         print ("Received aggregated server data")
 
+
+    def __prepare_astarte_payload(self, stats) -> dict:
+        result  = {}
+
+        # TODO
+
+        return result
+    
+
+    def __publish_statistics(self, interface, stats, timestamp) -> None:
+        payload = self.__prepare_astarte_payload(stats)
+        self.__device.send_aggregate(interface, "/", payload, timestamp)
+
     ########################################
 
     def connect(self):
@@ -67,3 +83,15 @@ class AstarteClient :
     
     def is_connected(self) :
         return self.__device.is_connected()
+    
+
+    def publish_minute_statistics(self, stats, timestamp) -> None:
+        self.__publish_statistics(self.MINUTE_STATISTICS_INTERFACE, self.__prepare_astarte_payload(stats), timestamp)
+
+
+    def publish_hourly_statistics(self, stats, timestamp) -> None:
+        self.__publish_statistics(self.HOURLY_STATISTICS_INTERFACE, self.__prepare_astarte_payload(stats), timestamp)
+
+
+    def publish_daily_statistics(self, stats, timestamp) -> None:
+        self.__publish_statistics(self.DAILY_STATISTICS_INTERFACE, self.__prepare_astarte_payload(stats), timestamp)
