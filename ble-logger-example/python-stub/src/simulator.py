@@ -24,6 +24,9 @@ class DevicesManager:
     __minute_devices_cache  = None
     __hourly_devices_cache  = None
     __daily_devices_cache   = None
+
+    __accessories_vendors   = None
+    __smartphones_vendors   = None
     
     def __init__(self, config, country) -> None:
         self.__config           = config
@@ -46,15 +49,33 @@ class DevicesManager:
             id = row[0]
             self.__vendors[id] = {"dec_id": id, "hex_id": row[1], "name": row[2]}
 
+        # Building accessories vendors
+        self.__accessories_vendors  = utils.build_weighted_list(self.__config['admitted_accessories_vendors'])
+
+        # Building smartphones vendors
+        self.__smartphones_vendors  = utils.build_weighted_list(self.__config['admitted_smartphones_vendors'])
+
 
     def __update_local_cache(self, cache, address, device) -> None:
         if not (address in cache):
-            print(device)
             if device['presence_time']>self.__config['interaction_min_time_s']:
                 device['has_interacted']    = True
             else:
                 device['has_interacted']    = False
             cache[address]  = device
+
+
+    def __get_vendor(self, device_type:DeviceType) -> str:
+        # Generating weighted vendor
+        target_map  = self.__smartphones_vendors if device_type==DeviceType.SMARTPHONE else self.__accessories_vendors
+        weight      = random.uniform(0, 100)
+        i           = 0
+        while i<len(target_map) and weight>target_map[i]['lower_bound']:
+            i += 1
+        if i>=len(target_map):
+            i   = len(target_map)-1
+
+        return target_map[i]['id']
 
 
     def generate_nearby_devices(self, now:datetime) -> None:
@@ -74,17 +95,15 @@ class DevicesManager:
                         device_type                 = DeviceType.SMARTPHONE \
                                                         if random.random()<=self.__config['smartphone_probability'] \
                                                         else DeviceType.ACCESSORY
-                        device_vendor_idx           = random.choice(self.__config['admitted_smartphones_vendors']) \
-                                                        if device_type==DeviceType.SMARTPHONE \
-                                                        else random.choice(self.__config['admitted_accessories_vendors'])
+                        device_vendor               = self.__get_vendor(device_type)
                         self.__nearby_devices[addr] = {
                             "presence_time" : random.randint(presence_time_range[0], presence_time_range[1]),
                             "creation_time" : now,
                             "device_type"   : device_type,
-                            "device_vendor" : self.__vendors[device_vendor_idx]['name']
+                            "device_vendor" : device_vendor
                         }
 
-                        print(f"Generated device: {self.__nearby_devices[addr]}")
+                        #print(f"Generated device: {self.__nearby_devices[addr]}")
 
 
     def prune_nearby_devices(self, now:datetime) -> None:
@@ -93,7 +112,6 @@ class DevicesManager:
         for addr in self.__nearby_devices:
             item    = self.__nearby_devices[addr]
             if (now-item['creation_time']).total_seconds()>item['presence_time']:
-                print(f"Adding {addr} in caches")
                 to_be_popped.append(addr)
                 self.__update_local_cache(self.__minute_devices_cache, addr, item)
                 self.__update_local_cache(self.__hourly_devices_cache, addr, item)
@@ -171,7 +189,7 @@ class Simulator:
                 if payload!=None:
                     timestamp               = last_minute_stats_time.replace(second=59)
                     last_minute_stats_time  = now.replace(microsecond=0, second=0)
-                    print(f"timestamp:{timestamp}\nlast_minute_stats_time:{last_minute_stats_time}")
+                    #print(f"timestamp:{timestamp}\nlast_minute_stats_time:{last_minute_stats_time}")
                     self.__client.publish_minute_statistics(payload, timestamp)
                 
                 # Trying to publish hourly stats
