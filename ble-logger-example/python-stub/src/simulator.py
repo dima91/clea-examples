@@ -1,5 +1,5 @@
 
-import asyncio, random, holidays, traceback
+import asyncio, random, holidays, traceback, csv
 from datetime import datetime, timedelta
 from typing import Tuple
 
@@ -19,6 +19,8 @@ class DevicesManager:
     __holidays          = None
     __nearby_devices    = None
 
+    __vendors   = None
+
     __minute_devices_cache  = None
     __hourly_devices_cache  = None
     __daily_devices_cache   = None
@@ -32,9 +34,26 @@ class DevicesManager:
         self.__hourly_devices_cache = {}
         self.__daily_devices_cache  = {}
 
+        self.__vendors  = {}
+        vendors_file    = open(self.__config['vendors_file_path'], encoding='utf-8')
+        file_reader     = csv.reader(vendors_file)
+        # Skipping the first row
+        next(file_reader)
+        # Adding the 'Unknown' value
+        self.__vendors["-1"]    = {"dec_id":"-1", "hex_id":"0xFFFF", "name":"Unknown"}
+        # Iterating over file lines
+        for row in file_reader:
+            id = row[0]
+            self.__vendors[id] = {"dec_id": id, "hex_id": row[1], "name": row[2]}
+
 
     def __update_local_cache(self, cache, address, device) -> None:
         if not (address in cache):
+            print(device)
+            if device['presence_time']>self.__config['interaction_min_time_s']:
+                device['has_interacted']    = True
+            else:
+                device['has_interacted']    = False
             cache[address]  = device
 
 
@@ -47,7 +66,7 @@ class DevicesManager:
 
             if random.random() <= generation_probability:
                 devices_count   = random.randint(new_devices_range[0], new_devices_range[1])
-                print(f"Generating {devices_count} devices @ {now}")
+                # print(f"Generating {devices_count} devices @ {now}")
                 
                 for i in range(devices_count):
                     addr            = utils.generate_mac_address()
@@ -59,10 +78,10 @@ class DevicesManager:
                                                         if device_type==DeviceType.SMARTPHONE \
                                                         else random.choice(self.__config['admitted_accessories_vendors'])
                         self.__nearby_devices[addr] = {
-                            "presence_time"     : random.randint(presence_time_range[0], presence_time_range[1]),
-                            "creation_time"     : now,
-                            "device_type"       : device_type,
-                            "device_vendor_idx" : "Unknown" if device_vendor_idx=="-1" else device_vendor_idx
+                            "presence_time" : random.randint(presence_time_range[0], presence_time_range[1]),
+                            "creation_time" : now,
+                            "device_type"   : device_type,
+                            "device_vendor" : self.__vendors[device_vendor_idx]['name']
                         }
 
                         print(f"Generated device: {self.__nearby_devices[addr]}")
@@ -86,31 +105,33 @@ class DevicesManager:
     def dump_and_clear_minute_data(self, now:datetime, last_time:datetime) -> dict:
         result  = None
 
-        if (now-last_time).total_seconds()>self.__MINUTE_DELAY_S:
-            # TODO
-            pass
+        if (now-last_time).total_seconds()>self.__MINUTE_DELAY_S and len(self.__minute_devices_cache)>0:
+            result                      = self.__minute_devices_cache
+            self.__minute_devices_cache = {}
 
-        return None
+        return result
     
     
     def dump_and_clear_hourly_data(self, now:datetime, last_time:datetime) -> dict:
         result  = None
 
-        if (now-last_time).total_seconds()>self.__HOURLY_DELAY_S:
+        if (now-last_time).total_seconds()>self.__HOURLY_DELAY_S and len(self.__hourly_devices_cache)>0:
+            result  = {}
             # TODO
-            pass
+            self.__hourly_devices_cache.clear()
 
-        return None
+        return result
     
     
     def dump_and_clear_daily_data(self, now:datetime, last_time:datetime) -> dict:
         result  = None
 
-        if (now-last_time).total_seconds()>self.__DAILY_DELAY_S:
+        if (now-last_time).total_seconds()>self.__DAILY_DELAY_S and len(self.__daily_devices_cache)>0:
+            result  = {}
             # TODO
-            pass
+            self.__daily_devices_cache.clear()
 
-        return None
+        return result
 
 
 
@@ -150,21 +171,22 @@ class Simulator:
                 if payload!=None:
                     timestamp               = last_minute_stats_time.replace(second=59)
                     last_minute_stats_time  = now.replace(microsecond=0, second=0)
-                    self.__client.publish_minute_statistics(self.__client.MINUTE_STATISTICS_INTERFACE, payload, timestamp)
+                    print(f"timestamp:{timestamp}\nlast_minute_stats_time:{last_minute_stats_time}")
+                    self.__client.publish_minute_statistics(payload, timestamp)
                 
                 # Trying to publish hourly stats
                 payload = self.__devices_manager.dump_and_clear_hourly_data(now, last_hourly_stats_time)
                 if payload!=None:
                     timestamp               = last_hourly_stats_time.replace(second=59, minute=59)
                     last_hourly_stats_time  = now.replace(microsecond=0, second=0, minute=0)
-                    self.__client.publish_hourly_statistics(self.__client.HOURLY_STATISTICS_INTERFACE, payload, timestamp)
+                    self.__client.publish_hourly_statistics(payload, timestamp)
                 
                 # Trying to publish daily stats
                 payload = self.__devices_manager.dump_and_clear_daily_data(now, last_daily_stats_time)
                 if payload!=None:
                     timestamp               = last_hourly_stats_time.replace(second=59, minute=59, hour=23)
                     last_daily_stats_time   = now.replace(microsecond=0, second=0, minute=0, hour=0)
-                    self.__client.publish_daily_statistics(self.__client.DAILY_STATISTICS_INTERFACE, payload, timestamp)
+                    self.__client.publish_daily_statistics(payload, timestamp)
 
                 # Trying to generate new devices
                 self.__devices_manager.generate_nearby_devices(now)

@@ -2,7 +2,9 @@
 import os, glob, json
 from pathlib import Path
 from datetime import datetime
+
 from astarte.device import Device
+from utils import DeviceType
 
 
 class AstarteClient :
@@ -64,15 +66,34 @@ class AstarteClient :
 
 
     def __prepare_astarte_payload(self, stats) -> dict:
-        result  = {}
+        accessories         = []
+        accessories_vendors = {}
+        smartphones         = []
+        smartphones_vendors = {}
+        interactions        = []    # Computed only on smartphones
 
-        # TODO
+        for addr in stats :
+            item    = stats[addr]
+            if item['device_type'] == DeviceType.ACCESSORY:
+                accessories.append(addr)
+                accessories_vendors[item['device_vendor']]  = addr
+            elif item['device_type'] == DeviceType.SMARTPHONE:
+                smartphones.append(addr)
+                smartphones_vendors[item['device_vendor']]  = addr
+                # Checking if interaction is present
+                if item['has_interacted']:
+                    interactions.append(item['presence_time'])
 
-        return result
+        return {
+            "accessoriesVendors"    : json.dumps(accessories_vendors),
+            "detectedAccessories"   : accessories,
+            "smartphonesVendors"    : json.dumps(smartphones_vendors),
+            "detectedSmartphones"   : smartphones,
+            "interactions"          : interactions
+        }
     
 
-    def __publish_statistics(self, interface, stats, timestamp) -> None:
-        payload = self.__prepare_astarte_payload(stats)
+    def __publish_statistics(self, interface, payload, timestamp) -> None:
         self.__device.send_aggregate(interface, "/", payload, timestamp)
 
     ########################################

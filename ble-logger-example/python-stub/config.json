@@ -12,6 +12,7 @@
         "interaction_min_time_s"    : 20,
         "smartphone_probability"    : 0.7,
         "presence_time_range_s"     : [10, 60],
+        "vendors_file_path"         : "data/company_identifiers.csv",
         "generation_number_ranges"  : {
             "0" : [0, 2],
             "1" : [0, 2],

@@ -14,12 +14,13 @@ def main():
 
     loop    = asyncio.get_event_loop()
 
-    # Creating AstarteClient
-    client  = AstarteClient(device_id, realm_name, device_secret, api_base_url, persistency_path, interfaces_folder, loop)
-    client.connect()
-
     # Loading configuration
     config  = json.load(open(os.environ["CONFIG_FILE_PATH"]))
+
+    # Creating AstarteClient
+    client  = AstarteClient(device_id, realm_name, device_secret, api_base_url, persistency_path, interfaces_folder,
+                            loop)
+    client.connect()
 
     # Creating Simulator
     simulator   = Simulator(config, client)
