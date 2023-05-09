@@ -26,6 +26,16 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
     const [isReady, setIsReady] = React.useState(false);
     const [viz, setViz]         = React.useState({ width: 550, height: 350, data: [] });        // Right part: graph
     const [counter, setCounter] = React.useState({ total: 0, areas: default_areas });           // left part: counters
+
+
+    const get_data_chart_sizes = (chart_ref) => {
+        const domRect   = chart_ref.current.getBoundingClientRect();
+        let new_width   = domRect.width
+        let new_heigth  = new_width*10/16
+        return {
+            "w":new_width,
+            "h":new_heigth}
+    }
     
 
     const update_viz_and_stats  = (new_data) => {
@@ -53,6 +63,10 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
         let newest_data = new_data[new_data.length-1]
         if (newest_data)
             setCounter (parseCounterData(newest_data))
+
+        // Getting new sizes
+        let sizes   = get_data_chart_sizes(chartRef)
+        setViz(viz => {return { ...viz, width:sizes['w'], height:sizes['h']}});
 
         // Updating chart with incoming data
         setViz (viz => {
@@ -185,11 +199,10 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
     React.useEffect(() => {
         if (isReady) {
             const resizeChart = () => {
-                const domRect = chartRef.current.getBoundingClientRect();
-                let new_width   = domRect.width
-                let new_heigth  = new_width*10/16
-                setViz(viz => {return { ...viz, width: new_width, height:new_heigth }});
+                let sizes   = get_data_chart_sizes(chartRef)
+                setViz(viz => {return { ...viz, width:sizes['w'], height:sizes['h']}});
             }
+
             window.addEventListener("resize", resizeChart);
             resizeChart()
 
