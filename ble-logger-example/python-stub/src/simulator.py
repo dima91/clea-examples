@@ -36,7 +36,6 @@ class DevicesManager:
     def __update_local_cache(self, cache, address, device) -> None:
         if not (address in cache):
             cache[address]  = device
-            print(f"Adding {address} in cache")
 
 
     def generate_nearby_devices(self, now:datetime) -> None:
@@ -68,17 +67,20 @@ class DevicesManager:
 
                         print(f"Generated device: {self.__nearby_devices[addr]}")
 
-                print("\n")
-
 
     def prune_nearby_devices(self, now:datetime) -> None:
         #print("Pruning nearby devices")
+        to_be_popped    = []
         for addr in self.__nearby_devices:
             item    = self.__nearby_devices[addr]
             if (now-item['creation_time']).total_seconds()>item['presence_time']:
+                print(f"Adding {addr} in caches")
+                to_be_popped.append(addr)
                 self.__update_local_cache(self.__minute_devices_cache, addr, item)
                 self.__update_local_cache(self.__hourly_devices_cache, addr, item)
                 self.__update_local_cache(self.__daily_devices_cache, addr, item)
+        for addr in to_be_popped:
+            self.__nearby_devices.pop(addr)
 
 
     def dump_and_clear_minute_data(self, now:datetime, last_time:datetime) -> dict:
