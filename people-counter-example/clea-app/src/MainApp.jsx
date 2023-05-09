@@ -669,6 +669,11 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
             }
         })
 
+        if (filter_grain==1 && final_results) {
+            // IF week visualization, starting the week from monday
+            final_results.shift()
+        }
+
         // console.log(final_results)
         return final_results
     }
