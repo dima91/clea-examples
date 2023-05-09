@@ -23,7 +23,7 @@ def main():
     client.connect()
 
     # Creating Simulator
-    simulator   = Simulator(config, client)
+    simulator   = Simulator(config, client, os.environ['TZ'])
     s_task      = loop.create_task(simulator.run())
 
     loop.run_forever()

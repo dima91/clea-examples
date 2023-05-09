@@ -1,6 +1,6 @@
 
-import asyncio, random, holidays, traceback, csv
-from datetime import datetime, timedelta
+import asyncio, random, holidays, traceback, csv, pytz
+from datetime import datetime, timezone
 from typing import Tuple
 
 from astarte_client import AstarteClient
@@ -157,12 +157,14 @@ class DevicesManager:
 class Simulator:
 
     __config            = None
+    __timezone          = None
     __client            = None
     __devices_manager   = None
 
-    def __init__(self, config:dict, astarte_client:AstarteClient) -> None:
+    def __init__(self, config:dict, astarte_client:AstarteClient, timezone:str) -> None:
         
         self.__config           = config
+        self.__timezone         = timezone
         self.__client           = astarte_client
         self.__devices_manager  = DevicesManager(self.__config['ble_devices'], self.__config['country'])
 
@@ -171,7 +173,7 @@ class Simulator:
         try:
             print ("Running Simulator loop..")
 
-            now                     = datetime.now()
+            now                     = datetime.now(pytz.timezone(self.__timezone))
             loop_delay              = self.__config["loop_delay_s"]
             last_minute_stats_time  = now.replace(microsecond=0, second=0)
             last_hourly_stats_time  = last_minute_stats_time.replace(minute=0)
@@ -179,7 +181,7 @@ class Simulator:
 
             while True:
                 await asyncio.sleep(loop_delay)
-                now = datetime.now()
+                now = datetime.now(pytz.timezone(self.__timezone))
 
                 # Pruning expired nearby devices in order to fill devices caches
                 self.__devices_manager.prune_nearby_devices(now)
