@@ -75,7 +75,12 @@ class DevicesManager:
         if i>=len(target_map):
             i   = len(target_map)-1
 
-        return target_map[i]['id']
+        vendor_id   = target_map[i]['id']
+        print (vendor_id)
+        print (self.__vendors)
+        return self.__vendors[vendor_id]['name'] \
+            if vendor_id in self.__vendors \
+            else "Unknown"
 
 
     def generate_nearby_devices(self, now:datetime) -> None:
