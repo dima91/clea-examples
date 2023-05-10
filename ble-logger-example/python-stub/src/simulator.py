@@ -76,8 +76,6 @@ class DevicesManager:
             i   = len(target_map)-1
 
         vendor_id   = target_map[i]['id']
-        print (vendor_id)
-        print (self.__vendors)
         return self.__vendors[vendor_id]['name'] \
             if vendor_id in self.__vendors \
             else "Unknown"
