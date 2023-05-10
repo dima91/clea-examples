@@ -14,19 +14,22 @@ class AstarteClient :
     HOURLY_STATISTICS_INTERFACE = "ai.clea.examples.blelogger.HourlyStats"
     DAILY_STATISTICS_INTERFACE  = "ai.clea.examples.blelogger.DailyStats"
 
-    __device        = None
-    __device_id     = None
-    __api_base_url  = None
-    __realm         = None
-    __loop          = None
+    __device            = None
+    __device_id         = None
+    __api_base_url      = None
+    __realm             = None
+    __loop              = None
+    __on_connection_cb  = None
 
 
-    def __init__(self, device_id, realm_name, credentials_secret, api_base_url, persistency_path, interfaces_folder, loop) -> None:
+    def __init__(self, device_id, realm_name, credentials_secret, api_base_url, persistency_path, interfaces_folder,
+                 loop, on_connection_cb) -> None:
 
         self.__device_id        = device_id
         self.__api_base_url     = api_base_url
         self.__realm            = realm_name
         self.__loop             = loop
+        self.__on_connection_cb = on_connection_cb
 
         if not os.path.exists(persistency_path) :
             print ("Directory at path "+persistency_path+" does not exists.\nCreating it...")
@@ -54,6 +57,7 @@ class AstarteClient :
 
     def __connection_cb(self, dvc) :
         print ('================\nDevice connected\n================\n\n')
+        self.__on_connection_cb()
 
     def __disconnecton_cb(self, dvc, code) :
         print ('===================\nDevice disconnected\n===================\n\n')

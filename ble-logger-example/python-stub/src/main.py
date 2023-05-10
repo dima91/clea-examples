@@ -12,19 +12,22 @@ def main():
     persistency_path    = os.environ["PERSISTENCY_PATH"]
     interfaces_folder   = os.environ["INTERFACES_FOLDER"]
 
-    loop    = asyncio.get_event_loop()
+    loop        = asyncio.get_event_loop()
+    simulator   = None
+
+    # Wrapping simulator execution in a lambda
+    on_connection_lambda    = lambda : loop.create_task(simulator.run())
 
     # Loading configuration
     config  = json.load(open(os.environ["CONFIG_FILE_PATH"]))
 
     # Creating AstarteClient
     client  = AstarteClient(device_id, realm_name, device_secret, api_base_url, persistency_path, interfaces_folder,
-                            loop)
+                            loop, on_connection_lambda)
     client.connect()
 
     # Creating Simulator
     simulator   = Simulator(config, client, os.environ['TZ'])
-    s_task      = loop.create_task(simulator.run())
 
     loop.run_forever()
 
