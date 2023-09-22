@@ -110,7 +110,6 @@ class DevicesManager:
 
 
     def prune_nearby_devices(self, now:datetime) -> None:
-        #print("Pruning nearby devices")
         to_be_popped    = []
         for addr in self.__nearby_devices:
             item    = self.__nearby_devices[addr]
@@ -137,9 +136,8 @@ class DevicesManager:
         result  = None
 
         if (now-last_time).total_seconds()>self.__HOURLY_DELAY_S and len(self.__hourly_devices_cache)>0:
-            result  = {}
-            # TODO
-            self.__hourly_devices_cache.clear()
+            result                      = self.__hourly_devices_cache
+            self.__hourly_devices_cache = {}
 
         return result
     
@@ -148,9 +146,8 @@ class DevicesManager:
         result  = None
 
         if (now-last_time).total_seconds()>self.__DAILY_DELAY_S and len(self.__daily_devices_cache)>0:
-            result  = {}
-            # TODO
-            self.__daily_devices_cache.clear()
+            result                      = self.__daily_devices_cache
+            self.__daily_devices_cache  = {}
 
         return result
 
