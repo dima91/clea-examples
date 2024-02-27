@@ -137,103 +137,107 @@ class Simulator:
             last_event_generation_time      = None
 
             while True:
-                await asyncio.sleep(5)
-                now                     = datetime.now()
-                print(f"[{now}]")
+                try :
+                    await asyncio.sleep(5)
+                    now                     = datetime.now()
+                    #print(f"[{now}]")
 
-                if last_event_generation_time==None and self.__in_publish_interval(now):
-                    last_event_generation_time  = now
-                elif not self.__in_publish_interval(now):
-                    last_event_generation_time  = None
-
-                current_day_period      = self.__weather_collector.current_day_period()
-                cloud_cover_percentage  = self.__weather_collector.cloud_cover_percentage()
-                sunrise_sunset_times    = self.__weather_collector.get_sunrise_sunset_times()
-                current_irradiance      = self.__weather_collector.get_current_irradiance()
-
-                # Eventually publishing external sensors values
-                if (now-last_ext_sensors_publish_time)>ext_sensors_publish_delay:
-                    #print('Publishing external sensors values..')
-                    last_ext_sensors_publish_time   = now
-                    self.__client.publish_day_period(self.__weather_collector.current_day_period())
-                    self.__client.publish_temperature(self.__weather_collector.current_temperature())
-                    self.__client.publish_wind_speed(self.__weather_collector.current_wind_speed())
-                    self.__client.publish_reference_current(round(utils.solar_power_to_watts(self.__config["reference_solar_panel_size"],
-                                                                                                                current_day_period,
-                                                                                                                current_irradiance,
-                                                                                                                cloud_cover_percentage,
-                                                                                                                sunrise_sunset_times),2))
-
-                # Computing generated power by solar panel
-                actual_panel_power      = utils.solar_power_to_watts(self.__solar_panel_config["size"], current_day_period,
-                                                                     current_irradiance, cloud_cover_percentage, sunrise_sunset_times)
-                remaining_panel_power       = actual_panel_power
-                curr_power_supply_source    = None
-                total_load_power            = self.__total_load()
-                if remaining_panel_power>=total_load_power:
-                    # Providing power supply from solar panel
-                    remaining_panel_power -= total_load_power
-                    total_load_power            = 0
-                    curr_power_supply_source    = utils.PowerSupplySource.PANEL
-                else :
-                    # Providing power supply from battery charge
-                    curr_power_supply_source    = utils.PowerSupplySource.BATTERY
-
-                # Updating battery charge
-                if (now-last_battery_update_time).total_seconds() > self.__config["BATTERY"]["update_delay_s"]:
-                    last_battery_update_time        = now
-                    remaining_charge, delta, factor = self.__update_battery_charge(-total_load_power,remaining_panel_power)
-                    print(f'remaining_charge:{remaining_charge}, charge_delta:{delta}, delta_factor:{factor}')
-                
-                print (f"[{curr_power_supply_source}] {remaining_panel_power}/{actual_panel_power} W goes to battery")
-
-                battery_voltage,battery_current = self.__get_battery_stats()
-                load_voltage,load_current       = self.__get_load_stats()
-                panel_voltage,panel_current     = self.__get_panel_stats(actual_panel_power)
-
-                if self.__remaining_battery_charge()<=0:
-                    # No data will be published!
-                    print(f'No battery charge! Remaining charge:{self.__remaining_battery_charge()}')
-                elif (now-last_stats_publish_time)>stats_publish_delay:
-                    last_stats_publish_time = now
-
-                    # Publishing battery, battery and load stats
-                    if curr_power_supply_source==utils.PowerSupplySource.PANEL:
-                        self.__client.publish_battery_stats(battery_voltage, 0)
-                    else:
-                        # Applying a percentage to current (battery discharge)
-                        discharge_factor    = battery_voltage/self.__config["BATTERY"]["max_voltage"]
-                        battery_current             = min(load_current, battery_current*discharge_factor)
-                        self.__client.publish_battery_stats(battery_voltage, battery_current)
-
-                    self.__client.publish_panel_stats(panel_voltage, panel_current)
-                    self.__client.publish_load_stats(load_voltage, load_current)
-
-                # Checking if there exist ended events
-                i   = 0
-                while i<len(self.__current_events):
-                    evt = self.__current_events[i]
-                    if now>evt["end_time"]:
-                        del self.__current_events[i]
-                    else:
-                        i+=1
-
-                # Eventually creating an event
-                actual_events_delay     = utils.get_random_value(events_base_delay, events_delay_error)
-                current_events_count    = len(self.__current_events)
-                if last_event_generation_time!=None and (current_events_count<max_events_count) and \
-                   (now-last_event_generation_time).total_seconds()>actual_events_delay:
-
-                    event_probability       = random.uniform(0,1)
-                    #print(f"event_probability:{event_probability}")
-                    if event_probability>self.__events_config["min_probability"]:
+                    if last_event_generation_time==None and self.__in_publish_interval(now):
                         last_event_generation_time  = now
-                        new_event                   = self.__create_event()
-                        print (f"Generated this event:\t{new_event}")
-                        self.__current_events.append(new_event)
+                    elif not self.__in_publish_interval(now):
+                        last_event_generation_time  = None
 
-                print(f"===== {len(self.__current_events)}\n")  #FIXME Remove me!
+                    current_day_period      = self.__weather_collector.current_day_period()
+                    cloud_cover_percentage  = self.__weather_collector.cloud_cover_percentage()
+                    sunrise_sunset_times    = self.__weather_collector.get_sunrise_sunset_times()
+                    current_irradiance      = self.__weather_collector.get_current_irradiance()
+
+                    # Eventually publishing external sensors values
+                    if (now-last_ext_sensors_publish_time)>ext_sensors_publish_delay:
+                        #print('Publishing external sensors values..')
+                        last_ext_sensors_publish_time   = now
+                        self.__client.publish_day_period(self.__weather_collector.current_day_period())
+                        self.__client.publish_temperature(self.__weather_collector.current_temperature())
+                        self.__client.publish_wind_speed(self.__weather_collector.current_wind_speed())
+                        self.__client.publish_reference_current(round(utils.solar_power_to_watts(self.__config["reference_solar_panel_size"],
+                                                                                                                    current_day_period,
+                                                                                                                    current_irradiance,
+                                                                                                                    cloud_cover_percentage,
+                                                                                                                    sunrise_sunset_times),2))
+
+                    # Computing generated power by solar panel
+                    actual_panel_power      = utils.solar_power_to_watts(self.__solar_panel_config["size"], current_day_period,
+                                                                        current_irradiance, cloud_cover_percentage, sunrise_sunset_times)
+                    remaining_panel_power       = actual_panel_power
+                    curr_power_supply_source    = None
+                    total_load_power            = self.__total_load()
+                    if remaining_panel_power>=total_load_power:
+                        # Providing power supply from solar panel
+                        remaining_panel_power -= total_load_power
+                        total_load_power            = 0
+                        curr_power_supply_source    = utils.PowerSupplySource.PANEL
+                    else :
+                        # Providing power supply from battery charge
+                        curr_power_supply_source    = utils.PowerSupplySource.BATTERY
+
+                    # Updating battery charge
+                    if (now-last_battery_update_time).total_seconds() > self.__config["BATTERY"]["update_delay_s"]:
+                        last_battery_update_time        = now
+                        remaining_charge, delta, factor = self.__update_battery_charge(-total_load_power,remaining_panel_power)
+                        print(f'[{now}] remaining_charge:{remaining_charge}, charge_delta:{delta}, delta_factor:{factor}')
+                    
+                    #print (f"[{curr_power_supply_source}] {remaining_panel_power}/{actual_panel_power} W goes to battery")
+
+                    battery_voltage,battery_current = self.__get_battery_stats()
+                    load_voltage,load_current       = self.__get_load_stats()
+                    panel_voltage,panel_current     = self.__get_panel_stats(actual_panel_power)
+
+                    if self.__remaining_battery_charge()<=0:
+                        # No data will be published!
+                        print(f'No battery charge! Remaining charge:{self.__remaining_battery_charge()}')
+                    elif (now-last_stats_publish_time)>stats_publish_delay:
+                        last_stats_publish_time = now
+
+                        # Publishing battery, battery and load stats
+                        if curr_power_supply_source==utils.PowerSupplySource.PANEL:
+                            self.__client.publish_battery_stats(battery_voltage, 0)
+                        else:
+                            # Applying a percentage to current (battery discharge)
+                            discharge_factor    = battery_voltage/self.__config["BATTERY"]["max_voltage"]
+                            battery_current             = min(load_current, battery_current*discharge_factor)
+                            self.__client.publish_battery_stats(battery_voltage, battery_current)
+
+                        self.__client.publish_panel_stats(panel_voltage, panel_current)
+                        self.__client.publish_load_stats(load_voltage, load_current)
+
+                    # Checking if there exist ended events
+                    i   = 0
+                    while i<len(self.__current_events):
+                        evt = self.__current_events[i]
+                        if now>evt["end_time"]:
+                            del self.__current_events[i]
+                        else:
+                            i+=1
+
+                    # Eventually creating an event
+                    actual_events_delay     = utils.get_random_value(events_base_delay, events_delay_error)
+                    current_events_count    = len(self.__current_events)
+                    if last_event_generation_time!=None and (current_events_count<max_events_count) and \
+                    (now-last_event_generation_time).total_seconds()>actual_events_delay:
+
+                        event_probability       = random.uniform(0,1)
+                        #print(f"event_probability:{event_probability}")
+                        if event_probability>self.__events_config["min_probability"]:
+                            last_event_generation_time  = now
+                            new_event                   = self.__create_event()
+                            print (f"Generated this event:\t{new_event}")
+                            self.__current_events.append(new_event)
+
+                    #print(f"===== {len(self.__current_events)}\n")  #FIXME Remove me!
+                
+                except Exception as e:
+                    print (f"\n\n=====================================\n[S] Inner loop catched this exception: {e}\n=====================================\n\n")
 
 
         except Exception as e:
-            print (f"[S] Catched this exception: {e}")
+            print (f"\n\n===========================\n[S] Catched this exception: {e}\n===========================\n\n")
