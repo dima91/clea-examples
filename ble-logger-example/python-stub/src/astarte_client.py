@@ -3,7 +3,7 @@ import os, glob, json
 from pathlib import Path
 from datetime import datetime
 
-from astarte.device import Device
+from astarte.device import DeviceMqtt as Device
 from utils import DeviceType
 
 
@@ -39,18 +39,20 @@ class AstarteClient :
             print (error_message)
             raise Exception (error_message)
 
-        self.__device   = Device (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path, loop)
-
-        self.__device.on_connected                  = self.__connection_cb
-        self.__device.on_disconnected               = self.__disconnecton_cb
-        self.__device.on_data_received              = self.__data_cb
-        self.__device.on_aggregate_data_received    = self.__aggregated_data_cb
+        self.__device   = Device (
+            device_id= device_id,
+            realm= realm_name,
+            credentials_secret= credentials_secret,
+            pairing_base_url= f"{api_base_url}/pairing",
+            persistency_dir= persistency_path
+        )
+        self.__device.set_events_callbacks(on_connected=self.__connection_cb, on_disconnected=self.__disconnecton_cb, on_data_received=self.__data_cb, loop=loop)
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
             if os.path.isfile(filename) :
                 print (f"Loading interface in {filename}...")
-                self.__device.add_interface (json.load(open(filename)))
+                self.__device.add_interface_from_json (json.load(open(filename)))
             else:
                 print (f"File {filename} is not file!")
 
@@ -98,7 +100,7 @@ class AstarteClient :
     
 
     def __publish_statistics(self, interface, payload, timestamp) -> None:
-        self.__device.send_aggregate(interface, "/", payload, timestamp)
+        self.__device.send_aggregate(interface, "", payload, timestamp)
 
     ########################################
 
