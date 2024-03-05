@@ -91,22 +91,22 @@ class AstarteClient {
 
 
     async get_container_status (params : QueryParameters) {
-        return this.performQuery (params, this.STATUS_INTRFACE, 'containerStatus')
+        return this.performQuery (params, this.STATUS_INTRFACE, 'status/containerStatus')
     }
 
 
     async get_water_status (params : QueryParameters) {
-        return this.performQuery (params, this.STATUS_INTRFACE, 'waterStatus')
+        return this.performQuery (params, this.STATUS_INTRFACE, 'status/waterStatus')
     }
 
 
     async get_short_coffee_status (params : QueryParameters) {
-        return this.performQuery (params, this.COUNTERS_INTERFACE, 'shortCoffee')
+        return this.performQuery (params, this.COUNTERS_INTERFACE, 'coffee/shortCoffee')
     }
     
     
     async get_long_coffee_status (params : QueryParameters) {
-        return this.performQuery (params, this.COUNTERS_INTERFACE, 'longCoffee')
+        return this.performQuery (params, this.COUNTERS_INTERFACE, 'coffee/longCoffee')
     }
 }
 

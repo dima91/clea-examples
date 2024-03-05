@@ -161,10 +161,15 @@ class CoffeeMachineSimulator:
                     # No coffees should be delivered for this specific hour
                     curr_hour_coffees_count = 0
 
-                while curr_hour_coffees_count>0:
+                while curr_hour_coffees_count>0 and len(minutes)>0:
                     target_minutes.append(minutes.pop(0))
                     curr_hour_coffees_count -= 1
                 target_minutes.sort()
+
+                # Cleaning passed minutes
+                curr_minute = datetime.now().minute
+                while len(target_minutes)>0 and target_minutes[0] < curr_minute:
+                    target_minutes.pop(0)
 
                 print(f"[{curr_hour}] -> Delivering coffees at minutes {target_minutes}")
                 

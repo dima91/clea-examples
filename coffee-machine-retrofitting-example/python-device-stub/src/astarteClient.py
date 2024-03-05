@@ -2,7 +2,8 @@
 import os, glob, json, enum
 from pathlib import Path
 from datetime import datetime
-from astarte.device import Device
+from astarte.device import DeviceMqtt
+
 
 
 class ContainerStatus(enum.Enum):
@@ -44,18 +45,19 @@ class AstarteClient :
             print (error_message)
             raise Exception (error_message)
 
-        self.__device   = Device (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path, loop)
-
-        self.__device.on_connected                  = self.__connection_cb
-        self.__device.on_disconnected               = self.__disconnecton_cb
-        self.__device.on_data_received              = self.__data_cb
-        self.__device.on_aggregate_data_received    = self.__aggregated_data_cb
+        self.__device   = DeviceMqtt (device_id=device_id,
+                                      realm=realm_name,
+                                      credentials_secret=credentials_secret,
+                                      pairing_base_url=f"{api_base_url}/pairing",
+                                      persistency_dir=persistency_path
+                                      )
+        self.__device.set_events_callbacks(on_connected=self.__connection_cb, on_data_received=self.__data_cb, on_disconnected=self.__disconnecton_cb, loop=self.__loop)
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
             if os.path.isfile(filename) :
                 print (f"Loading interface in {filename}...")
-                self.__device.add_interface (json.load(open(filename)))
+                self.__device.add_interface_from_json (json.load(open(filename)))
             else:
                 print (f"File {filename} is not file!")
 
@@ -68,9 +70,6 @@ class AstarteClient :
     
     def __data_cb(self, astarte_device, interface, path, data) :
         print ("Received server data")
-    
-    def __aggregated_data_cb(self, device, ifname, ifpath, data) :
-        print ("Received aggregated server data")
 
     
     def __build_appengine_url(self):
@@ -89,16 +88,16 @@ class AstarteClient :
     
 
     def send_short_coffee_count(self, count):
-        self.__device.send (self.__COUNTERS_INTERFACE, "/shortCoffee", count)
+        self.__device.send (self.__COUNTERS_INTERFACE, "/coffee/shortCoffee", count)
     
 
     def send_long_coffee_count(self, count):
-        self.__device.send (self.__COUNTERS_INTERFACE, "/longCoffee", count)
+        self.__device.send (self.__COUNTERS_INTERFACE, "/coffee/longCoffee", count)
 
 
     def publish_container_status(self, container_status:ContainerStatus):
-        self.__device.send (self.__STATUS_INTERFACE, "/containerStatus", container_status.value)
+        self.__device.send (self.__STATUS_INTERFACE, "/status/containerStatus", container_status.value)
 
 
     def publish_water_status(self, water_status:WaterStatus):
-        self.__device.send (self.__STATUS_INTERFACE, "/waterStatus", water_status.value)
+        self.__device.send (self.__STATUS_INTERFACE, "/status/waterStatus", water_status.value)

@@ -34,8 +34,8 @@ struct _privateData{
 
 const static astarte_interface_t machine_counters_interface = {
     .name = "ai.clea.examples.machine.Counters",
-    .major_version = 0,
-    .minor_version = 1,
+    .major_version = 1,
+    .minor_version = 0,
     .ownership = OWNERSHIP_DEVICE,
     .type = TYPE_DATASTREAM
 };
@@ -43,8 +43,8 @@ const static astarte_interface_t machine_counters_interface = {
 
 const static astarte_interface_t machine_status_interface = {
     .name = "ai.clea.examples.machine.Status",
-    .major_version = 0,
-    .minor_version = 1,
+    .major_version = 1,
+    .minor_version = 0,
     .ownership = OWNERSHIP_DEVICE,
     .type = TYPE_DATASTREAM,
 };
@@ -200,32 +200,32 @@ void publish_event (AstarteHandler *this, coffee_machine_event event) {
     
     switch (event) {
         case CONTAINER_OFF_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/containerStatus", "CONTAINER_OFF_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/containerStatus", "CONTAINER_OFF_ALARM_EVENT", 0);
             break;
         case CONTAINER_OPEN_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/containerStatus", "CONTAINER_OPEN_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/containerStatus", "CONTAINER_OPEN_ALARM_EVENT", 0);
             break;
         case CONTAINER_FULL_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/containerStatus", "CONTAINER_FULL_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/containerStatus", "CONTAINER_FULL_ALARM_EVENT", 0);
             break;
         case WATER_OFF_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/waterStatus", "WATER_OFF_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/waterStatus", "WATER_OFF_ALARM_EVENT", 0);
             break;
         case WATER_EMPTY_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/waterStatus", "WATER_EMPTY_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/waterStatus", "WATER_EMPTY_ALARM_EVENT", 0);
             break;
         case WATER_OPEN_ALARM_EVENT:
-            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/waterStatus", "WATER_OPEN_ALARM_EVENT", 0);
+            astarte_device_stream_string(this->astarteDeviceHandle, machine_status_interface.name, "/status/waterStatus", "WATER_OPEN_ALARM_EVENT", 0);
             break;
         case COFFEE_SHORT_EVENT:
             ESP_ERROR_CHECK (update_counter (&(this->private_data->nvs_handle), &(this->private_data->short_coffee_cnt),
                                                 this->private_data->short_coffee_cnt+1, "ss_coffee"));
-            astarte_device_set_integer_property(this->astarteDeviceHandle, machine_counters_interface.name, "/shortCoffee", this->private_data->short_coffee_cnt);
+            astarte_device_set_integer_property(this->astarteDeviceHandle, machine_counters_interface.name, "/coffee/shortCoffee", this->private_data->short_coffee_cnt);
             break;
         case COFFEE_LONG_EVENT:
             ESP_ERROR_CHECK (update_counter (&(this->private_data->nvs_handle), &(this->private_data->long_coffee_cnt),
                                                 this->private_data->long_coffee_cnt+1, "sl_coffee"));
-            astarte_device_set_integer_property(this->astarteDeviceHandle, machine_counters_interface.name, "/longCoffee", this->private_data->long_coffee_cnt);
+            astarte_device_set_integer_property(this->astarteDeviceHandle, machine_counters_interface.name, "/coffee/longCoffee", this->private_data->long_coffee_cnt);
             break;
         default:
             ESP_LOGW(TAG, "event not supported");
