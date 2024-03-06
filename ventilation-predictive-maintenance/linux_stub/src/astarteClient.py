@@ -2,7 +2,7 @@
 import os, glob, json
 from pathlib import Path
 from datetime import datetime
-from astarte.device import Device
+from astarte.device import DeviceMqtt
 
 
 class AstarteClient :
@@ -52,18 +52,14 @@ class AstarteClient :
             print (error_message)
             raise Exception (error_message)
 
-        self.__device   = Device (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path, loop)
-
-        self.__device.on_connected                  = self.__connection_cb
-        self.__device.on_disconnected               = self.__disconnecton_cb
-        self.__device.on_data_received              = self.__data_cb
-        self.__device.on_aggregate_data_received    = self.__aggregated_data_cb
+        self.__device   = DeviceMqtt (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path)
+        self.__device.set_events_callbacks(on_connected=self.__connection_cb, on_data_received=self.__data_cb, on_disconnected=self.__disconnecton_cb, loop=self.__loop)
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
             if os.path.isfile(filename) :
                 print (f"Loading interface in {filename}...")
-                self.__device.add_interface (json.load(open(filename)))
+                self.__device.add_interface_from_json (json.load(open(filename)))
             else:
                 print (f"File {filename} is not file!")
 
