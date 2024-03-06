@@ -1,13 +1,13 @@
 {
     "interface_name": "ai.clea.examples.offgrid.PanelStats",
-    "version_major": 0,
-    "version_minor": 1,
+    "version_major": 1,
+    "version_minor": 0,
     "type": "datastream",
     "ownership": "device",
     "aggregation": "object",
     "mappings": [
         {
-            "endpoint": "/voltage",
+            "endpoint": "/panel/voltage",
             "type": "double",
             "reliability":"unique",
             "retention":"volatile",
@@ -16,7 +16,7 @@
             "database_retention_ttl": 31536000
         },
         {
-            "endpoint": "/current",
+            "endpoint": "/panel/current",
             "type": "double",
             "reliability":"unique",
             "retention":"volatile",

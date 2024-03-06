@@ -102,17 +102,17 @@ class AstarteClient {
 
 
     async getSolarPanelData (since:Date, to:Date) {
-        return this.formatData(await this.performQuery ({since, to}, this.PANEL_STATISTICS_INTERFACE, ""))
+        return this.formatData(await this.performQuery ({since, to}, this.PANEL_STATISTICS_INTERFACE, "/panel"))
     }
-
-
+    
+    
     async getBatteryData (since:Date, to:Date) {
-        return this.formatData(await this.performQuery ({since, to}, this.BATTERY_STATISTICS_INTERFACE, ""))
+        return this.formatData(await this.performQuery ({since, to}, this.BATTERY_STATISTICS_INTERFACE, "/battery"))
     }
-
-
+    
+    
     async getElectricalLoadData (since:Date, to:Date) {
-        return this.formatData(await this.performQuery ({since, to}, this.LOAD_STATISTICS_INTERFACE, ""))
+        return this.formatData(await this.performQuery ({since, to}, this.LOAD_STATISTICS_INTERFACE, "/load"))
     }
 }
 

@@ -232,8 +232,6 @@ class Simulator:
                             new_event                   = self.__create_event()
                             print (f"Generated this event:\t{new_event}")
                             self.__current_events.append(new_event)
-
-                    #print(f"===== {len(self.__current_events)}\n")  #FIXME Remove me!
                 
                 except Exception as e:
                     print (f"\n\n=====================================\n[S] Inner loop catched this exception: {e}\n=====================================\n\n")

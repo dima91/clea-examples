@@ -224,8 +224,8 @@ export const MainApp = ({astarteClient}) => {
     const statisticsRetriver        = async () => {
         console.log (`============================\nCall of statisticsRetriever\n============================`)
         let dataItem                = statsData[statsSource];
-        console.log (`date range`)
-        console.log (dateRange)
+        /* console.log (`date range`)
+        console.log (dateRange) */
         
         if (!dateRange[0] || !dateRange[1]) {
             console.log (`--> At least one invalid date..`);
@@ -233,7 +233,7 @@ export const MainApp = ({astarteClient}) => {
         }
         
         try {
-            console.log (`Querying data from\n\t${dateRange[0]}\nto\n\t${dateRange[1]}`)
+            // console.log (`Querying data from\n\t${dateRange[0]}\nto\n\t${dateRange[1]}`)
             let response    = await dataItem.dataRetrieverCallback (new Date(dateRange[0]), new Date(dateRange[1]))
             dataItem.data   = response;
         } catch (err) {
@@ -366,8 +366,8 @@ export const MainApp = ({astarteClient}) => {
     // Handling statsSource, showUnit and showPeriod variables update
     React.useEffect(() => {
         if (chartContainerRef) {
-            console.log (`Something changed: (entually) reloading displayed data!\n\
-\tstatsSource: ${statsSource}\n\tshowUnit: ${shownUnit}\n\tshowPeriod: ${shownPeriod}\n\tdateRange: [${dateRange[0]}, ${dateRange[1]}]`)
+            /* console.log (`Something changed: (entually) reloading displayed data!\n\
+                                \tstatsSource: ${statsSource}\n\tshowUnit: ${shownUnit}\n\tshowPeriod: ${shownPeriod}\n\tdateRange: [${dateRange[0]}, ${dateRange[1]}]`) */
 
             statisticsRetriver();
             
