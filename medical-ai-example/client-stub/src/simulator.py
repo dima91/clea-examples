@@ -1,4 +1,3 @@
-
 import asyncio, random, utils, traceback
 from copy import deepcopy
 from typing import Tuple
@@ -154,7 +153,6 @@ class Simulator:
             self.__client.publish_rooms_identifiers(rooms)
 
 
-            print("Running..")
             while True:
                 await asyncio.sleep(loop_delay_s)
                 now = datetime.now()

@@ -1,7 +1,6 @@
-
-import os, glob, json, utils
+import os, glob, json, utils, time
 from datetime import datetime
-from astarte.device import Device
+from astarte.device import DeviceMqtt
 
 
 class AstarteClient :
@@ -33,18 +32,19 @@ class AstarteClient :
             print (error_message)
             raise Exception (error_message)
 
-        self.__device   = Device (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path, loop)
-
-        self.__device.on_connected                  = self.__connection_cb
-        self.__device.on_disconnected               = self.__disconnecton_cb
-        self.__device.on_data_received              = self.__data_cb
-        self.__device.on_aggregate_data_received    = self.__aggregated_data_cb
+        self.__device   = DeviceMqtt (device_id=device_id,
+                                      realm=realm_name,
+                                      credentials_secret=credentials_secret,
+                                      pairing_base_url=f"{api_base_url}/pairing",
+                                      persistency_dir=persistency_path
+                                      )
+        self.__device.set_events_callbacks(on_connected=self.__connection_cb, on_data_received=self.__data_cb, on_disconnected=self.__disconnecton_cb, loop=self.__loop)
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
             if os.path.isfile(filename) :
                 print (f"Loading interface in {filename}...")
-                self.__device.add_interface (json.load(open(filename)))
+                self.__device.add_interface_from_json (json.load(open(filename)))
             else:
                 print (f"File {filename} is not file!")
 
@@ -57,9 +57,6 @@ class AstarteClient :
     
     def __data_cb(self, astarte_device, interface, path, data) :
         print ("Received server data")
-    
-    def __aggregated_data_cb(self, device, ifname, ifpath, data) :
-        print ("Received aggregated server data")
 
 
     ##### ================================ #####
@@ -67,6 +64,7 @@ class AstarteClient :
 
     def connect(self):
         self.__device.connect()
+        time.sleep(1)
     
     
     def is_connected(self) :
@@ -79,22 +77,24 @@ class AstarteClient :
 
     def publish_room_descriptor(self, room_id:int, patient_id:int, diagnosis:str, hospitalization_date:datetime,
                                 release_date:datetime) -> None:
-        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientId", patient_id)
-        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/diagnosis", diagnosis)
-        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientHospitalizationDate", hospitalization_date)
-        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/{room_id}/patientReleaseDate", release_date)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/r_{room_id}/patientId", patient_id)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/r_{room_id}/diagnosis", diagnosis)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/r_{room_id}/patientHospitalizationDate", hospitalization_date)
+        self.__device.send(self.__ROOM_DESCRIPTOR_INTERFACE, f"/r_{room_id}/patientReleaseDate", release_date)
 
     
     def publish_event(self, event_type:utils.EventType, confidence:float, init_frame_content:bytes, init_frame_url:str,
                       room_id:int) -> None:
         payload = {
             "eventType"     : event_type.value,
-            "confidence"    : confidence,
-            "roomId"        : room_id
+            "confidence"    : float(confidence),
+            "roomId"        : room_id,
+            "initFrameContent"  : b'',
+            "initFrameURL"  : ''
         }
         if init_frame_content:
             payload['initFrameContent'] = init_frame_content
         if init_frame_url:
             payload['initFrameURL']     = init_frame_url
         
-        self.__device.send_aggregate(self.__EVENT_INTERFACE, f"/{room_id}", payload)
+        self.__device.send_aggregate(self.__EVENT_INTERFACE, f"/r_{room_id}", payload)

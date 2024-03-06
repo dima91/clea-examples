@@ -34,8 +34,6 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
 
 
     const handleChannelEvent = (e) => {
-        /*console.log (`New event!!!`)
-        console.log (e)*/
         let evt = e.event.value
         setEventsList ((prev) => {
             let newEvent    = {
@@ -72,7 +70,7 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                 confidence          : tmpEvent.event.value.confidence,
                 initFrameContent    : tmpEvent.event.value.initFrameContent,
                 initFrameURL        : tmpEvent.event.value.initFrameURL,
-                roomId              : Number(tmpEvent.event.path.slice(1))
+                roomId              : Number(tmpEvent.event.path.slice(3))
             }
 
             // Updating event for target room

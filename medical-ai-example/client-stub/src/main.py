@@ -1,4 +1,3 @@
-
 import os, asyncio, json
 from astarte_client import AstarteClient
 from simulator import Simulator

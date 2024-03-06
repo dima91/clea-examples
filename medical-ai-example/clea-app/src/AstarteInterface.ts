@@ -105,13 +105,16 @@ class AstarteInterface {
                 "Authorization" : `Bearer ${this.getAuthorizationToken()}`,
                 "content-type"  : "application/json;charset=UTF-8"
             }
-        }).then ((response) => response.data?.data["roomsIds"])
+        }).then ((response) => {
+            console.log(`rooms: ${response.data?.data["roomsIds"]}`)
+            return response.data?.data["roomsIds"]
+        })
     }
     
     
     getRoomDetails (roomId : number) : Promise<RoomDescriptor> {
         const interfaceName = `it.unisi.atlas.RoomDescriptor`;
-        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
+        const path          = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/r_${roomId}`;
         const requestUrl    = new URL (path, this.getAppengineUrl());
 
         //console.log (`Retrieving details for room ${roomId}`)
@@ -168,7 +171,7 @@ class AstarteInterface {
         const IT_THRESHOLD  = 20;
 
         const interfaceName     = `it.unisi.atlas.Event`;
-        const path              = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/${roomId}`;
+        const path              = `v1/${this.getRealm()}/devices/${this.getDeviceId()}/interfaces/${interfaceName}/r_${roomId}`;
         const requestUrl        = new URL (path, this.getAppengineUrl());
         let timespan            = 0;
         let results : Event[]   = [];
