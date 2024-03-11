@@ -11,3 +11,6 @@ node_modules
 # people-counter-example application
 people-counter-example/rgb-cam-device/rgb-cam-people-counter-example
 .qmake.stash
+
+# BLE logger example
+ble-logger-example
