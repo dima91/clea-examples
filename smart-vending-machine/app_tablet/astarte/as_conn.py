@@ -1,4 +1,4 @@
-from astarte.device import Device
+from astarte.device import DeviceMqtt
 import json
 import os
 import glob
@@ -44,7 +44,7 @@ def set_device(config):
 
     astarte_config = config["ASTARTE"]
     os.makedirs(astarte_config["persistency_dir"], exist_ok=True)
-    device = Device(device_id=astarte_config["device_id"], realm=astarte_config["realm"],
+    """ device = Device(device_id=astarte_config["device_id"], realm=astarte_config["realm"],
                     credentials_secret=astarte_config["credentials_secret"], pairing_base_url=astarte_config["pairing_base_url"],
                     persistency_dir=astarte_config["persistency_dir"])
 
@@ -54,7 +54,13 @@ def set_device(config):
         device.add_interface(interface)
 
     # device.on_connected = connect_callback
-    device.on_data_received = callback
+    device.on_data_received = callback """
+
+    device   = DeviceMqtt (device_id=astarte_config["device_id"], realm=astarte_config["realm"],
+                           credentials_secret=astarte_config["credentials_secret"], pairing_base_url=astarte_config["pairing_base_url"],
+                           persistency_dir=astarte_config["persistency_dir"])
+    device.set_events_callbacks(on_connected=connect_callback, on_data_received=callback)
+    device.add_interfaces_from_dir(astarte_config["interfaces_dir_path"])
 
     device.connect()
     print("Wating connection with astarte: ")
@@ -80,4 +86,4 @@ def send_rejected_transaction (device, data) :
 
 def send_ble_data (device, data) :
     #print ("Sending those data with {}: {}\n\n\n".format(device, data))
-    device.send_aggregate ('ai.clea.examples.BLEDevices', '/', payload=data)
+    device.send_aggregate ('ai.clea.examples.BLEDevices', '/bleDevices', payload=data)

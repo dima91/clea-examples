@@ -1,8 +1,8 @@
 
-import os, glob, json
+import os, glob, json, time
 from pathlib import Path
-from datetime import datetime
-from astarte.device import Device
+from datetime import datetime, timezone
+from astarte.device import DeviceMqtt
 
 
 class AstarteClient :
@@ -34,18 +34,14 @@ class AstarteClient :
             print (error_message)
             raise Exception (error_message)
 
-        self.__device   = Device (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path, loop)
-
-        self.__device.on_connected                  = self.__connection_cb
-        self.__device.on_disconnected               = self.__disconnecton_cb
-        self.__device.on_data_received              = self.__data_cb
-        self.__device.on_aggregate_data_received    = self.__aggregated_data_cb
+        self.__device   = DeviceMqtt (device_id, realm_name, credentials_secret, f"{api_base_url}/pairing", persistency_path)
+        self.__device.set_events_callbacks(on_connected=self.__connection_cb, on_data_received=self.__data_cb, on_disconnected=self.__disconnecton_cb, loop=self.__loop)
 
         # Adding used interfaces
         for filename in glob.iglob(f'{interfaces_folder}/*.json'):
             if os.path.isfile(filename) :
                 print (f"Loading interface in {filename}...")
-                self.__device.add_interface (json.load(open(filename)))
+                self.__device.add_interface_from_json (json.load(open(filename)))
             else:
                 print (f"File {filename} is not file!")
 
@@ -81,22 +77,27 @@ class AstarteClient :
             payload["devices"].append(d["device_address"])
             payload["presence_time"].append(int(d["presence_time"])*1000)
         
-        self.__device.send_aggregate(self.__BLE_DEVICES_INTERFACE, "/", payload)
+        print (f"Devices @ {datetime.now(tz=timezone.utc)}")
+        self.__device.send_aggregate(self.__BLE_DEVICES_INTERFACE, "/bleDevices", payload)
 
 
     def publish_transaction(self, descriptor) -> None:
-        #print (f"Publishing following transaction\n{descriptor}")
+        currtime = datetime.now(tz=timezone.utc)
+        print (f"Transaction @ {currtime}")
+        print (f"Publishing following transaction\n{descriptor}")
+
         
         payload = {
             "age"           : descriptor["age"] if not descriptor["detection_failed"] else 0,
             "emotion"       : descriptor["emotion"] if not descriptor["detection_failed"] else "None",
             "gender"        : descriptor["gender"] if not descriptor["detection_failed"] else "None",
-            "suggestion"    : descriptor["suggestion"] if not descriptor["detection_failed"] else "None"
+            "suggestion"    : descriptor["suggestion"] if not descriptor["detection_failed"] else "None",
+            "timedate"      : currtime
         }
 
         if not descriptor["is_rejected"]:
             payload["choice"]   = descriptor["choice"]
-            payload["price"]    = descriptor["price"]
-            self.__device.send_aggregate(self.__TRANSACTION_INTERFACE, "/transaction", payload)
+            payload["price"]    = float(descriptor["price"])
+            self.__device.send_aggregate(self.__TRANSACTION_INTERFACE, "/transaction", payload, currtime)
         else:    
-            self.__device.send_aggregate(self.__REJECTED_TRANSACTION_INTERFACE, "/transaction", payload)
+            self.__device.send_aggregate(self.__REJECTED_TRANSACTION_INTERFACE, "/transaction", payload, currtime)

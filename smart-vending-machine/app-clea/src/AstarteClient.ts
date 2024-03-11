@@ -222,11 +222,12 @@ class AstarteClient {
         "Content-Type": "application/json;charset=UTF-8",
       },
     }).then((response) => {
-      // console.log("Got BLE response from Astarte:", response);
+      //console.log("Got BLE response from Astarte:", response);
       let result : any[] = [];
       
-      if (response.status=200 && response.data.data && Array.isArray(response.data.data)) {
-        response.data.data.forEach ((item:any) => {
+      if (response.status=200 && response.data.data.bleDevices && Array.isArray(response.data.data.bleDevices)) {
+        let bleDevices = response.data.data.bleDevices
+        bleDevices.forEach ((item:any) => {
             if (Array.isArray(item.devices) && Array.isArray(item.presence_time)) {
                 if (item.devices.length != item.presence_time.length) {
                     console.error ("Lengths differs!")
