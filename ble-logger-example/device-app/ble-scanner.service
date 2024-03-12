@@ -1,0 +1,18 @@
+[Unit]
+Description=BLE Scanner POC
+After=network.target
+After=bluetooth.target
+Requires=network.target
+Requires=bluetooth.target
+
+[Service]
+Type=simple
+User=seco
+WorkingDirectory=/home/seco/ws/clea-examples/ble-logger-example/device-app
+Restart=on-failure
+RestartSec=10
+ExecStartPre=/bin/sleep 10
+ExecStart=python3 scan.py
+
+[Install]
+WantedBy=multi-user.target
