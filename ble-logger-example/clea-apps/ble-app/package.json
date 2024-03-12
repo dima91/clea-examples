@@ -1,0 +1,72 @@
+{
+  "name": "ble-logger",
+  "version": "0.0.1",
+  "description": "BLE Logger App that analyzes user interactions thanks to the BLE sensor",
+  "scripts": {
+    "build": "webpack",
+    "prebuild": "npm run i18n:compile",
+    "watch": "webpack --mode=development --watch",
+    "prewatch": "npm run i18n:compile",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "check-types": "tsc --noEmit",
+    "precheck-types": "npm run i18n:compile",
+    "i18n:extract": "formatjs extract 'src/**/*.ts*' --out-file translations.generated.json --ignore '**/*.d.ts' --id-interpolation-pattern '[sha512:contenthash:base64:6]'",
+    "i18n:compile": "formatjs compile-folder src/lang src/lang-compiled"
+  },
+  "keywords": [],
+  "author": "Davide Briani",
+  "private": true,
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/react-fontawesome": "^0.1.18",
+    "@types/lodash": "^4.14.181",
+    "apexcharts": "^3.35.0",
+    "axios": "^0.26.1",
+    "babel-plugin-formatjs": "^10.3.19",
+    "bootstrap": "^5.1.3",
+    "dayjs": "^1.11.0",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2",
+    "react-apexcharts": "^1.4.0",
+    "react-bootstrap": "^2.2.3",
+    "react-datepicker": "^4.5.0",
+    "react-dom": "^17.0.2",
+    "react-intl": "^5.24.8",
+    "react-use": "^17.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/preset-env": "^7.14.2",
+    "@babel/preset-react": "^7.13.13",
+    "@formatjs/cli": "^4.8.3",
+    "@svgr/webpack": "^6.2.1",
+    "@types/react-datepicker": "^4.3.2",
+    "@types/react-dom": "^17.0.14",
+    "css-loader": "^6.7.1",
+    "prettier": "^2.6.2",
+    "style-loader": "^3.3.1",
+    "svg-url-loader": "^7.1.1",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.7.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      [
+        "formatjs",
+        {
+          "idInterpolationPattern": "[sha512:contenthash:base64:6]",
+          "ast": true
+        }
+      ]
+    ]
+  }
+}

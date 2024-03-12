@@ -88,7 +88,7 @@ class AstarteClient :
                 smartphones_vendors[item['device_vendor']]  = addr
                 # Checking if interaction is present
                 if item['has_interacted']:
-                    interactions.append(item['presence_time'])
+                    interactions.append(float(item['presence_time']))
 
         return {
             "accessoriesVendors"    : json.dumps(accessories_vendors),
@@ -100,7 +100,7 @@ class AstarteClient :
     
 
     def __publish_statistics(self, interface, payload, timestamp) -> None:
-        self.__device.send_aggregate(interface, "", payload, timestamp)
+        self.__device.send_aggregate(interface, "/statistics", payload, timestamp)
 
     ########################################
 
