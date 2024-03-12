@@ -16,4 +16,4 @@ services:
       - CONFIG_FILE_PATH=/app/config.json
       - TZ=Europe/Rome
     volumes:
-      - <clea-examples-local-path>/ble-logger-example/python-stub/custom_config.json:/app/config.json
+      - ../custom_config.json:/app/config.json
