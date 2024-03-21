@@ -1,4 +1,5 @@
 from astarte.device import DeviceMqtt
+from pathlib import Path
 import json
 import os
 import glob
@@ -60,7 +61,7 @@ def set_device(config):
                            credentials_secret=astarte_config["credentials_secret"], pairing_base_url=astarte_config["pairing_base_url"],
                            persistency_dir=astarte_config["persistency_dir"])
     device.set_events_callbacks(on_connected=connect_callback, on_data_received=callback)
-    device.add_interfaces_from_dir(astarte_config["interfaces_dir_path"])
+    device.add_interfaces_from_dir(Path(astarte_config["interfaces_dir_path"]))
 
     device.connect()
     print("Wating connection with astarte: ")
