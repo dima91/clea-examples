@@ -1,5 +1,6 @@
 from astarte.device import DeviceMqtt
 from pathlib import Path
+from datetime import datetime, timezone
 import json
 import os
 import glob
@@ -76,13 +77,17 @@ def set_device(config):
 
 
 def send_data(device, data):
+    currtime = datetime.now(tz=timezone.utc)
+    data['timedate'] = currtime
     device.send_aggregate ("ai.clea.examples.face.emotion.detection.Transaction", "/transaction",
-                            payload=data, timestamp=time.time())
+                            payload=data, timestamp=currtime)
 
 
 def send_rejected_transaction (device, data) :
+    currtime = datetime.now(tz=timezone.utc)
+    data['timedate'] = currtime
     device.send_aggregate ("ai.clea.examples.face.emotion.detection.RejectedTransaction", "/transaction",
-                            payload=data, timestamp=time.time())
+                            payload=data, timestamp=currtime)
 
 
 def send_ble_data (device, data) :

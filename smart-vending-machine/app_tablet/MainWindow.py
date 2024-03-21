@@ -137,7 +137,7 @@ class MainWindow(QWidget):
     def rejected_transaction_slot(self, user_info):
         astarte = Astarte()
         send_rejected_transaction (device=astarte.device, data={"age":user_info['age'], "emotion":user_info['emotion'],
-                                    "gender":user_info['gender']})
+                                    "gender":user_info['gender'], "suggestion":""})
 
     def new_image_slot(self):
         """Qt Slot for updated signal of the FaceRecogniser. Called every time a new frame is elaborated"""
