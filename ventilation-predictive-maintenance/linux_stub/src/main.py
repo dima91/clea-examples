@@ -26,16 +26,22 @@ async def simulator(astarte_client):
     DELTA_FLOW      = 0.1
     DELTA_POLLUTION = 2.5
 
-    last_event_timestamp    = datetime.now()
-    event_type              = None
-    event_duration          = 0
-    target_event_value      = 0
+    last_event_timestamp            = datetime.now()
+    event_type                      = None
+    event_duration                  = 0
+    target_event_value              = 0
+    last_wifi_update_timestamp      = datetime.now()
+    last_cellular_update_timestamp  = datetime.now()
 
     curr_flow       = astarte_client.MAX_FLOW-DELTA_FLOW
     curr_pollution  = astarte_client.MIN_POLLUTION+DELTA_POLLUTION
     
+    # Sending device info
+    astarte_client.send_device_info()
+
+    print("Running simulator loop..")
     while True:
-        time.sleep(LOOP_DELAY_S)
+        await asyncio.sleep(LOOP_DELAY_S)
 
         # Checking if events should be created
         curr_timestamp      = datetime.now()
@@ -64,6 +70,8 @@ async def simulator(astarte_client):
         
         # Generating values for (eventually) existing event
         if event_type!=None:
+            astarte_client.update_system_status(8, astarte_client.DEFAULT_AVAILABLE_MEM_BYTES-1866465)
+            
             if event_type==0:
                 print(f"New data for flow event, {delta_timestamps}")
                 curr_flow       = generate_random_value(curr_flow, target_event_value-DELTA_FLOW,\
@@ -87,11 +95,24 @@ async def simulator(astarte_client):
                 target_event_value      = 0
                 last_event_timestamp    = curr_timestamp
 
+                # Resetting tasks count and available memory
+                astarte_client.update_system_status(astarte_client.DEFAULT_TASKS_COUNT, astarte_client.DEFAULT_AVAILABLE_MEM_BYTES)
+
         else:
             curr_flow       = generate_random_value(curr_flow, astarte_client.MAX_FLOW-DELTA_FLOW,\
                                                 astarte_client.MAX_FLOW, DELTA_FLOW)
             curr_pollution  = generate_random_value(curr_pollution, astarte_client.MIN_POLLUTION,\
                                                     astarte_client.MIN_POLLUTION+DELTA_POLLUTION, DELTA_POLLUTION)
+            
+        # Checking if WiFi scan results should be updated
+        if (curr_timestamp - last_wifi_update_timestamp) > timedelta(seconds=int(os.environ['WIFI_SCAN_RESULT_DELAY_UPDATE_S'])):
+            astarte_client.update_wifi_scan_results()
+            last_wifi_update_timestamp = curr_timestamp
+
+        # Checking if cellular connection status should be updated
+        if (curr_timestamp - last_cellular_update_timestamp) > timedelta(seconds=int(os.environ['CELLULAR_STATUS_DELAY_UPDATE_S'])):
+            astarte_client.update_cellular_connection_status()
+            last_cellular_update_timestamp = curr_timestamp
 
 
         client.send_air_data(curr_flow, curr_pollution)
@@ -105,14 +126,13 @@ if __name__== "__main__" :
     persistency_path    = os.environ["PERSISTENCY_PATH"]
     interfaces_folder   = os.environ["INTERFACES_FOLDER"]
 
+    
+
     loop    = asyncio.get_event_loop()
 
     # Building AstarteClient object with command line arguments
     client  = AstarteClient(device_id, realm_name, device_secret, api_base_url,
                             persistency_path, interfaces_folder, loop)
-    client.connect()
-
-    # Creating simulator task
-    loop.create_task (simulator(client))
+    client.connect(lambda : simulator(client))
 
     loop.run_forever()
