@@ -1,6 +1,6 @@
 
 import asyncio, random, holidays
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Tuple
 
 import utils
@@ -15,13 +15,13 @@ class DevicesGenerator:
     def __init__(self, config, country) -> None:
         self.__config               = config
         self.__holidays             = holidays.country_holidays(country)
-        self.__last_generation_time = datetime.now()
+        self.__last_generation_time = datetime.now(timezone.utc)
 
 
     def generate_device(self, curr_devices_count) -> Tuple[str, int]:
         device_addess   = ""
         time            = random.uniform(self.__config["min_presence_time_s"], self.__config["max_presence_time_s"])
-        now             = datetime.now()
+        now             = datetime.now(timezone.utc)
 
         if (now-self.__last_generation_time).total_seconds()>self.__config["creation_delay_s"] and \
             random.random()>self.__config["min_creation_probabilities"][str(now.hour)] and \
@@ -44,7 +44,7 @@ class TransactionsGenerator:
     def __init__(self, config, country) -> None:
         self.__config               = config
         self.__holidays             = holidays.country_holidays(country)
-        self.__last_generation_time = datetime.now()
+        self.__last_generation_time = datetime.now(timezone.utc)
         self.__products_weights     = []
         # Checking that producs weights summation is equal to one
         tmp_sum = 0
@@ -62,7 +62,7 @@ class TransactionsGenerator:
 
     def generate_transaction(self) -> dict:
         descriptor  = None
-        now         = datetime.now()
+        now         = datetime.now(timezone.utc)
 
         if (now-self.__last_generation_time).total_seconds()>utils.generate_float_with_error(self.__config["delay_s"], self.__config["delay_error"]) and \
             random.random()>self.__config["min_creation_probabilities"][str(now.hour)] :
@@ -114,19 +114,23 @@ class Simulator:
         self.__devices_generator        = DevicesGenerator(self.__config["devices"], self.__config["country"])
         self.__current_devices          = []
         self.__transactions_generator   = TransactionsGenerator(self.__config["transactions"], self.__config["country"])
+        self.__last_system_update_time  = datetime.now(timezone.utc)
 
 
     async def run(self) -> None:
         try:
             print ("Running Simulator loop..")
+            while not self.__client.is_connected():
+                await asyncio.sleep(.25)
+            self.__client.send_device_info()
 
-            last_publish_time   = datetime.now()
+            last_publish_time   = datetime.now(timezone.utc)
             expired_devices     = []
 
             while True:
                 await asyncio.sleep(5)
 
-                now             = datetime.now()
+                now             = datetime.now(timezone.utc)
 
                 # Trying to generate a new device
                 device, presence_time   = self.__devices_generator.generate_device(len(self.__current_devices))
@@ -158,6 +162,11 @@ class Simulator:
                 if transaction!=None:
                     # Publishing the just created transaction
                     self.__client.publish_transaction(transaction)
+
+                # Eventually updating system status
+                if (now - self.__last_system_update_time).total_seconds() > self.__config['edgehog']['system_update_delay_s']:
+                    self.__client.update_system_status()
+                    self.__last_system_update_time = now
 
 
         except Exception as e:

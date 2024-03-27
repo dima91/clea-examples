@@ -1,6 +1,9 @@
 
 {
     "country"   : "IT",
+    "edgehog"   : {
+        "system_update_delay_s" : 7200
+    },
     "devices"   : {
         "creation_delay_s"                  : 5,
         "expired_devices_publish_delay_s"   : 60,
