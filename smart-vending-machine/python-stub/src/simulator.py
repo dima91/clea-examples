@@ -130,6 +130,10 @@ class Simulator:
             while True:
                 await asyncio.sleep(5)
 
+                if self.__client.ota_update_in_progress():
+                    print("Skipping simulator execution due to OTA update..")
+                    continue
+
                 now             = datetime.now(timezone.utc)
 
                 # Trying to generate a new device
