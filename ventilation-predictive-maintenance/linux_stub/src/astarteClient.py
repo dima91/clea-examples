@@ -1,5 +1,5 @@
 
-import os, glob, json, random, uuid
+import os, glob, json, random, uuid, asyncio, time
 from pathlib import Path
 from datetime import datetime, timezone
 from astarte.device import DeviceMqtt
@@ -24,10 +24,20 @@ class AstarteClient :
     __COMMANDS_INTERFACE                        = "io.edgehog.devicemanager.Commands"
     __FORWARDER_SESSION_REQUEST_INTERFACE       = "io.edgehog.devicemanager.ForwarderSessionRequest"
     __OTA_REQUEST_INTERFACE                     = "io.edgehog.devicemanager.OTARequest"
+    __OTA_EVENT_INTERFACE                       = "io.edgehog.devicemanager.OTAEvent"
     __TELEMETRY_INTERFACE                       = "io.edgehog.devicemanager.config.Telemetry"
     __WIFI_SCAN_RESULTS_INTERFACE               = "io.edgehog.devicemanager.WiFiScanResults"
     __CELLULAR_CONNECTION_PROPERTIES_INTERFACE  = "io.edgehog.devicemanager.CellularConnectionProperties"
     __CELLULAR_CONNECTION_STATUS_INTERFACE      = "io.edgehog.devicemanager.CellularConnectionStatus"
+
+    __OTA_HANDLER_ACKNOWLEDGE_DURATION_S        = 3
+    __OTA_HANDLER_DOWNLOAD_DURATION_S           = 6
+    __OTA_HANDLER_DOWNLOAD_STEP_COUNT           = 6
+    __OTA_HANDLER_DEPLOYING_DURATION_S          = 20
+    __OTA_HANDLER_DEPLOYING_STEP_COUNT          = 7
+    __OTA_HANDLER_DEPLOYED_DURATION_S           = 5
+    __OTA_HANDLER_REBOOTING_DURATION_S          = 20
+    __OTA_HANDLER_ERROR_DURATION_S              = 5
 
 
     MAX_FLOW        = 1.0
@@ -167,6 +177,7 @@ class AstarteClient :
         self.__loop             = loop
         self.__simulator_lambda = None
         self.__start_time_ms    = int(datetime.now(tz=timezone.utc).timestamp()*1000)
+        self.__current_ota_uuid  = None
 
         # Initializing "random" module
         random.seed()
@@ -316,6 +327,10 @@ class AstarteClient :
         
         self.update_wifi_scan_results()
         self.update_cellular_connection_status()
+
+
+    def ota_update_in_progress(self):
+        return self.__current_ota_uuid != None
         
 
     def __on_server_command(self, path, data):
@@ -339,12 +354,101 @@ class AstarteClient :
 
     def __on_ota_request(self, path, data):
         print(f"Received OTA request\n{path=}\n{data=}")
-        # TODO 
 
 
-    def __publish_ota_event(self):
-        # TODO
-        print("Publishing OTA event")
+        if self.__current_ota_uuid != None:
+            print("VERY DANGEROUS: OTA update already in progress!!")
+            self.__publish_error_and_failure(data['uuid'], "UpdateAlreadyInProgress", "")
+        else :
+            self.__current_ota_uuid = data['uuid']
+            self.__loop.create_task(self.__ota_handler())
+        
+
+
+    def __publish_ota_event(self, payload):
+        print(f"Publishing OTA event -> {payload['status']}")
+        self.__device.send_aggregate(self.__OTA_EVENT_INTERFACE, "/event", payload, datetime.now(tz=timezone.utc))
+
+    def __publish_error_and_failure(self, request_uuid:str, status_code:str, message:str):
+        # Sending error status
+        self.__publish_ota_event(self.__build_error_payload(request_uuid, status_code, message))
+        time.sleep(self.__OTA_HANDLER_ERROR_DURATION_S)
+        # Sending failure result
+        self.__publish_ota_event(self.__build_failure_payload(request_uuid, status_code, message))
+
+    
+    def __build_aknowledgd_payload(self):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Acknowledged", "statusProgress":100,
+                "statusCode":"", "message":""}
+    
+    def __build_downloading_payload(self, status_progress:float):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Downloading", "statusProgress":int(status_progress),
+                "statusCode":"", "message":""}
+
+    def __build_deploying_payload(self, status_progress:float):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Deploying", "statusProgress":int(status_progress),
+                "statusCode":"", "message":""}
+    
+    def __build_deployed_payload(self):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Deployed", "statusProgress":100,
+                "statusCode":"", "message":""}
+    
+    def __build_rebooting_payload(self):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Rebooting", "statusProgress":100,
+                "statusCode":"", "message":""}
+    
+    def __build_success_payload(self):
+        return {"requestUUID":self.__current_ota_uuid, "status":"Success", "statusProgress":100,
+                "statusCode":"", "message":""}
+    
+    def __build_error_payload(self, request_uuid, status_code, message):
+        return {"requestUUID":request_uuid, "status":"Error", "statusProgress":100,
+                "statusCode":status_code, "message":message}
+    
+    def __build_failure_payload(self, request_uuid, status_code, message):
+        return {"requestUUID":request_uuid, "status":"Failure", "statusProgress":100,
+                "statusCode":status_code, "message":message}
+
+
+    async def __ota_handler(self):
+        print("Handling OTA..")
+        current_step_number = 0
+        current_step_delay_s = 0
+
+        # Sending acknowledge
+        self.__publish_ota_event(self.__build_aknowledgd_payload())
+        await asyncio.sleep(self.__OTA_HANDLER_ACKNOWLEDGE_DURATION_S)
+
+        # Simulating binary file downloading
+        current_step_number = 0
+        current_step_delay_s = float(self.__OTA_HANDLER_DOWNLOAD_DURATION_S / self.__OTA_HANDLER_DOWNLOAD_STEP_COUNT)
+        while current_step_number < self.__OTA_HANDLER_DOWNLOAD_STEP_COUNT:
+            await asyncio.sleep(current_step_delay_s)
+            # Publishing download event update
+            current_step_number = current_step_number+1
+            self.__publish_ota_event(self.__build_downloading_payload((100/self.__OTA_HANDLER_DOWNLOAD_STEP_COUNT)*current_step_number))
+
+        # Simulating image deploy
+        current_step_number = 0
+        current_step_delay_s = float(self.__OTA_HANDLER_DEPLOYING_DURATION_S / self.__OTA_HANDLER_DEPLOYING_STEP_COUNT)
+        while current_step_number < self.__OTA_HANDLER_DEPLOYING_STEP_COUNT:
+            await asyncio.sleep(current_step_delay_s)
+            # Publishing deploying event update
+            current_step_number = current_step_number+1
+            self.__publish_ota_event(self.__build_deploying_payload((100/self.__OTA_HANDLER_DEPLOYING_STEP_COUNT)*current_step_number))
+
+        # Sending deployed result
+        self.__publish_ota_event(self.__build_deployed_payload())
+        await asyncio.sleep(self.__OTA_HANDLER_DEPLOYED_DURATION_S)
+        
+        # Sending rebooting result
+        self.__publish_ota_event(self.__build_rebooting_payload())
+        await asyncio.sleep(self.__OTA_HANDLER_REBOOTING_DURATION_S)
+        
+        # Sending success result
+        self.__publish_ota_event(self.__build_success_payload())
+
+        self.__current_ota_uuid = None
 
 
     def __on_telemetry(self):

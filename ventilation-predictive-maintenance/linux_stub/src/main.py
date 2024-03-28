@@ -43,6 +43,10 @@ async def simulator(astarte_client):
     while True:
         await asyncio.sleep(LOOP_DELAY_S)
 
+        if astarte_client.ota_update_in_progress():
+            print("Skipping simulator execution due to OTA update..")
+            continue
+
         # Checking if events should be created
         curr_timestamp      = datetime.now()
         delta_timestamps    = curr_timestamp-last_event_timestamp
