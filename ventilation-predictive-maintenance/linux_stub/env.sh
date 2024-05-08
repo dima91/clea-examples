@@ -1,8 +1,8 @@
 
-DEVICE_ID=
-DEVICE_SECRET=
-API_BASE_URL=
-REALM_NAME=
+export API_BASE_URL=
+export REALM_NAME=
+export DEVICE_ID=
+export DEVICE_SECRET=
 export PERSISTENCY_PATH=persistency.d
 export INTERFACES_FOLDER=astarte-interfaces
 export PYTHONUNBUFFERED=1

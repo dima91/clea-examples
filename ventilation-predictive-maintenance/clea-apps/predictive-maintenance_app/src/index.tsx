@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { IntlProvider } from "react-intl";
 import moment from "moment";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+//import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap";
 

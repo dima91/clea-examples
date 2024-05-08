@@ -1,35 +1,35 @@
-
 <html>
-    <head>
-        <link href="https://showcase.clea.cloud/static/css/main.9a4023b8.chunk.css"
-                type="text/css" rel="stylesheet">
-        <link href="https://showcase.clea.cloud/static/media/default-properties.092a7225.css"
-                type="text/css"rel="stylesheet" data-rh="true">
-        <link href="https://showcase.clea.cloud/static/media/default.dc2b40a2.css"
-                type="text/css"rel="stylesheet" data-rh="true">
-        
 
-                <script>
-                    import(/* webpackIgnore: true */ "./dist/main.js")
-                    .then((module) => {
-                        const app = module.default;
-                        const div = document.getElementById("root");
-                        const shadow = div.attachShadow({ mode: "open" });
-                        const appProps = {
-                            astarteUrl: new URL(""),
-                            realm: "",
-                            token: "",
-                            deviceId: ""
-                        };
-                app.mount(shadow, appProps, {themeUrl: "https://showcase.clea.cloud/static/media/default.dc2b40a2.css",
-                userPreferences: {language: "en"}});
+<head>
+
+    <link href="https://storage.googleapis.com/clea-showcase-uploads/uploads/tenants/3/theme/default.css"
+        type="text/css" rel="stylesheet" data-rh="true">
+
+
+    <script>
+        import(/* webpackIgnore: true */ "./dist/main.js")
+            .then((module) => {
+                const app = module.default;
+                const div = document.getElementById("root");
+                const shadow = div.attachShadow({ mode: "open" });
+                const appProps = {
+                    astarteUrl: new URL(""),
+                    realm: "",
+                    token: "",
+                    deviceId: ""
+                };
+                app.mount(shadow, appProps, {
+                    themeUrl: "https://storage.googleapis.com/clea-showcase-uploads/uploads/tenants/3/theme/default.css",
+                    userPreferences: { language: "en" }
+                });
             })
-        </script>
-    </head>
+    </script>
+</head>
 
-    <body>
-        <div id="root" style="width:85%; float:right; margin-top:150px; margin-right: 20px">
-        </div>
-        </div>
-    </body>
+<body>
+    <div id="root" style="width:85%; float:right; margin-top:150px; margin-right: 20px">
+    </div>
+    </div>
+</body>
+
 </html>
