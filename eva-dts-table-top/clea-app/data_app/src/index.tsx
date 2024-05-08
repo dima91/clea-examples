@@ -4,7 +4,7 @@ import { IntlProvider } from "react-intl";
 import moment from "moment";
 import flatten from "flat";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap";
 
