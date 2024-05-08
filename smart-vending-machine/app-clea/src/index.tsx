@@ -4,7 +4,7 @@ import { IntlProvider } from "react-intl";
 import moment from "moment";
 
 import './index.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+//import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { Settings, UserPreferences } from "./types";
 import App, { AppProps }from './App';
