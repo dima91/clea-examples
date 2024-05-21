@@ -219,7 +219,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
             <Container fluid>
                 <Row>
                     <Col sm={12} md={6}>
-                        <Card className="rounded text-bg-accent">
+                        <Card className="rounded text-bg-accent mb-2">
                             <Card.Body>
                                 <div className="counter-container">
                                     <div className="counter-title">
@@ -236,7 +236,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                             {counter.areas.map((area, index) => {
                                 return (
                                     <Col sm={12} md={6} key={index}>
-                                        <Card className="rounded">
+                                        <Card className="rounded my-2">
                                             <Card.Body>
                                                 <div className="area-container">
                                                     <div className="area-title text-secondary">
