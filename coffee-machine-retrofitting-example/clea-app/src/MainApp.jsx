@@ -1,4 +1,3 @@
-
 import "core-js/stable"
 import "regenerator-runtime/runtime"
 import React, { Fragment, forwardRef } from "react";
@@ -328,7 +327,7 @@ export const MainApp = ({ astarte_client, device_id }) => {
         return (
         <ButtonGroup className="text-center m-3">
             {button_group.map((el, idx) => (
-                <ToggleButton variant='outline-primary' key={`${idx_prefix}-${idx}`} id={`${idx_prefix}-${idx}`}
+                <ToggleButton className={el.value === state_var ? "btn-primary" : "bg-white text-secondary"} key={`${idx_prefix}-${idx}`} id={`${idx_prefix}-${idx}`}
                     type='radio' name={el.name} value={el.value}
                     checked={el.value === state_var}
                     ref={el.button_ref}
@@ -358,11 +357,11 @@ export const MainApp = ({ astarte_client, device_id }) => {
                 <Row>
                     {_.map (cards_descriptors, ((item, k) =>
                         (<Col sm={12} md={3} key={`cd-${k}`}>
-                            <Card bg={item.bg} text="white" className="rounded text-center m-3">
+                            <Card className="rounded text-center m-3">
                                 <Card.Body>
-                                    <div className="h3">{item.value}</div>
-                                    <div className="h5">{item.description}</div>
-                                    <small>Real time</small>
+                                    <div className="text-primary fw-bold fs-3">{item.value}</div>
+                                    <div className="fs-5 text-muted">{item.description}</div>
+                                    <span>Real time</span>
                                 </Card.Body>
                             </Card>
                         </Col>)
@@ -373,7 +372,7 @@ export const MainApp = ({ astarte_client, device_id }) => {
                 {/* PRODUCTS OVERVIEW ROW */}
                 <Row>
                     <Col sm={12} md={12}>
-                        <Card bg="light" className="rounded m-3">
+                        <Card className="rounded m-3">
                             <Card.Title className='text-primary m-3'>
                                 Products Overview
                             </Card.Title>
@@ -793,7 +792,7 @@ const ChartData = ({ chart_descriptor, group_by, isMount = false }) => {
 
 const OverviewData  = ({data}) => {
     return (
-        <Table striped bordered hover>
+        <Table bordered hover>
             <thead>
                 <tr>
                     <th>Beverage</th>
