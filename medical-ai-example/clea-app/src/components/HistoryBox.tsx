@@ -237,7 +237,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
 
                                         return item.pageIdx == undefined || (MIN_PAGE <= nIdx && nIdx <= MAX_PAGE) ?
                                         (
-                                            <Button className="btn-circle shadow-sm ms-1 me-1"
+                                            <Button className="btn-circle ms-1 me-1 border"
                                                             variant={nIdx == focusedPageIndex ? 'primary' : 'light'}
                                                             onClick={item.onClick}>
                                                 {item.char}

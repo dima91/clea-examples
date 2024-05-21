@@ -28,10 +28,11 @@ const RoomsOverview : React.FC<RoomsOverviewProps>  = ({descriptors, itemsPerRow
 
 
     return (
-        <Table responsive>
+        <Table responsive className="table-borderless">
             <tbody>
                 {
                     _.map (groupedDescriptors, (gitem, gidx) => {
+                        console.log ("gitem ", gitem)
                         let content = _.map (gitem, (room, idx) => {
                             let patientStatus   = undefined
                             try {
