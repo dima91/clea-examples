@@ -122,7 +122,7 @@ export function patientStatusToGradientClass (s : PatientStatus) {
         res = ""
         break
     case PatientStatus.NORMAL :
-        res = "primary-bg"
+        res = "text-bg-accent"
         break
     case PatientStatus.WARNING :
         res = "warning-gradient-bg"
@@ -178,5 +178,5 @@ export function patientStatusToDatailsBody (s: PatientStatus) {
 }
 
 export function normalizeConfidence (c: number) {
-    return Number(c.toFixed(4))
+    return Number(c.toFixed(3))
 }

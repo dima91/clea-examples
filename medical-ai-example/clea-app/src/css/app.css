@@ -54,3 +54,7 @@
 .primary-bg {
     background-color: #11B0EF;
 }
+
+.content-card {
+    border-left: 1px solid #BEC7D0;
+}

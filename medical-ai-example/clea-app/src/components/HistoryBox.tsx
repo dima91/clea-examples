@@ -169,7 +169,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
     
     return (
         <Container fluid>
-            <Card bg="light" className="rounded shadow mt-3 h-100">
+            <Card bg="light" className="rounded mt-3 h-100">
                 <Container fluid>
 
                     <Card.Subtitle className="mt-3 text-primary">
@@ -237,7 +237,7 @@ const HistoryBox : React.FC<HistoryBoxProps> = ({events, selectedRoomIdx, focusD
 
                                         return item.pageIdx == undefined || (MIN_PAGE <= nIdx && nIdx <= MAX_PAGE) ?
                                         (
-                                            <Button className="btn-circle shadow ml-4 mr-2"
+                                            <Button className="btn-circle shadow-sm ms-1 me-1"
                                                             variant={nIdx == focusedPageIndex ? 'primary' : 'light'}
                                                             onClick={item.onClick}>
                                                 {item.char}

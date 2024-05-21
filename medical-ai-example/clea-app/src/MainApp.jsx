@@ -169,17 +169,17 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
             <Container fluid>
                 <Row>
                     {/* Overview buton + Rooms buttons */}
-                    <Col sm={3} md={4}>
-                        <Card className="shadow rounded">
+                    <Col sm={2} md={3}>
+                        <Card className="border-0">
                             <Card.Body>
                                 <Nav variant="pills" defaultActiveKey="0" className="flex-column">
                                     {
                                         _.map (roomsDescriptors, (item, idx) => {
                                             try {
                                                 return (
-                                                    <Button className={`mt-2 text-start ${focusDescriptorIdx==item.descriptorId?'primary-bg':''}`}
+                                                    <Button className={`mt-2 text-start ${focusDescriptorIdx==item.descriptorId?'bg-primary':''}`}
                                                             value={item.value} onClick={item.onclick}
-                                                            key={idx} variant={focusDescriptorIdx == item.descriptorId ? "shadow" : ""}>
+                                                            key={idx} variant={focusDescriptorIdx == item.descriptorId ? "" : ""}>
                                                         {item.descriptorId == ROOMS_OVERVIEW_IDX ?
                                                             <></> :
                                                             <span className={`dot ${patientStatusToStringColor(stringToPatientStatus(item.currentEvent.eventType))}`}/> }
@@ -198,27 +198,29 @@ export const MainApp = ({ astarteInterface, roomsList, introspection, isReady })
                         </Card>
                     </Col>
 
-                    <Col sm={9} md={8}>
-                        {focusDescriptorIdx == ROOMS_OVERVIEW_IDX ?
-                        <Row>
-                            <RoomsOverview descriptors={roomsDescriptors.slice(1)} itemsPerRow={ROOMS_ITEMS_PER_ROW}
-                                            onclick={(id)=>{
-                                                setFocusDescriptorIdx(onRoomsOverviewClick(id))
-                                                setSelectedRoomIdx(id)
-                                            }}></RoomsOverview>
-                        </Row> : 
-                        
-                        <Row>
-                            <RoomDetails descriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
-                        </Row>
-                        }
+                    <Col sm={10} md={9}>
+                        <div className="content-card ps-5">
+                            {focusDescriptorIdx == ROOMS_OVERVIEW_IDX ?
+                            <Row>
+                                <RoomsOverview descriptors={roomsDescriptors.slice(1)} itemsPerRow={ROOMS_ITEMS_PER_ROW}
+                                                onclick={(id)=>{
+                                                    setFocusDescriptorIdx(onRoomsOverviewClick(id))
+                                                    setSelectedRoomIdx(id)
+                                                }}></RoomsOverview>
+                            </Row> : 
+                            
+                            <Row>
+                                <RoomDetails descriptor={roomsDescriptors[focusDescriptorIdx]}></RoomDetails>
+                            </Row>
+                            }
 
 
 
-                        <Row>
-                            <HistoryBox events={eventsList} selectedRoomIdx={selectedRoomIdx}
-                                        focusDescriptorIdx={focusDescriptorIdx} roomsDescriptors={roomsDescriptors.slice(1)}/>
-                        </Row>
+                            <Row>
+                                <HistoryBox events={eventsList} selectedRoomIdx={selectedRoomIdx}
+                                            focusDescriptorIdx={focusDescriptorIdx} roomsDescriptors={roomsDescriptors.slice(1)}/>
+                            </Row>
+                        </div>
                     </Col>
                 </Row>
             </Container>

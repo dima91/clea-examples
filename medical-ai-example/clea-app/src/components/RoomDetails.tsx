@@ -47,7 +47,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
     <Container fluid>
         <Row>
             <Col sm={6} md={6} lg={6}>
-                <Card className="rounded shadow bg-light h-100">
+                <Card className="rounded bg-light h-100">
                     <Container fluid>
                         <Card.Subtitle className="mt-3 text-primary">
                             Details
@@ -93,7 +93,7 @@ const RoomDetails : React.FC<RoomDetailsProps> = ({descriptor}) => {
                 </Card>
             </Col>
             <Col sm={6} md={6} lg={6}>
-                <Card className={`rounded shadow ${patientStatusToGradientClass(patientStatus)} h-100`}>
+                <Card className={`rounded ${patientStatusToGradientClass(patientStatus)} h-100`}>
                     <Container fluid className="h-100 text-white">
                         <Card.Subtitle className="mt-3">
                             Real time
