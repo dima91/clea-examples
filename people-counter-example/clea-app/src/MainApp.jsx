@@ -3,7 +3,8 @@ import "core-js/stable"
 import "regenerator-runtime/runtime"
 import React, { Fragment } from "react";
 import { Button, Col, Container, Card, Row, InputGroup, FormControl, ToggleButton,
-            ToggleButtonGroup, Spinner, Navbar, Nav} from "react-bootstrap";
+            ToggleButtonGroup, Spinner, Navbar, Nav,
+            ButtonGroup} from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 import Chart from "react-apexcharts";
 import {FaRegCalendarAlt} from 'react-icons/fa';
@@ -214,11 +215,11 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
 
 
     return (
-        <div className="p-4">
+        <div className="">
             <Container fluid>
                 <Row>
                     <Col sm={12} md={6}>
-                        <Card bg="info" className="counter-section rounded">
+                        <Card className="rounded text-bg-accent">
                             <Card.Body>
                                 <div className="counter-container">
                                     <div className="counter-title">
@@ -235,7 +236,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                             {counter.areas.map((area, index) => {
                                 return (
                                     <Col sm={12} md={6} key={index}>
-                                        <Card className="area-section rounded">
+                                        <Card className="rounded">
                                             <Card.Body>
                                                 <div className="area-container">
                                                     <div className="area-title text-secondary">
@@ -253,11 +254,11 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                         </Row>
                     </Col>
                     <Col sm={12} md={6}>
-                        <Card className="chart-section rounded">
+                        <Card className="rounded">
                             <Card.Body>
 
                                 <Card.Title>
-                                    <div className="pb-2">
+                                    <div className="pb-2 text-primary">
                                         People
                                     </div>
                                 </Card.Title>
@@ -266,7 +267,7 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                                     <InputGroup.Text>Chart History Size (minutes)</InputGroup.Text>
                                     <FormControl aria-label="Minutes" defaultValue={historical_data_size}
                                                 ref={inputRef}/>
-                                    <Button variant="outline-secondary" id="history-update-id"
+                                    <Button variant="primary" id="history-update-id"
                                             onClick={onHistoricalDataSizeUpdate}>
                                         Update
                                     </Button>
@@ -282,19 +283,21 @@ export const MainApp = ({ sceneSettings, updateInterval, astarteClient, deviceId
                     </Col>
                 </Row>
 
-                <Row className="mt-5">
-                    <Card className="border-0">
-                        <Card.Title className="m-2">
-                            Average Presence
-                        </Card.Title>
-                        <Card.Body>
-                            <div className="chart-container" ref={stats_chart_ref}>
-                                <Fragment>
-                                    <StatsChart astarte_client={astarteClient} device_id={deviceId} stats_chart_ref={stats_chart_ref} />
-                                </Fragment>
-                            </div>
-                        </Card.Body>
-                    </Card>
+                <Row className="mt-4">
+                    <Col sm={12}>
+                        <Card className="rounded">
+                            <Card.Title className="p-3 text-primary">
+                                Average Presence
+                            </Card.Title>
+                            <Card.Body>
+                                <div className="chart-container" ref={stats_chart_ref}>
+                                    <Fragment>
+                                        <StatsChart astarte_client={astarteClient} device_id={deviceId} stats_chart_ref={stats_chart_ref} />
+                                    </Fragment>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
                 </Row>
             </Container>
         </div>
@@ -787,9 +790,9 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
     
     const create_button = (item, idx) => {
         return (
-            <ToggleButton variant="outline-light" type="radio"
-                            className={`m-2 ${filter_grain==item.value ?
-                                                "shadow text-primary" : "text-dark"}`}
+            <ToggleButton type="radio" variant="primary"
+                            className={`${filter_grain==item.value ?
+                                                "bg-primary text-light" : "text-muted bg-light"}`}
                             id={`filter-btn-${item.id}`} key={`filter-btn-${item.id}`}
                             onChange={(e) => {update_filter_grain(item.value, date_range)}}>
                 {item.content}
@@ -856,12 +859,14 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
 
     return (
         <Col sm={12} md={12}>
-            <Navbar className="bg-light d-flex justify-content-end">
+            <Navbar className="d-flex justify-content-end">
+                <ButtonGroup>
                 {
                     _.map (buttons_descriptors, (item, idx) => {
                         return create_button (item, idx)
                     })
                 }
+                </ButtonGroup>
                 <div className="m-2">
                     <style>{DatePickerStyle.toString()}</style>
                     {/*DATE PICKER*/}

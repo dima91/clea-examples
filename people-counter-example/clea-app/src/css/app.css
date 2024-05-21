@@ -1,12 +1,7 @@
-
 .window-center {
   position: relative;
   margin-left: 47%;
   margin-top: 20%;
-}
-
-.counter-section {
-  margin: 8px;
 }
 
 .counter-container {
@@ -25,10 +20,6 @@
   font-weight: bold;
 }
 
-.area-section {
-  margin: 8px;
-}
-
 .area-container {
   display: flex;
   flex-direction: column-reverse;
@@ -45,10 +36,6 @@
 .area-number {
   font-size: 2.3em;
   font-weight: bold;
-}
-
-.chart-section {
-  margin: 8px;
 }
 
 .chart-title {
