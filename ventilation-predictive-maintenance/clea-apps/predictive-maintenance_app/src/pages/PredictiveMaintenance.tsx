@@ -218,8 +218,9 @@ const PredictiveMaintenance: React.FC<ActionDetectorProps> = ({ thresholds, devi
                 {/* Air Measurement Card */}
                 <div className="col">
                     {/* <Filter label="Air Flow" color="orange" alerts={alerts} thresholds={thresholds} fetcher={getAlerts} /> */}
-                    <Card title="Air Measurement">
+                    <Card>
                         <div className="container-fluid">
+                            <div className="fw-bold fs-5 text-primary mb-2">Air Measurement</div>
                             <div className="row">
                                 <div className="col">
                                     {airFlow ? (
@@ -234,7 +235,11 @@ const PredictiveMaintenance: React.FC<ActionDetectorProps> = ({ thresholds, devi
                             <div className="row mt-3">
                                 <div className="col">
                                     {airVelocity ? (
-                                        <AirMeasurementCard title="Air Velocity" unit="m/s" value={airVelocity.value}></AirMeasurementCard>
+                                        <AirMeasurementCard
+                                            title="Air Velocity"
+                                            unit="m/s"
+                                            value={airVelocity.value}
+                                        ></AirMeasurementCard>
                                     ) : (
                                         <Card>
                                             <h3>Loading</h3>
@@ -264,7 +269,8 @@ const PredictiveMaintenance: React.FC<ActionDetectorProps> = ({ thresholds, devi
             {/* Alerts Table */}
             <div className="row mt-3">
                 <div className="col">
-                    <Card title="Events History" className="products-table-card">
+                    <Card className="products-table-card text-primary">
+                        <div className="fw-bold fs-5 text-primary mb-2">Events history</div>
                         <Table tabs={tableHeader} rows={tableRows} />
                     </Card>
                 </div>

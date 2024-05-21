@@ -31,7 +31,7 @@ const AirMeasurementCard: React.FC<AirMeasurementCardProps> = ({ title, unit, va
       <Card className={className}>
         <div className="d-flex">
           <p className="title">{title}</p>
-          <p className="unit ms-auto">{unit}</p>
+          <p className="unit ms-auto fs-5">{unit}</p>
         </div>
         <p className={getClassName(value, thresholds)}>{value.toFixed(2)}</p>
       </Card>
@@ -41,7 +41,7 @@ const AirMeasurementCard: React.FC<AirMeasurementCardProps> = ({ title, unit, va
       <Card className={className}>
         <div className="d-flex">
           <p className="title">{title}</p>
-          <p className="unit ms-auto">{unit}</p>
+          <p className="unit ms-auto fs-5">{unit}</p>
         </div>
         <p className="value mb-0 mt-3">{value.toFixed(2)}</p>
       </Card>

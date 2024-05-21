@@ -23,13 +23,13 @@ const getDescription = (state: State): string => {
 const getBackground = (state: State): string => {
   switch (state) {
     case State.SUCCESS:
-      return "linear-gradient(to bottom right, #11b0ef, #11b0ef)";
+      return "bg-success";
     case State.WARNING:
-      return "linear-gradient(to bottom right, #ffcf0f, #ff1c02)";
+      return "bg-warning";
     case State.DANGER:
-      return "linear-gradient(to bottom right, #ce4302, #ce4302)";
+      return "bg-danger";
     case State.UNKNOWN:
-      return "linear-gradient(to bottom right, grey, grey)";
+      return "bg-secondary";
   }
 };
 const getIcon = (state: State): string => {
@@ -77,7 +77,7 @@ const AlertBanner: React.FC<AlertBannerProps> = ({ title, value, thresholds }) =
   }
 
   return (
-    <Card className="alert-banner-card h-100" style={{ backgroundImage: getBackground(state) }}>
+    <Card className={"alert-banner-card h-100 " + getBackground(state)}>
       <h6 className="card-title alert-banner-title">{title}</h6>
       <p className="card-text alert-banner-value">{getValueString(value, state)}</p>
       <p className="card-subtitle alert-banner-subtitle">{getDescription(state)}</p>
