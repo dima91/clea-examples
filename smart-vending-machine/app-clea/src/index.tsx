@@ -17,11 +17,15 @@ const messages = { en, it };
 
 // Custom CSS to inject into the Clea App
 const customCss = `
-  .button-style-active{
-    color: #0631cc;
+  .button-style-active {
+    color: white;
     font-weight: 500;
-    background-color: white;
-    border-radius: 12px;
+    background-color: #312f73;
+    border-radius: 4px;
+  }
+  .button-style-active:hover {
+    color: white;
+    background-color: #222150;
   }
   .button-style-disabled {
     color: #abb0ba;
@@ -32,13 +36,14 @@ const customCss = `
     border-width: 0px;
   }
   .button-style-disabled:hover {
-    color: #0631cc;
+    color: #312f73;
     font-weight: 500;
     background-color: white;
     border-radius: 12px;
   }
   .card-custom {
-    box-shadow: 0.3em 0.3em 0.8em rgba(128, 128, 128, 0.295);
+    //box-shadow: 0.3em 0.3em 0.8em rgba(128, 128, 128, 0.295);
+    border: 1px solid #BEC7D0;
     border-radius: 15px
   }
   .table>:not(:first-child) {
@@ -47,6 +52,11 @@ const customCss = `
   .table-bordered>:not(caption)>*>* {
     border-width: 0 0px;
   }
+
+  .content-card {
+    border-left: 1px solid #BEC7D0;
+}
+
 `;
 
 

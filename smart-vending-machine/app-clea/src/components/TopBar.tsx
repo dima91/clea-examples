@@ -10,7 +10,7 @@ const cardStyle = {
     height: "100%",
 }
 const titleStyle = {
-    color: "#0631cc",
+    //color: "#0631cc",
     fontSize: "29px",
     fontWeight: "700",
 }
@@ -24,7 +24,7 @@ const textCardStyle = {
     fontSize: "10px",
 };
 const suggestionCardStyle = {
-    backgroundColor: "#11b0ef",
+    //backgroundColor: "#11b0ef",
     borderRadius: "9px",
     height: "100%",
 }
@@ -73,8 +73,8 @@ const TopBar: React.FC<PageProps> = ( { transactions } ) => {
     return (
         <>
             <div className="col px-0">
-                <div className="card-custom" style={cardStyle}>
-                    <div className="card-title text-center mt-1 mb-0" style={titleStyle}>
+                <div className="card-custom mb-2" style={cardStyle}>
+                    <div className="card-title text-primary text-center mt-1 mb-0" style={titleStyle}>
                         {revenueText}
                     </div>
                     <div className="card-subtitle text-center" style={subTitleStyle}>
@@ -86,8 +86,8 @@ const TopBar: React.FC<PageProps> = ( { transactions } ) => {
                 </div>
             </div>
             <div className="col">
-                <div className="card-custom" style={cardStyle}>
-                    <div className="card-title text-center mt-1 mb-0" style={titleStyle}>
+                <div className="card-custom mb-2" style={cardStyle}>
+                    <div className="card-title text-primary text-center mt-1 mb-0" style={titleStyle}>
                         {bestSeller}
                     </div>
                     <div className="card-subtitle text-center" style={subTitleStyle}>
@@ -99,7 +99,7 @@ const TopBar: React.FC<PageProps> = ( { transactions } ) => {
                 </div>
             </div>
             <div className="col px-0">
-                <div className="card-custom" style={suggestionCardStyle}>
+                <div className="card-custom mb-2 bg-primary" style={suggestionCardStyle}>
                     <div className="card-title ms-3 mt-1 mb-0 pt-2" style={suggestionTitleStyle}>
                         Smart Suggestion
                     </div>

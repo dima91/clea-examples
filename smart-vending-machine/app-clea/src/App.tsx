@@ -85,20 +85,22 @@ const App = ({ astarteUrl, realm, token, deviceId }: AppProps) => {
 
   return (
     <HashRouter>
-      <div className="row mt-3">
-        <div className='col-3'>
+      <div className="row mt-3 me-4">
+        <div className='col-2'>
           <SideMenu titles={titlesSideBar} paths={paths}/>
         </div>
-        <div className="col me-3">
-          <Routes>
-            {routes.map((route, index) => (
-              <Route
-                key={index}
-                path={route.path}
-                element={route.main}
-              />
-            ))}
-          </Routes>
+        <div className="col content-card">
+            <div className="col ms-4">
+            <Routes>
+                {routes.map((route, index) => (
+                <Route
+                    key={index}
+                    path={route.path}
+                    element={route.main}
+                />
+                ))}
+            </Routes>
+            </div>
         </div>
       </div>
     </HashRouter>

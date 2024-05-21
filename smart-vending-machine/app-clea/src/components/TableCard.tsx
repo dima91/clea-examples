@@ -8,7 +8,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 
 // -------- STYLE --------
 const cartTitle = {
-    color: "#0631cc",
+    //color: "#0631cc",
     fontSize: "20px",
     fontWeight: "700",
     marginTop: "0.5em",
@@ -98,7 +98,7 @@ const pageListRenderer: any = ({pages, onPageChange}: any) => {
 
 const TableCard: React.FC<TableProps> = ( { tabs, rows, caption="Latest detections", pagination=false }) => {
       
-    const CaptionElement = () => <div className="card-title" style={cartTitle}> {caption}</div>;
+    const CaptionElement = () => <div className="text-primary" style={cartTitle}> {caption}</div>;
 
     const options: PaginationOptions = {
         pageListRenderer,
@@ -128,7 +128,7 @@ const TableCard: React.FC<TableProps> = ( { tabs, rows, caption="Latest detectio
 
 
     return (
-        <div className="card-custom mb-3 pb-2">
+        <div className="card-custom mt-2 mb-2 pl-3 pr-3 pb-2">
             {pagination ? 
             <BootstrapTable
                 bootstrap4

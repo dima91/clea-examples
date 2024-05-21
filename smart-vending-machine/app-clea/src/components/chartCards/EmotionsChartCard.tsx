@@ -128,7 +128,7 @@ const EmotionsChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                                     return (
                                         <div className="col pe-0 ps-1" key={value}>
                                             <button
-                                            className= {"btn text-center py-1 px-2 ms-1 " + ((currentDataType === value) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                            className= {"btn text-center py-1 px-2 ms-1 " + ((currentDataType === value) ? "button-style-active" : "button-style-disabled")}
                                             onClick={() => setCurrentDataType(value)}
                                             >
                                                 {value}
@@ -148,7 +148,7 @@ const EmotionsChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Day */}
                             <div className="col pe-0">
                                 <button 
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.DAY && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.DAY && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.DAY));
@@ -161,7 +161,7 @@ const EmotionsChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Week */}
                             <div className="col px-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.WEEK && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.WEEK && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.WEEK));
@@ -174,7 +174,7 @@ const EmotionsChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Month */}
                             <div className="col px-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.MONTH && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.MONTH && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.MONTH));
@@ -187,7 +187,7 @@ const EmotionsChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Year */}
                             <div className="col ps-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.YEAR && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.YEAR && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.YEAR));

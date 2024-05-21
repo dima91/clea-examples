@@ -10,7 +10,7 @@ export type SideMenuProps = {
 
 const SideMenu: React.FC<SideMenuProps> = ({ titles, paths }) => {
   const cardStyle = {
-    "borderRadius": "15px",
+    border: 0
   }
 
   return (

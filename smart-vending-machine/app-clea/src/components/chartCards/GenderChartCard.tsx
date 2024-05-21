@@ -133,7 +133,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                         <div className="row justify-content-center">
                             <div className="col pe-0">
                                 <button
-                                    className= {"btn text-center py-1 px-2 ms-1 " + ((currentDataType === DataType.UNITS) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                    className= {"btn text-center " + ((currentDataType === DataType.UNITS) ? "button-style-active" : "button-style-disabled")}
                                     onClick={() => setCurrentDataType(DataType.UNITS)}
                                 >
                                     <FormattedMessage id="quantity" />                                                                
@@ -141,7 +141,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             </div>
                             <div className="col">
                                 <button 
-                                    className= {"btn text-center py-1 px-2 ms-1 " + ((currentDataType === DataType.REVENUES) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                    className= {"btn text-center " + ((currentDataType === DataType.REVENUES) ? "button-style-active" : "button-style-disabled")}
                                     onClick={() => setCurrentDataType(DataType.REVENUES)}
                                 >
                                     <FormattedMessage id="revenues" />
@@ -157,7 +157,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Day */}
                             <div className="col pe-0">
                                 <button 
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.DAY && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.DAY && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.DAY));
@@ -170,7 +170,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Week */}
                             <div className="col px-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.WEEK && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.WEEK && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.WEEK));
@@ -183,7 +183,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Month */}
                             <div className="col px-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.MONTH && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.MONTH && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.MONTH));
@@ -196,7 +196,7 @@ const GenderChartCard: React.FC<ChartCardProps> = ( { data } ) => {
                             {/* Year */}
                             <div className="col ps-0">
                                 <button
-                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.YEAR && !customDateRange.current) ? "button-style-active shadow-sm" : "button-style-disabled")}
+                                className={"card btn ms-1 text-center " + ((dateGranularity === DateGranularity.YEAR && !customDateRange.current) ? "button-style-active" : "button-style-disabled")}
                                 onClick={() => {
                                     customDateRange.current = false;
                                     setDateRange(getDateRange(DateGranularity.YEAR));
