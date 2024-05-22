@@ -57,7 +57,7 @@ const MenuButton = ({
     <button
       type="button"
       className={
-        "btn action-button bg-white text-primary border shadow-sm fw-bold " +
+        " rounded bg-primary text-white fw-bold p-2 " +
         className
       }
       onClick={onClick}
@@ -125,7 +125,7 @@ const DateRangeMenu = ({ className = "", onChange, value }: Props) => {
   }, 10 * 1000);
 
   return (
-    <Card className={"p-2 border-0 bg-light " + className}>
+    <Card className={"p-2 border-0 " + className}>
       <Nav
         role="tablist"
         as="ul"

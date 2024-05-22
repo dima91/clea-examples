@@ -38,7 +38,7 @@ const MenuButton = ({
     <button
       type="button"
       className={
-        "btn action-button bg-white text-primary border shadow-sm fw-bold " +
+        " rounded bg-primary text-white fw-bold p-2  " +
         className
       }
       onClick={onClick}

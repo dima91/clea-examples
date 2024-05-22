@@ -90,7 +90,7 @@ const InteractionsAnalysis = () => {
   );
 
   return (
-    <Card className="shadow border-0 p-3">
+    <Card className="border-1 p-3">
       <Stack gap={2}>
         <h6 className="text-primary d-flex justify-content-between align-items-center">
           <FormattedMessage

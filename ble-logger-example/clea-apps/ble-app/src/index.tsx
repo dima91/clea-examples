@@ -47,7 +47,7 @@ const App = () => {
       <Tab.Container id="app-menu" defaultActiveKey="audience">
         <Row>
           <Col sm={3}>
-            <Card className="shadow border-0 p-3">
+            <Card className="border-0 pe-4">
               <Nav variant="pills" className="flex-column">
                 <Nav.Item role="button">
                   <Nav.Link
@@ -84,18 +84,18 @@ const App = () => {
               </Nav>
             </Card>
           </Col>
-          <Col sm={9}>
-            <Tab.Content>
-              <Tab.Pane eventKey="audience">
-                <Stack gap={3}>
-                  <AudienceAnalysis />
-                  <VendorAnalysis />
-                </Stack>
-              </Tab.Pane>
-              <Tab.Pane eventKey="interactions">
-                <InteractionsAnalysis />
-              </Tab.Pane>
-            </Tab.Content>
+          <Col sm={9} className="content-card ps-4">
+                <Tab.Content>
+                <Tab.Pane eventKey="audience">
+                    <Stack gap={3}>
+                    <AudienceAnalysis />
+                    <VendorAnalysis />
+                    </Stack>
+                </Tab.Pane>
+                <Tab.Pane eventKey="interactions">
+                    <InteractionsAnalysis />
+                </Tab.Pane>
+                </Tab.Content>
           </Col>
         </Row>
       </Tab.Container>
