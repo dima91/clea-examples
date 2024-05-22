@@ -40,39 +40,43 @@ export const MainApp = ({astarteClient}) => {
                             value           : React.useState(null),
                             valueTimestamp  : React.useState(null),
                             text            : "Temperature",
+                            textColor       : (currValue) => {return "white-text"},
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getTemperature(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+"°"},
-                            className       : (currValue) => {return "card-info rounded shadow h-100"}
+                            className       : (currValue) => {return "text-bg-accent rounded h-100"}
                         },
         windSpeed      : {
                             value           : React.useState(null),
                             valueTimestamp  : React.useState(null),
                             text            : "Wind Velocity",
+                            textColor       : (currValue) => {return "white-text"},
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getWindSpeed(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" m/s"},
-                            className       : (currValue) => {return "card-info rounded shadow h-100"}
+                            className       : (currValue) => {return "text-bg-accent rounded h-100"}
                         },
         refSolarCell    : {
                             value           : React.useState(null),
                             valueTimestamp  : React.useState(null),
                             text            : "Reference Solar Power",
+                            textColor       : (currValue) => {return "white-text"},
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getReferenceCellCurrent(date)},
                             displayValue    : (currValue) => {return currValue==null ? "Unknown" : currValue.toFixed(1)+" W"},
-                            className       : (currValue) => {return "card-info rounded shadow h-100"}
+                            className       : (currValue) => {return "text-bg-accent rounded h-100"}
                         },
         dayPeriod       : {
                             // TODO Handle unknown value of day period
                             value           : React.useState(1),
                             valueTimestamp  : React.useState(null),
                             text            : "Day / Night",
+                            textColor       : (currValue) => {console.log("Curr value is ", currValue); return (currValue===0) ? "white-text" : "dark-text"},
                             lastUpdate      : new Date(),
                             query           : (date) => {return astarteClient.getDayPeriod(date)},
                             displayValue    : (currValue) => {return currValue==0 ? <BsMoonFill size={43} color="white"/>
                                                                                     : <BsSunFill size={43} color="white"/>},
-                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded shadow h-100"}
+                            className       : (currValue) => {return (currValue==0 ? "card-night" : "card-day") + " rounded h-100"}
         }
     }
 
@@ -149,9 +153,9 @@ export const MainApp = ({astarteClient}) => {
     const createButtonGroup = (buttonGroup, idxPrefix, stateVar, changeCallback) => {
         return (
         // <ButtonGroup className="text-center mb-3">
-        <Navbar className="bg-light d-flex justify-content-end rounded">
+        <Navbar className="d-flex justify-content-end rounded">
             {buttonGroup.map((el, idx) => (
-                <ToggleButton variant='light' className={`ms-2 me-2 ${el.value === stateVar ? ' shadow text-primary' : 'text-dark'}`}
+                <ToggleButton className={`border-0 ms-0 me-0 ${el.value === stateVar ? ' text-bg-primary' : 'text-secondary bg-white'}`}
                     key={`${idxPrefix}-${idx}`} id={`${idxPrefix}-${idx}`} type='radio' name={el.name} value={el.value}
                     checked={el.value === stateVar}
                     ref={el.button_ref}
@@ -428,8 +432,8 @@ export const MainApp = ({astarteClient}) => {
                                     <Card.Body>
                                         <div className="card-container">
                                             <div>
-                                                <div className="card-title mb-0 pb-0">{item.text}</div>
-                                                <div className="card-subtitle mt-0 pt-0">{lastUpdateToString(item.valueTimestamp[0])}</div>
+                                                <div className={"card-title mb-0 pb-0 " + item.textColor(item.value[0])}>{item.text}</div>
+                                                <div className={"card-subtitle mt-0 pt-0 " + item.textColor(item.value[0])}>{lastUpdateToString(item.valueTimestamp[0])}</div>
                                                 <div className="d-flex justify-content-end card-value">{item.displayValue(item.value[0])}</div>
                                             </div>
                                         </div>
@@ -443,11 +447,11 @@ export const MainApp = ({astarteClient}) => {
                 <Row className="mt-5">
                     {/*Statistics source selector*/}
                     <Col sm={2} md={2}>
-                        <Card className="ps-2 pe-2 pb-1 pt-1 shadow">
+                        <Card className="ps-2 pe-2 pb-1 pt-1 border-0">
                             <Nav variant="pills" defaultActiveKey="0" className="flex-column">
                                 {_.map (statsSourceSelectors, (item, idx) => {
                                     return (
-                                    <Button className={(statsSource==item.value?"card-info" : "")+" m-2 d-flex justify-content-left"}
+                                    <Button className={(statsSource==item.value?"text-bg-primary" : "")+" m-2 d-flex justify-content-left"}
                                                 key={idx} variant="" onClick={item.onClick} value={item.value}>
                                             {item.text}
                                         </Button>
@@ -457,14 +461,14 @@ export const MainApp = ({astarteClient}) => {
                         </Card>
                     </Col>
                     
-                    <Col sm={10} md={10}>
+                    <Col sm={10} md={10} className="content-card ps-4">
 
-                        <Card className="p-3 shadow">
+                        <Card className="p-3">
                             <Card.Body>
                                 <ButtonToolbar className="d-flex justify-content-between">
                                     
                                     <div>
-                                        {/*ELECTRICITY, VOLTAGE, ALL buttons*/}
+                                        {/*CURRENT, VOLTAGE, ALL buttons*/}
                                         {createButtonGroup (controlButtonsDescriptors.unitSelectors,
                                                                 "us", shownUnit, (currVal) => {setShownUnit(currVal)})}
                                     </div>
@@ -485,7 +489,7 @@ export const MainApp = ({astarteClient}) => {
                                             onChange= {dateUpdater}
                                             className="ms-5"
                                             customInput={
-                                                <Button variant={`light ${shownPeriod==4 ? 'shadow text-primary' : 'text-dark'}`}
+                                                <Button variant={`${shownPeriod==4 ? 'shadow text-primary' : 'text-dark'}`}
                                                         className="d-flex align-items-center p-3">
                                                     <FaRegCalendarAlt size={20} onClick={()=>{setShownPeriod(4)}}/>
                                                 </Button>
@@ -1011,7 +1015,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
         return (
             <ToggleButton variant="outline-light" type="radio"
                             className={`m-2 ${filter_grain==item.value ?
-                                                "shadow text-primary" : "text-dark"}`}
+                                                "text-primary" : "text-dark"}`}
                             id={`filter-btn-${item.id}`} key={`filter-btn-${item.id}`}
                             onChange={(e) => {set_filter_grain(item.value)}}>
                 {item.content}
@@ -1058,7 +1062,7 @@ const StatsChart    = ({astarte_client, device_id, stats_chart_ref}) => {
 
     return (
         <Container>
-            <Navbar className="bg-light d-flex justify-content-end">
+            <Navbar className="d-flex justify-content-end">
                 {
                     _.map (buttons_descriptors, (item, idx) => {
                         return create_button (item, idx)

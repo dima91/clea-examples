@@ -1,4 +1,8 @@
 
+.content-card {
+    border-left: 1px solid #BEC7D0;
+}
+
 .card-container {
     color: white;
 }
@@ -16,8 +20,16 @@
     background-color: #26a5e0;
 }
 .card-day {
-    background-color: #ffc107;
+    background: linear-gradient(95.16deg, #FFFFFF 0.25%, #F0D805 99.81%);
+    border: 1px solid;
+    border-image-source: linear-gradient(95.45deg, #F0D805 0%, #FFFFFF 100%);
+}
+.dark-text {
+    color: black;
 }
 .card-night {
-    background-color: #020079;
+    background: linear-gradient(94.98deg, #BEBEBE 0.5%, #001AA3 99.81%);
+}
+.white-text {
+    color: white;
 }
